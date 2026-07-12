@@ -349,7 +349,7 @@
       <button class="btn" onclick="verifyCode()" data-i18n="btnConfirm">Tasdiqlash</button>
     </div>
     <div class="auth-error" id="authError"></div>
-    <div class="auth-hint" data-i18n="authHint">Demo rejim: istalgan raqam va 6 xonali kod ishlaydi</div>
+    <div class="auth-hint" data-i18n="authHint">Telefon raqamingizga haqiqiy SMS kod yuboriladi</div>
   </div>
 </div>
 
@@ -767,7 +767,7 @@ const I18N = {
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
-    authHint:"Demo rejim: istalgan raqam va 6 xonali kod ishlaydi", obTitle:"Xush kelibsiz!",
+    authHint:"Telefon raqamingizga haqiqiy SMS kod yuboriladi", obTitle:"Xush kelibsiz!",
     obStep1T:"Vazifa bajaring", obStep1D:"Video ko'ring, ilova yuklang, so'rovnoma to'ldiring",
     obStep2T:"Coin yig'ing", obStep2D:"Har bir vazifa uchun coin balansingizga qo'shiladi",
     obStep3T:"Pulga aylantiring", obStep3D:"10 000 coin = $1, Payme yoki Click orqali yeching",
@@ -812,7 +812,7 @@ const I18N = {
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
     authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
-    authHint:"Demo mode: any number and 6-digit code works", obTitle:"Welcome!",
+    authHint:"A real SMS code will be sent to your phone", obTitle:"Welcome!",
     obStep1T:"Complete tasks", obStep1D:"Watch videos, install apps, fill surveys",
     obStep2T:"Collect coins", obStep2D:"Coins are added to your balance for each task",
     obStep3T:"Cash out", obStep3D:"10,000 coins = $1, withdraw via Payme or Click",
@@ -857,7 +857,7 @@ const I18N = {
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
     authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
-    authHint:"Демо-режим: подойдёт любой номер и 6-значный код", obTitle:"Добро пожаловать!",
+    authHint:"На ваш номер будет отправлен настоящий SMS-код", obTitle:"Добро пожаловать!",
     obStep1T:"Выполняйте задания", obStep1D:"Смотрите видео, устанавливайте приложения, проходите опросы",
     obStep2T:"Собирайте монеты", obStep2D:"Монеты начисляются на баланс за каждое задание",
     obStep3T:"Выводите деньги", obStep3D:"10 000 монет = $1, вывод через Payme или Click",
@@ -950,8 +950,14 @@ function sendCode(){
     })
     .catch((err) => {
       console.error(err);
-      document.getElementById('authError').textContent = "Xatolik: qayta urinib ko'ring";
+      let msg = "Xatolik: qayta urinib ko'ring";
+      if(err.code === 'auth/unauthorized-domain') msg = "Bu domen ruxsat etilmagan. Admin bilan bog'laning.";
+      else if(err.code === 'auth/invalid-phone-number') msg = "Telefon raqami noto'g'ri formatda";
+      else if(err.code === 'auth/too-many-requests') msg = "Juda ko'p urinish. Birozdan keyin qayta urinib ko'ring";
+      else if(err.code === 'auth/quota-exceeded') msg = "Kunlik SMS limiti tugadi. Ertaga qayta urinib ko'ring";
+      document.getElementById('authError').textContent = msg;
       btn.disabled = false; btn.textContent = t('btnSendCode');
+      if(window.recaptchaVerifier){ window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; }
     });
 }
 
