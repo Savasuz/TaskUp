@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskUp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0B10; --bg-alt:#14151D; --bg-card:#181A24; --line:#242631;
+    --text:#F2F3F7; --muted:#8A8D9B;
+    --purple:#6C5CE7; --purple-dim:rgba(108,92,231,0.16);
+    --amber:#FFB020; --red:#FF5C6C; --green:#2ECC8F; --blue:#3E8EFF; --orange:#FF8A3D;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html,body{ background:var(--bg); color:var(--text); font-family:'Inter', sans-serif; min-height:100vh; }
+  .app{ max-width:480px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; }
+  .screen{ flex:1; padding:14px 16px 96px; overflow-y:auto; }
+  .tab-content{ display:none; }
+  .tab-content.active{ display:block; animation:fadeIn .3s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- Splash screen ---------- */
+  #splashScreen{ display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh;
+    padding:40px 28px; text-align:center; position:relative; overflow:hidden; }
+  .splash-check{ width:64px; height:64px; border-radius:20px; background:linear-gradient(135deg,#7B6EF0,#6C5CE7);
+    display:flex; align-items:center; justify-content:center; font-size:30px; color:#fff; font-weight:700;
+    box-shadow:0 10px 30px rgba(108,92,231,0.4); margin-bottom:18px; }
+  .splash-title{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; }
+  .splash-sub{ font-size:14px; color:var(--muted); margin-top:6px; margin-bottom:30px; }
+  .splash-chest{ font-size:100px; margin-bottom:30px; filter:drop-shadow(0 15px 25px rgba(108,92,231,0.35)); }
+  .splash-dots{ display:flex; gap:6px; margin-bottom:30px; }
+  .splash-dots span{ width:7px; height:7px; border-radius:50%; background:var(--line); }
+  .splash-dots span.active{ background:var(--purple); width:20px; border-radius:5px; }
+  .btn-outline{ width:100%; padding:15px; border:1.5px solid var(--line); border-radius:12px; background:none;
+    color:var(--text); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; cursor:pointer; margin-top:10px; }
+  .btn-outline:active{ transform:scale(0.98); }
+  #authScreen{ display:none; flex-direction:column; justify-content:center; min-height:100vh; padding:0 20px; }
+  .auth-card{ background:var(--bg-card); border:1px solid var(--line); border-radius:18px; padding:28px 22px; }
+  .auth-logo{ text-align:center; font-size:34px; margin-bottom:6px; }
+  .auth-title{ font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:700; margin-bottom:6px; text-align:center; }
+  .auth-sub{ font-size:13px; color:var(--muted); margin-bottom:22px; text-align:center; }
+  label{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; font-family:'JetBrains Mono', monospace; display:block; margin-bottom:6px; }
+  input[type=text], input[type=tel]{
+    width:100%; background:var(--bg); border:1px solid var(--line); color:var(--text);
+    padding:13px 14px; border-radius:10px; font-size:15px; outline:none; margin-bottom:14px; transition:border-color .2s;
+  }
+  input:focus{ border-color:var(--purple); }
+  .btn{ width:100%; padding:15px; border:none; border-radius:12px; font-family:'Space Grotesk', sans-serif;
+    font-weight:700; font-size:15px; cursor:pointer; color:#fff;
+    background:linear-gradient(135deg, #7B6EF0, #6C5CE7);
+    box-shadow:0 6px 18px rgba(108,92,231,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+    transition:transform .12s ease, box-shadow .12s ease; }
+  .btn:disabled{ opacity:0.5; cursor:wait; box-shadow:none; }
+  .btn:not(:disabled):hover{ transform:translateY(-1px); box-shadow:0 8px 22px rgba(108,92,231,0.45), inset 0 1px 0 rgba(255,255,255,0.15); }
+  .btn:not(:disabled):active{ transform:translateY(0) scale(0.98); box-shadow:0 3px 10px rgba(108,92,231,0.3); }
+  .auth-error{ color:var(--red); font-size:12.5px; margin-top:10px; min-height:16px; text-align:center; }
+  .auth-hint{ color:var(--muted); font-size:11.5px; margin-top:10px; text-align:center; line-height:1.5; }
+
+  #onboardScreen{ display:none; flex-direction:column; justify-content:center; min-height:100vh; padding:0 22px; text-align:center; }
+  .onboard-icon{ font-size:44px; margin-bottom:14px; }
+  .onboard-title{ font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:700; margin-bottom:10px; }
+  .onboard-steps{ text-align:left; margin:20px 0; }
+  .onboard-step{ display:flex; gap:12px; margin-bottom:16px; align-items:flex-start; }
+  .onboard-num{ width:26px; height:26px; border-radius:50%; background:var(--bg-card); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono', monospace;
+    font-size:12px; color:var(--purple); flex-shrink:0; margin-top:1px; }
+  .onboard-step-text b{ display:block; font-size:14px; margin-bottom:2px; }
+  .onboard-step-text span{ font-size:12.5px; color:var(--muted); }
+
+  #loadingScreen{ position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px; z-index:100; }
+  .spinner{ width:34px; height:34px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--purple); animation:spin 0.8s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .loading-text{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--muted); letter-spacing:1px; }
+
+  /* ---------- Header (greeting + balance chip) ---------- */
+  .home-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:10px; }
+  .greet{ display:flex; align-items:center; gap:12px; }
+  .greet-avatar{ width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue));
+    display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; flex-shrink:0; }
+  .greet-name{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; }
+  .greet-sub{ font-size:11.5px; color:var(--muted); margin-top:1px; max-width:180px; line-height:1.3; }
+  .balance-chip{ background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:9px 14px; cursor:pointer; flex-shrink:0; }
+  .balance-chip-label{ font-size:10.5px; color:var(--muted); }
+  .balance-chip-value{ display:flex; align-items:center; gap:5px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; margin-top:2px; }
+  .coin-dot{ width:16px; height:16px; border-radius:50%; background:var(--amber); display:inline-flex; align-items:center; justify-content:center; font-size:9px; color:#2A1800; font-weight:700; }
+  .level-chip{ background:var(--purple-dim); color:var(--purple); font-size:11px; font-weight:700; padding:5px 11px; border-radius:20px; cursor:pointer; font-family:'Space Grotesk', sans-serif; }
+  .xp-bar-row{ margin-bottom:18px; cursor:pointer; }
+  .xp-bar-track{ height:7px; background:var(--bg-card); border:1px solid var(--line); border-radius:5px; overflow:hidden; }
+  .xp-bar-fill{ height:100%; background:linear-gradient(90deg, var(--purple), var(--blue)); width:0%; transition:width .6s ease; }
+  .xp-bar-label{ font-size:10.5px; color:var(--muted); margin-top:5px; text-align:right; font-family:'JetBrains Mono', monospace; }
+  .mini-coin{ width:14px; height:14px; border-radius:50%; background:var(--amber); display:inline-flex; align-items:center; justify-content:center; font-size:8px; color:#2A1800; font-weight:700; flex-shrink:0; }
+
+  /* ---------- Referral banner ---------- */
+  .banner{ background:linear-gradient(135deg, #4B3FCB, #2E2670); border-radius:18px; padding:20px; margin-bottom:20px; position:relative; overflow:hidden; }
+  .banner-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:17px; margin-bottom:6px; max-width:75%; }
+  .banner-sub{ font-size:12px; color:rgba(255,255,255,0.75); max-width:70%; line-height:1.4; margin-bottom:14px; }
+  .banner-btn{ background:rgba(255,255,255,0.18); backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.25);
+    color:#fff; padding:10px 18px; border-radius:11px; font-family:'Space Grotesk', sans-serif; font-weight:700;
+    font-size:12.5px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+    transition:transform .12s ease, background .12s ease; }
+  .banner-btn:active{ transform:scale(0.95); background:rgba(255,255,255,0.28); }
+  .banner-emoji{ position:absolute; right:14px; top:14px; font-size:48px; opacity:0.85; transform:rotate(8deg); }
+
+  /* ---------- Section header ---------- */
+  .sec-head{ display:flex; justify-content:space-between; align-items:baseline; margin:6px 0 12px; }
+  .sec-title{ font-family:'Space Grotesk', sans-serif; font-size:17px; font-weight:700; }
+  .sec-link{ font-size:12.5px; color:var(--purple); font-weight:600; cursor:pointer; }
+
+  /* ---------- Task card ---------- */
+  .task{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px;
+    display:flex; align-items:center; gap:12px; }
+  .task-icon{ width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; color:#fff; }
+  .icon-video{ background:var(--red); } .icon-download{ background:var(--green); }
+  .icon-survey{ background:var(--blue); } .icon-invite{ background:var(--orange); }
+  .task-body{ flex:1; min-width:0; }
+  .task-name{ font-size:14px; font-weight:700; }
+  .task-desc{ font-size:11.5px; color:var(--muted); margin-top:1px; }
+  .task-reward{ display:flex; align-items:center; gap:4px; font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--amber); font-weight:600; margin-top:5px; }
+  .task-btn{ border:none; padding:10px 20px; border-radius:11px; font-family:'Space Grotesk', sans-serif; font-weight:700;
+    font-size:12.5px; cursor:pointer; color:#fff; flex-shrink:0; min-width:92px; position:relative; overflow:hidden;
+    background:linear-gradient(135deg, #7B6EF0, #6C5CE7);
+    box-shadow:0 4px 12px rgba(108,92,231,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+    transition:transform .12s ease, box-shadow .12s ease, opacity .2s ease; }
+  .task-btn:not(:disabled):active{ transform:scale(0.94); box-shadow:0 2px 6px rgba(108,92,231,0.25); }
+  .task-btn:disabled{ opacity:0.35; background:var(--line); color:var(--muted); cursor:default; box-shadow:none; }
+  .task-btn .btn-spinner{ width:14px; height:14px; border-radius:50%; border:2px solid rgba(255,255,255,0.35);
+    border-top-color:#fff; display:inline-block; animation:spin .7s linear infinite; vertical-align:middle; }
+
+  /* ---------- Daily bonus ---------- */
+  .daily-card{ background:var(--bg-card); border:1px solid var(--amber); border-radius:16px; padding:16px;
+    display:flex; align-items:center; justify-content:space-between; margin:4px 0 22px; }
+  .daily-left b{ color:var(--amber); font-family:'Space Grotesk', sans-serif; font-size:14.5px; display:block; margin-bottom:3px; }
+  .daily-left span{ font-size:11.5px; color:var(--muted); }
+  .daily-reward{ display:flex; align-items:center; gap:5px; font-family:'JetBrains Mono', monospace; color:var(--amber); font-size:13px; font-weight:700; margin-top:6px; }
+  .daily-timer{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--muted); margin-top:3px; }
+  .daily-btn{ border:none; padding:12px 20px; border-radius:11px; font-family:'Space Grotesk', sans-serif; font-weight:700;
+    font-size:13px; cursor:pointer; color:#2A1800; position:relative; overflow:hidden;
+    background:linear-gradient(135deg, #FFC94A, #FFB020);
+    box-shadow:0 5px 16px rgba(255,176,32,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+    transition:transform .12s ease, box-shadow .12s ease; }
+  .daily-btn:not(:disabled):active{ transform:scale(0.94); box-shadow:0 2px 8px rgba(255,176,32,0.3); }
+  .daily-btn:disabled{ opacity:0.35; background:var(--line); color:var(--muted); box-shadow:none; }
+
+  /* ---------- Stats grid ---------- */
+  .stats-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:8px; }
+  .stat-box{ background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:12px 6px; text-align:center; }
+  .stat-icon{ font-size:18px; margin-bottom:6px; }
+  .stat-val{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; }
+  .stat-lbl{ font-size:9.5px; color:var(--muted); margin-top:2px; }
+
+  /* ---------- Filter chips ---------- */
+  .filter-chips{ display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; padding-bottom:2px; }
+  .chip{ flex-shrink:0; padding:8px 16px; border-radius:20px; background:var(--bg-card); border:1px solid var(--line);
+    font-size:12.5px; font-family:'Space Grotesk', sans-serif; font-weight:600; color:var(--muted); cursor:pointer; transition:all .15s ease; }
+  .chip.active{ background:var(--purple); color:#fff; border-color:var(--purple); }
+
+  /* ---------- Invite hero ---------- */
+  .invite-hero{ padding:24px 10px 20px; }
+  .invite-emoji{ font-size:52px; text-align:center; margin-bottom:14px; }
+  .section-label{ font-size:11.5px; color:var(--muted); margin:16px 2px 8px; font-family:'JetBrains Mono', monospace; letter-spacing:0.5px; }
+
+  /* ---------- Share row ---------- */
+  .share-row{ display:flex; gap:14px; justify-content:center; margin-top:6px; }
+  .share-item{ display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; }
+  .share-item span{ font-size:10.5px; color:var(--muted); }
+  .share-icon{ width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:20px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.3); transition:transform .12s ease; }
+  .share-item:active .share-icon{ transform:scale(0.9); }
+
+  /* ---------- Wallet hero ---------- */
+  .wallet-hero{ background:linear-gradient(135deg, #4B3FCB, #2E2670); border-radius:18px; padding:22px; text-align:center; margin-bottom:20px; position:relative; overflow:hidden; }
+  .wallet-emoji{ font-size:32px; margin-bottom:8px; }
+  .wallet-amount{ font-family:'Space Grotesk', sans-serif; font-size:32px; font-weight:700; margin:6px 0 2px; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .wallet-sub{ font-size:12.5px; color:rgba(255,255,255,0.7); font-family:'JetBrains Mono', monospace; }
+
+  /* ---------- Payment methods ---------- */
+  .pay-method{ display:flex; align-items:center; gap:12px; background:var(--bg-card); border:1.5px solid var(--line); border-radius:14px;
+    padding:13px 14px; margin-bottom:9px; cursor:pointer; transition:border-color .15s ease; }
+  .pay-method.active{ border-color:var(--purple); background:var(--purple-dim); }
+  .pay-icon{ width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14px; flex-shrink:0; }
+  .pay-body{ flex:1; display:flex; flex-direction:column; }
+  .pay-body b{ font-size:13.5px; }
+  .pay-body span{ font-size:11px; color:var(--muted); margin-top:1px; }
+  .pay-radio{ width:20px; height:20px; border-radius:50%; border:2px solid var(--line); flex-shrink:0; position:relative; }
+  .pay-method.active .pay-radio{ border-color:var(--purple); }
+  .pay-method.active .pay-radio::after{ content:''; position:absolute; inset:3px; border-radius:50%; background:var(--purple); }
+
+  #cashoutAmount{ width:100%; background:var(--bg-card); border:1px solid var(--line); color:var(--text);
+    padding:13px 14px; border-radius:11px; font-size:15px; font-family:'JetBrains Mono', monospace; outline:none; margin-bottom:12px; }
+  #cashoutAmount:focus{ border-color:var(--purple); }
+
+  /* ---------- Payment history ---------- */
+  .ph-item{ background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:9px; }
+  .list-row{ display:flex; align-items:center; background:var(--bg-card); border:1px solid var(--line); border-radius:14px;
+    padding:11px 14px; margin-bottom:8px; }
+  .row-avatar{ width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--purple),var(--blue));
+    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+  .list-body{ flex:1; min-width:0; }
+  .list-name{ font-size:13px; font-weight:600; }
+  .list-val{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--amber); font-weight:600; display:flex; align-items:center; gap:4px; }
+  .ph-top{ display:flex; justify-content:space-between; align-items:baseline; }
+  .ph-amount{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; }
+  .ph-status{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; }
+  .ph-status.paid{ background:rgba(46,204,143,0.15); color:var(--green); }
+  .ph-status.pending{ background:rgba(255,176,32,0.15); color:var(--amber); }
+  .ph-status.cancelled{ background:rgba(255,92,108,0.15); color:var(--red); }
+  .ph-meta{ font-size:11.5px; color:var(--muted); margin-top:5px; }
+
+  /* ---------- Activity (used in Wallet tab) ---------- */
+  .card{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:14px; }
+  .activity-item{ display:flex; justify-content:space-between; align-items:center; padding:11px 2px; border-bottom:1px solid var(--line); font-size:13px; }
+  .activity-item:last-child{ border-bottom:none; }
+  .activity-time{ color:var(--muted); font-size:11px; margin-top:2px; }
+  .activity-amount{ font-family:'JetBrains Mono', monospace; font-weight:700; }
+  .activity-empty{ text-align:center; color:var(--muted); font-size:12.5px; padding:16px 0; }
+
+  .cashout-row{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px; color:var(--muted); }
+  .cashout-row b{ color:var(--text); font-family:'JetBrains Mono', monospace; }
+  .progress-track{ height:8px; background:var(--bg); border-radius:5px; overflow:hidden; border:1px solid var(--line); margin:10px 0 14px; }
+  .progress-fill{ height:100%; background:linear-gradient(90deg, var(--purple), var(--blue)); width:0%; transition:width .6s ease; }
+  .cashout-btn{ width:100%; padding:14px; border:1px solid var(--line); border-radius:11px; font-family:'Space Grotesk', sans-serif;
+    font-weight:700; font-size:14px; cursor:pointer; background:var(--bg); color:var(--muted);
+    transition:transform .12s ease, box-shadow .12s ease; }
+  .cashout-btn.ready{ background:linear-gradient(135deg, #7B6EF0, #6C5CE7); color:#fff; border:none;
+    box-shadow:0 6px 18px rgba(108,92,231,0.35), inset 0 1px 0 rgba(255,255,255,0.15); }
+  .cashout-btn.ready:active{ transform:scale(0.98); box-shadow:0 3px 10px rgba(108,92,231,0.3); }
+
+  /* ---------- Leaderboard ---------- */
+  .lb-tabs{ display:flex; gap:8px; margin-bottom:14px; }
+  .lb-tab{ flex:1; text-align:center; padding:8px; border-radius:9px; background:var(--bg-card); border:1px solid var(--line);
+    font-size:12.5px; font-family:'Space Grotesk', sans-serif; font-weight:600; color:var(--muted); cursor:pointer; }
+  .lb-tab.active{ background:var(--purple-dim); color:var(--purple); border-color:var(--purple); }
+  .lb-row{ display:flex; align-items:center; gap:12px; padding:12px; border-radius:12px; margin-bottom:8px; background:var(--bg-card); border:1px solid var(--line); }
+  .lb-row.me{ border-color:var(--purple); background:var(--purple-dim); }
+  .lb-rank{ width:26px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14px; text-align:center; color:var(--muted); }
+  .lb-rank.top1{ color:var(--amber); } .lb-rank.top2{ color:#C0C0C0; } .lb-rank.top3{ color:#CD7F32; }
+  .lb-avatar{ width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue));
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
+  .lb-name{ flex:1; font-size:13.5px; font-weight:600; }
+  .lb-coins{ font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--amber); }
+
+  /* ---------- Profile ---------- */
+  .profile-header{ text-align:center; padding:10px 0 20px; }
+  .profile-avatar{ width:64px; height:64px; border-radius:50%; margin:0 auto 12px; background:linear-gradient(135deg, var(--purple), var(--blue));
+    display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:22px; }
+  .profile-phone{ font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--muted); }
+  .referral-box{ background:var(--bg); border:1px dashed var(--line); border-radius:10px; padding:12px 14px;
+    display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
+  .referral-code{ font-family:'JetBrains Mono', monospace; font-size:15px; font-weight:600; color:var(--purple); letter-spacing:1px; }
+  .copy-btn{ border:1px solid var(--line); background:var(--bg-alt); color:var(--text); padding:8px 14px; border-radius:9px;
+    font-size:11.5px; cursor:pointer; font-family:'Space Grotesk', sans-serif; font-weight:700;
+    transition:transform .12s ease, background .12s ease; }
+  .copy-btn:active{ transform:scale(0.93); background:var(--purple-dim); }
+  .profile-row{ display:flex; justify-content:space-between; align-items:center; padding:13px 2px; border-bottom:1px solid var(--line); font-size:14px; transition:opacity .12s ease; }
+  .profile-row:last-child{ border-bottom:none; }
+  .profile-row .muted{ color:var(--muted); font-size:12.5px; }
+  .signout-btn{ width:100%; margin-top:16px; padding:13px; border-radius:11px; border:1.5px solid var(--red); background:none; color:var(--red);
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:13.5px; cursor:pointer; transition:transform .12s ease, background .12s ease; }
+  .signout-btn:active{ transform:scale(0.98); background:rgba(255,92,108,0.1); }
+
+  /* ---------- Bottom nav (5 tabs) ---------- */
+  .bottom-nav{ position:fixed; bottom:0; left:0; right:0; background:rgba(10,11,16,0.94); backdrop-filter:blur(14px);
+    border-top:1px solid var(--line); z-index:30; }
+  .bottom-nav-inner{ max-width:480px; margin:0 auto; display:flex; }
+  .nav-item{ flex:1; text-align:center; padding:11px 0 9px; cursor:pointer; color:var(--muted); transition:transform .1s ease, color .15s ease; }
+  .nav-item:active{ transform:scale(0.92); }
+  .nav-item.active{ color:var(--purple); }
+  .nav-icon{ font-size:18px; display:block; margin-bottom:3px; }
+  .nav-label{ font-size:9.5px; font-family:'Space Grotesk', sans-serif; font-weight:600; }
+
+  /* ---------- Language selection ---------- */
+  .lang-row{ display:flex; align-items:center; gap:14px; padding:15px 14px; border-bottom:1px solid var(--line); cursor:pointer; transition:background .15s ease; }
+  .lang-row:active{ background:var(--bg-alt); }
+  .lang-flag{ font-size:22px; }
+  .lang-name{ flex:1; font-size:14px; font-weight:600; }
+  .lang-check{ color:var(--purple); font-size:16px; font-weight:700; opacity:0; transition:opacity .15s ease; }
+  .lang-row.selected .lang-check{ opacity:1; }
+  .lang-row.selected{ background:var(--purple-dim); }
+  .level-hero{ display:flex; flex-direction:column; align-items:center; padding:24px 0 6px; }
+  .level-shield{ font-size:80px; filter:drop-shadow(0 10px 20px rgba(108,92,231,0.4)); position:relative; }
+  .level-shield-num{ position:absolute; margin-top:-58px; font-family:'Space Grotesk', sans-serif; font-size:26px; font-weight:700; }
+  .level-hero-sub{ font-size:12px; color:var(--muted); margin-top:8px; }
+  .level-hero-title{ font-family:'Space Grotesk', sans-serif; font-size:20px; font-weight:700; margin-top:2px; }
+  .level-reward-row{ display:flex; align-items:center; justify-content:space-between; background:var(--bg-card);
+    border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:8px; }
+  .level-reward-row.locked{ opacity:0.5; }
+  .level-reward-name{ font-size:13px; font-weight:600; }
+  .level-reward-amt{ font-family:'JetBrains Mono', monospace; color:var(--amber); font-size:12.5px; font-weight:600; }
+
+  /* ---------- Podium ---------- */
+  .podium{ display:flex; align-items:flex-end; justify-content:center; gap:10px; padding:16px 4px 0; }
+  .podium-slot{ flex:1; display:flex; flex-direction:column; align-items:center; position:relative; }
+  .podium-avatar{ width:52px; height:52px; border-radius:50%; background:var(--bg-card); border:2px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:6px; }
+  .podium-avatar.gold{ border-color:var(--amber); width:60px; height:60px; font-size:28px; }
+  .podium-crown{ font-size:20px; margin-bottom:2px; }
+  .podium-name{ font-size:11.5px; font-weight:700; text-align:center; }
+  .podium-coin{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--amber); margin:2px 0 8px; }
+  .podium-bar{ width:100%; border-radius:10px 10px 0 0; display:flex; align-items:flex-start; justify-content:center;
+    padding-top:8px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; color:rgba(255,255,255,0.6); }
+  .podium-slot.first .podium-bar{ background:linear-gradient(180deg, #FFC94A, #FFB020); color:#2A1800; }
+  .podium-slot.second .podium-bar{ background:linear-gradient(180deg, #3A3D4A, #2A2C36); }
+  .podium-slot.third .podium-bar{ background:linear-gradient(180deg, #4A3323, #3A2818); }
+  .toast{ position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--purple); color:#fff; padding:10px 20px; border-radius:30px;
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:13px;
+    opacity:0; transition:all .3s ease; pointer-events:none; z-index:60; white-space:nowrap; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast.error{ background:var(--red); }
+  .confetti-piece{ position:fixed; top:-10px; width:8px; height:14px; opacity:0.9; z-index:70; animation:fall linear forwards; }
+  @keyframes fall{ to{ transform:translateY(110vh) rotate(360deg); opacity:0.2; } }
+  .pulse{ animation:pulse 0.4s ease; }
+  @keyframes pulse{ 0%{ transform:scale(1); } 40%{ transform:scale(1.06); } 100%{ transform:scale(1); } }
+</style>
+</head>
+<body>
+
+<div id="loadingScreen"><div class="spinner"></div><div class="loading-text">YUKLANMOQDA...</div></div>
+
+<!-- ================= AUTH ================= -->
+<div id="splashScreen">
+  <div class="splash-check">✓</div>
+  <div class="splash-title">TaskCoin</div>
+  <div class="splash-sub" data-i18n="splashSub">Vazifa bajarib, pul ishlang!</div>
+  <div class="splash-chest">🎁</div>
+  <div class="splash-dots"><span class="active"></span><span></span><span></span><span></span></div>
+  <button class="btn" onclick="goToAuth()" data-i18n="btnStart">Boshlash</button>
+  <button class="btn-outline" onclick="goToAuth()" data-i18n="btnLogin">Kirish</button>
+</div>
+
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">🪙</div>
+    <div class="auth-title">TaskUp</div>
+    <div class="auth-sub" data-i18n="authSub">Vazifa bajaring, coin yig'ing, pulga aylantiring</div>
+    <div id="phoneStep">
+      <label data-i18n="lblPhone">Telefon raqami</label>
+      <input type="tel" id="phoneInput" placeholder="+998901234567" autocomplete="tel">
+      <div id="recaptcha-container" style="margin-bottom:14px"></div>
+      <button class="btn" id="sendCodeBtn" onclick="sendCode()" data-i18n="btnSendCode">SMS kod yuborish</button>
+    </div>
+    <div id="codeStep" style="display:none">
+      <label data-i18n="lblCode">SMS orqali kelgan kod</label>
+      <input type="text" id="codeInput" placeholder="123456" inputmode="numeric" maxlength="6">
+      <button class="btn" onclick="verifyCode()" data-i18n="btnConfirm">Tasdiqlash</button>
+    </div>
+    <div class="auth-error" id="authError"></div>
+    <div class="auth-hint" data-i18n="authHint">Demo rejim: istalgan raqam va 6 xonali kod ishlaydi</div>
+  </div>
+</div>
+
+<!-- ================= ONBOARDING ================= -->
+<div id="onboardScreen">
+  <div class="onboard-icon">👋</div>
+  <div class="onboard-title" data-i18n="obTitle">Xush kelibsiz!</div>
+  <div class="onboard-steps">
+    <div class="onboard-step"><div class="onboard-num">1</div>
+      <div class="onboard-step-text"><b data-i18n="obStep1T">Vazifa bajaring</b><span data-i18n="obStep1D">Video ko'ring, ilova yuklang, so'rovnoma to'ldiring</span></div></div>
+    <div class="onboard-step"><div class="onboard-num">2</div>
+      <div class="onboard-step-text"><b data-i18n="obStep2T">Coin yig'ing</b><span data-i18n="obStep2D">Har bir vazifa uchun coin balansingizga qo'shiladi</span></div></div>
+    <div class="onboard-step"><div class="onboard-num">3</div>
+      <div class="onboard-step-text"><b data-i18n="obStep3T">Pulga aylantiring</b><span data-i18n="obStep3D">10 000 coin = $1, Payme yoki Click orqali yeching</span></div></div>
+  </div>
+  <button class="btn" onclick="finishOnboarding()" data-i18n="btnStart">Boshlash</button>
+</div>
+
+<!-- ================= MAIN APP ================= -->
+<div class="app" id="appScreen" style="display:none">
+  <div class="screen">
+
+    <!-- ---- HOME TAB ---- -->
+    <div class="tab-content active" id="tab-home">
+      <div class="home-header">
+        <div class="greet">
+          <div class="greet-avatar" id="homeAvatar">--</div>
+          <div>
+            <div class="greet-name"><span data-i18n="helloWord">Salom</span>, <span id="greetName">Foydalanuvchi</span>! 👋</div>
+            <div class="greet-sub" id="greetSubTxt" data-i18n="greetSub">Topshiriqlarni bajaring va daromad qiling</div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px">
+          <div class="balance-chip" onclick="switchTab('wallet')">
+            <div class="balance-chip-label" id="balanceLabelTxt" data-i18n="balanceLbl">Balansingiz</div>
+            <div class="balance-chip-value"><span class="coin-dot">$</span><span id="coinCount">0</span></div>
+          </div>
+          <div class="level-chip" onclick="switchTab('level')">🛡️ <span data-i18n="levelWord">Level</span> <span id="levelNum">1</span></div>
+        </div>
+      </div>
+
+      <div class="xp-bar-row" onclick="switchTab('level')">
+        <div class="xp-bar-track"><div class="xp-bar-fill" id="xpBarFill"></div></div>
+        <div class="xp-bar-label"><span id="xpCurrent">0</span> / <span id="xpNeeded">1000</span> XP</div>
+      </div>
+
+      <div class="banner">
+        <div class="banner-emoji">🎁</div>
+        <div class="banner-title" data-i18n="bannerTitle">Do'stlaringizni taklif qiling</div>
+        <div class="banner-sub" data-i18n="bannerSub">Do'stingiz har earnsanda siz 20% bonus olasiz.</div>
+        <button class="banner-btn" onclick="switchTab('friends')">👥 <span data-i18n="inviteBtn">Taklif qilish</span></button>
+      </div>
+
+      <div class="sec-head">
+        <div class="sec-title" data-i18n="tasksTitle">Vazifalar</div>
+        <div class="sec-link" onclick="switchTab('tasks')" data-i18n="seeAll">Barchasini ko'rish ›</div>
+      </div>
+
+      <div class="task">
+        <div class="task-icon icon-video">▶</div>
+        <div class="task-body">
+          <div class="task-name" data-i18n="taskVideoName">Video ko'rish</div>
+          <div class="task-desc" data-i18n="taskVideoDesc1">30 soniya video ko'ring</div>
+          <div class="task-reward"><span class="mini-coin">$</span> +50</div>
+        </div>
+        <button class="task-btn" onclick="completeTask('video', 50, 8, this)" data-i18n="btnDo">Bajarish</button>
+      </div>
+      <div class="task">
+        <div class="task-icon icon-download">⬇</div>
+        <div class="task-body">
+          <div class="task-name" data-i18n="taskDownloadName">Ilova yuklash</div>
+          <div class="task-desc" data-i18n="taskDownloadDesc1">Ilovani yuklab o'rnating</div>
+          <div class="task-reward"><span class="mini-coin">$</span> +120</div>
+        </div>
+        <button class="task-btn" onclick="completeTask('download', 120, 3, this)" data-i18n="btnDo">Bajarish</button>
+      </div>
+      <div class="task">
+        <div class="task-icon icon-survey">📋</div>
+        <div class="task-body">
+          <div class="task-name" data-i18n="taskSurveyName">So'rovnomada ishtirok etish</div>
+          <div class="task-desc" data-i18n="taskSurveyDesc">So'rovnomani to'ldiring</div>
+          <div class="task-reward"><span class="mini-coin">$</span> +80</div>
+        </div>
+        <button class="task-btn" onclick="completeTask('survey', 80, 1, this)" data-i18n="btnDo">Bajarish</button>
+      </div>
+      <div class="task">
+        <div class="task-icon icon-invite">👥</div>
+        <div class="task-body">
+          <div class="task-name" data-i18n="taskInviteName">Do'st taklif qilish</div>
+          <div class="task-desc" data-i18n="taskInviteDesc">Do'stingiz ro'yxatdan o'tsin</div>
+          <div class="task-reward"><span class="mini-coin">$</span> +1000</div>
+        </div>
+        <button class="task-btn" onclick="switchTab('friends')" data-i18n="btnDo">Bajarish</button>
+      </div>
+
+      <div class="daily-card">
+        <div class="daily-left">
+          <b>🔥 <span data-i18n="dailyBonusTitle">Kunlik bonus</span></b>
+          <span id="streakSub">Har kuni bonus oling!</span>
+          <div class="daily-reward" id="dailyRewardTxt"><span class="mini-coin">$</span> +500</div>
+          <div class="daily-timer" id="dailyTimer">23:59:59</div>
+        </div>
+        <button class="daily-btn" id="streakBtn" onclick="claimStreak()">Olish</button>
+      </div>
+
+      <div class="sec-head"><div class="sec-title" data-i18n="statsTitle">Statistika</div></div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-icon">✅</div><div class="stat-val" id="statTasks">0</div><div class="stat-lbl" data-i18n="statDone">Bajarilgan</div></div>
+        <div class="stat-box"><div class="stat-icon">💰</div><div class="stat-val" id="statLifetime">0</div><div class="stat-lbl" data-i18n="statTotalCoin">Jami coin</div></div>
+        <div class="stat-box"><div class="stat-icon">👥</div><div class="stat-val" id="statInvites">0</div><div class="stat-lbl" data-i18n="statInvitesLbl">Takliflar</div></div>
+        <div class="stat-box"><div class="stat-icon">💰</div><div class="stat-val" id="statCashedOut">0</div><div class="stat-lbl" data-i18n="statCashedLbl">Yechib olingan</div></div>
+      </div>
+    </div>
+
+    <!-- ---- TASKS TAB (full list) ---- -->
+    <div class="tab-content" id="tab-tasks">
+      <div class="sec-head"><div class="sec-title" data-i18n="tasksTitle">Vazifalar</div></div>
+      <div class="filter-chips">
+        <div class="chip active" data-filter="all" onclick="filterTasks('all', this)" data-i18n="filterAll">Barcha</div>
+        <div class="chip" data-filter="oddiy" onclick="filterTasks('oddiy', this)" data-i18n="filterSimple">Oddiy</div>
+        <div class="chip" data-filter="premium" onclick="filterTasks('premium', this)" data-i18n="filterPremium">Premium</div>
+        <div class="chip" data-filter="bonus" onclick="filterTasks('bonus', this)" data-i18n="filterBonus">Bonus</div>
+      </div>
+
+      <div class="task" data-cat="oddiy">
+        <div class="task-icon icon-video">▶</div>
+        <div class="task-body"><div class="task-name" data-i18n="taskVideoName">Video ko'rish</div><div class="task-desc" data-i18n="taskVideoDesc2">Kuniga 8 martagacha</div><div class="task-reward"><span class="mini-coin">$</span> +50</div></div>
+        <button class="task-btn" onclick="completeTask('video', 50, 8, this)" data-i18n="btnDo">Bajarish</button>
+      </div>
+      <div class="task" data-cat="oddiy">
+        <div class="task-icon icon-download">⬇</div>
+        <div class="task-body"><div class="task-name" data-i18n="taskDownloadName">Ilova yuklash</div><div class="task-desc" data-i18n="taskDownloadDesc2">Kuniga 3 martagacha</div><div class="task-reward"><span class="mini-coin">$</span> +120</div></div>
+        <button class="task-btn" onclick="completeTask('download', 120, 3, this)" data-i18n="btnDo">Bajarish</button>
+      </div>
+      <div class="task" data-cat="premium">
+        <div class="task-icon icon-survey">📋</div>
+        <div class="task-body"><div class="task-name" data-i18n="taskSurveyName">So'rovnomada ishtirok etish</div><div class="task-desc" data-i18n="taskSurveyDesc">So'rovnomani to'ldiring</div><div class="task-reward"><span class="mini-coin">$</span> +80</div></div>
+        <button class="task-btn" onclick="completeTask('survey', 80, 1, this)" data-i18n="btnDo">Bajarish</button>
+      </div>
+      <div class="task" data-cat="oddiy">
+        <div class="task-icon icon-survey">📺</div>
+        <div class="task-body"><div class="task-name" data-i18n="taskAdName">Reklama ko'rish</div><div class="task-desc" data-i18n="taskAdDesc">Reklamani to'liq ko'ring</div><div class="task-reward"><span class="mini-coin">$</span> +40</div></div>
+        <button class="task-btn" onclick="completeTask('ad', 40, 10, this)" data-i18n="btnDo">Bajarish</button>
+      </div>
+      <div class="task" data-cat="bonus">
+        <div class="task-icon icon-survey">✈️</div>
+        <div class="task-body"><div class="task-name" data-i18n="taskTgName">Telegram kanalga obuna bo'lish</div><div class="task-desc" data-i18n="taskTgDesc">Kanalga obuna bo'ling</div><div class="task-reward"><span class="mini-coin">$</span> +70</div></div>
+        <button class="task-btn" onclick="completeTask('telegram', 70, 1, this)" data-i18n="btnDo">Bajarish</button>
+      </div>
+      <div class="task" data-cat="bonus">
+        <div class="task-icon icon-invite">👥</div>
+        <div class="task-body"><div class="task-name" data-i18n="taskInviteName">Do'st taklif qilish</div><div class="task-desc" data-i18n="taskInviteDesc">Do'stingiz ro'yxatdan o'tsin</div><div class="task-reward"><span class="mini-coin">$</span> +1000</div></div>
+        <button class="task-btn" onclick="switchTab('friends')" data-i18n="btnDo">Bajarish</button>
+      </div>
+      <div class="task" data-cat="premium">
+        <div class="task-icon icon-invite">⭐</div>
+        <div class="task-body"><div class="task-name" data-i18n="taskRateName">O'yin o'ynab baho berish</div><div class="task-desc" data-i18n="taskRateDesc">O'yinni o'ynang va 5 yulduz bering</div><div class="task-reward"><span class="mini-coin">$</span> +150</div></div>
+        <button class="task-btn" onclick="completeTask('rate', 150, 1, this)" data-i18n="btnDo">Bajarish</button>
+      </div>
+    </div>
+
+    <!-- ---- FRIENDS TAB ---- -->
+    <div class="tab-content" id="tab-friends">
+      <div class="invite-hero">
+        <div class="invite-emoji">🎁</div>
+        <div class="sec-title" style="text-align:center; margin-bottom:6px" data-i18n="inviteHeroTitle">Do'stlaringizni taklif qiling</div>
+        <div style="text-align:center; font-size:12.5px; color:var(--muted)" data-i18n="inviteHeroSub">Har bir do'stingiz uchun 20% bonus oling</div>
+      </div>
+
+      <div class="section-label" data-i18n="yourRefLink">Sizning taklif havolangiz</div>
+      <div class="referral-box">
+        <span class="referral-code" id="referralLink" style="font-size:12.5px">taskup.uz/ref/TASKUP-0000</span>
+        <button class="copy-btn" onclick="copyReferral()" data-i18n="btnCopy">Nusxalash</button>
+      </div>
+
+      <div class="section-label" data-i18n="orShare">Yoki ulashish</div>
+      <div class="share-row">
+        <div class="share-item" onclick="shareVia('telegram')"><div class="share-icon" style="background:#2AABEE">✈️</div><span>Telegram</span></div>
+        <div class="share-item" onclick="shareVia('whatsapp')"><div class="share-icon" style="background:#25D366">💬</div><span>WhatsApp</span></div>
+        <div class="share-item" onclick="shareVia('instagram')"><div class="share-icon" style="background:linear-gradient(135deg,#F58529,#DD2A7B,#8134AF)">📷</div><span>Instagram</span></div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="profile-row"><span data-i18n="invitedCount">Taklif qilinganlar</span><b id="friendsCount">0</b></div>
+        <div class="profile-row"><span data-i18n="invitedBonus">Ulardan olingan bonus</span><b id="friendsBonus">0 coin</b></div>
+      </div>
+    </div>
+
+    <!-- ---- WALLET TAB ---- -->
+    <div class="tab-content" id="tab-wallet">
+      <div class="wallet-hero">
+        <div class="wallet-emoji">👛</div>
+        <div class="eyebrow" style="position:relative" data-i18n="cashoutBalanceLbl">YECHISH UCHUN BALANS</div>
+        <div class="wallet-amount"><span class="coin-dot" style="width:20px;height:20px;font-size:11px">$</span> <span id="coinCount2">0</span></div>
+        <div class="wallet-sub">= <span id="somEst">0</span> so'm</div>
+      </div>
+
+      <div class="section-label" data-i18n="choosePayMethod">To'lov usulini tanlang</div>
+      <div class="pay-method active" data-method="uzcard" onclick="selectPayMethod('uzcard', this)">
+        <div class="pay-icon" style="background:#1B4DE4">U</div>
+        <div class="pay-body"><b>UZCARD</b><span data-i18n="minAmount">Minimal: 10 000 so'm</span></div>
+        <div class="pay-radio"></div>
+      </div>
+      <div class="pay-method" data-method="humo" onclick="selectPayMethod('humo', this)">
+        <div class="pay-icon" style="background:#0FA968">H</div>
+        <div class="pay-body"><b>HUMO</b><span data-i18n="minAmount">Minimal: 10 000 so'm</span></div>
+        <div class="pay-radio"></div>
+      </div>
+      <div class="pay-method" data-method="payme" onclick="selectPayMethod('payme', this)">
+        <div class="pay-icon" style="background:#00C0FA">P</div>
+        <div class="pay-body"><b>Payme</b><span data-i18n="minAmount">Minimal: 10 000 so'm</span></div>
+        <div class="pay-radio"></div>
+      </div>
+      <div class="pay-method" data-method="click" onclick="selectPayMethod('click', this)">
+        <div class="pay-icon" style="background:#3E8EFF">C</div>
+        <div class="pay-body"><b>Click</b><span data-i18n="minAmount">Minimal: 10 000 so'm</span></div>
+        <div class="pay-radio"></div>
+      </div>
+
+      <div class="section-label" data-i18n="enterAmount">Summani kiriting</div>
+      <input type="text" id="cashoutAmount" placeholder="10000" value="10000" inputmode="numeric" style="margin-bottom:6px">
+      <div class="progress-track"><div class="progress-fill" id="cashoutProgress"></div></div>
+      <button class="cashout-btn" id="cashoutBtn" onclick="tryCashout()" style="margin-top:6px">Yuklanmoqda...</button>
+
+      <div class="sec-head" style="margin-top:24px">
+        <div class="sec-title" data-i18n="recentActivity">So'nggi harakatlar</div>
+        <div class="sec-link" onclick="switchTab('history')" data-i18n="paymentHistoryLink">To'lov tarixi ›</div>
+      </div>
+      <div class="card" style="padding:6px 12px">
+        <div class="activity-empty" id="activityEmpty" data-i18n="noActivity">Hali harakat yo'q</div>
+        <div id="activityList"></div>
+      </div>
+    </div>
+
+    <!-- ---- PAYMENT HISTORY TAB ---- -->
+    <div class="tab-content" id="tab-history">
+      <div class="sec-head">
+        <div class="sec-title" data-i18n="paymentHistoryTitle">To'lov tarixim</div>
+        <div class="sec-link" onclick="switchTab('wallet')" data-i18n="backBtn">‹ Orqaga</div>
+      </div>
+      <div class="lb-tabs">
+        <div class="lb-tab active" data-status="all" onclick="filterHistory('all', this)" data-i18n="filterAllHist">Barchasi</div>
+        <div class="lb-tab" data-status="pending" onclick="filterHistory('pending', this)" data-i18n="filterPending">Kutilmoqda</div>
+        <div class="lb-tab" data-status="paid" onclick="filterHistory('paid', this)" data-i18n="filterPaid">Muvaffaqiyatli</div>
+        <div class="lb-tab" data-status="cancelled" onclick="filterHistory('cancelled', this)" data-i18n="filterCancelled">Bekor qilingan</div>
+      </div>
+      <div id="paymentHistoryList"></div>
+    </div>
+
+    <!-- ---- PROFILE TAB ---- -->
+    <div class="tab-content" id="tab-profile">
+      <div class="profile-header">
+        <div class="profile-avatar" id="profileAvatar">--</div>
+        <div class="profile-phone" id="profilePhone">+998 -- --- -- --</div>
+      </div>
+      <div class="card">
+        <div class="profile-row"><span data-i18n="totalEarned">Umumiy top ilgan</span><b id="profLifetime">0 coin</b></div>
+        <div class="profile-row"><span data-i18n="currentLevel">Joriy daraja</span><b id="profLevel">Bronze</b></div>
+        <div class="profile-row"><span data-i18n="dailyStreakLbl">Kunlik seriya</span><b id="profStreak">0 kun</b></div>
+      </div>
+      <div class="card" style="padding:6px 4px">
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('language')">
+          <span data-i18n="langMenuItem">🌐 Til / Language</span><span class="muted" id="currentLangLabel">O'zbekcha ›</span>
+        </div>
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('leaderboard')">
+          <span data-i18n="leaderboardMenuItem">🏆 Reyting</span><span class="muted">›</span>
+        </div>
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('level')">
+          <span data-i18n="levelMenuItem">🛡️ Level</span><span class="muted">›</span>
+        </div>
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('history')">
+          <span data-i18n="paymentHistoryMenuItem">💳 To'lov tarixi</span><span class="muted">›</span>
+        </div>
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('tasks')">
+          <span data-i18n="taskHistoryMenuItem">✅ Vazifalar tarixi</span><span class="muted">›</span>
+        </div>
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('friends')">
+          <span data-i18n="myFriendsMenuItem">👥 Do'stlarim</span><span class="muted">›</span>
+        </div>
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="window.open('https://t.me/Taskupuz','_blank')">
+          <span data-i18n="helpMenuItem">💬 Yordam / Qo'llab-quvvatlash</span><span class="muted">›</span>
+        </div>
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="window.open('privacy-policy.html','_blank')">
+          <span data-i18n="privacyMenuItem">🔒 Maxfiylik siyosati</span><span class="muted">›</span>
+        </div>
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer; border-bottom:none" onclick="window.open('terms-of-service.html','_blank')">
+          <span data-i18n="termsMenuItem">📄 Foydalanish shartlari</span><span class="muted">›</span>
+        </div>
+      </div>
+      <button class="signout-btn" onclick="signOutUser()" data-i18n="logoutBtn">Chiqish</button>
+    </div>
+
+    <!-- ---- LEVEL TAB ---- -->
+    <div class="tab-content" id="tab-level">
+      <div class="sec-head"><div class="sec-title" data-i18n="levelPageTitle">Level</div><div class="sec-link" onclick="switchTab('profile')" data-i18n="backBtn">‹ Orqaga</div></div>
+      <div class="level-hero">
+        <div class="level-shield">🛡️</div>
+        <div class="level-shield-num" id="levelHeroNum">1</div>
+        <div class="level-hero-sub" data-i18n="yourLevelLbl">Sizning levelingiz</div>
+        <div class="level-hero-title" id="levelHeroTitle">1-level</div>
+      </div>
+      <div class="xp-bar-track" style="margin-top:18px"><div class="xp-bar-fill" id="xpBarFill2"></div></div>
+      <div class="xp-bar-label" id="xpLabel2" style="text-align:center; margin-top:8px">0 / 1000 XP</div>
+
+      <div class="sec-head" style="margin-top:24px"><div class="sec-title" data-i18n="levelRewardsTitle">Level mukofotlari</div></div>
+      <div id="levelRewardsList"></div>
+    </div>
+
+    <!-- ---- LANGUAGE TAB ---- -->
+    <div class="tab-content" id="tab-language">
+      <div class="sec-head"><div class="sec-title">🌐 Til / Language</div><div class="sec-link" onclick="switchTab('profile')" data-i18n="backBtn">‹ Orqaga</div></div>
+      <div class="card" style="padding:4px 4px">
+        <div class="lang-row selected" data-lang="uz" onclick="selectLanguage('uz', this)">
+          <span class="lang-flag">🇺🇿</span><span class="lang-name">O'zbekcha</span><span class="lang-check">✓</span>
+        </div>
+        <div class="lang-row" data-lang="en" onclick="selectLanguage('en', this)">
+          <span class="lang-flag">🇬🇧</span><span class="lang-name">English</span><span class="lang-check">✓</span>
+        </div>
+        <div class="lang-row" data-lang="ru" onclick="selectLanguage('ru', this)" style="border-bottom:none">
+          <span class="lang-flag">🇷🇺</span><span class="lang-name">Русский</span><span class="lang-check">✓</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- LEADERBOARD TAB ---- -->
+    <div class="tab-content" id="tab-leaderboard">
+      <div class="sec-head"><div class="sec-title" data-i18n="leaderboardTitle">Reyting</div><div class="sec-link" onclick="switchTab('profile')" data-i18n="backBtn">‹ Orqaga</div></div>
+      <div class="podium">
+        <div class="podium-slot second">
+          <div class="podium-avatar">🥈</div>
+          <div class="podium-name" id="p2Name">--</div>
+          <div class="podium-coin"><span class="mini-coin">$</span> <span id="p2Coin">0</span></div>
+          <div class="podium-bar" style="height:70px">2</div>
+        </div>
+        <div class="podium-slot first">
+          <div class="podium-crown">👑</div>
+          <div class="podium-avatar gold">🥇</div>
+          <div class="podium-name" id="p1Name">--</div>
+          <div class="podium-coin"><span class="mini-coin">$</span> <span id="p1Coin">0</span></div>
+          <div class="podium-bar" style="height:95px">1</div>
+        </div>
+        <div class="podium-slot third">
+          <div class="podium-avatar">🥉</div>
+          <div class="podium-name" id="p3Name">--</div>
+          <div class="podium-coin"><span class="mini-coin">$</span> <span id="p3Coin">0</span></div>
+          <div class="podium-bar" style="height:52px">3</div>
+        </div>
+      </div>
+      <div id="lbRestList" style="margin-top:16px"></div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <div class="nav-item active" data-tab="home" onclick="switchTab('home')"><span class="nav-icon">🏠</span><span class="nav-label" id="navL1" data-i18n="navL1">Bosh sahifa</span></div>
+      <div class="nav-item" data-tab="tasks" onclick="switchTab('tasks')"><span class="nav-icon">✅</span><span class="nav-label" id="navL2" data-i18n="navL2">Vazifalar</span></div>
+      <div class="nav-item" data-tab="friends" onclick="switchTab('friends')"><span class="nav-icon">👥</span><span class="nav-label" id="navL3" data-i18n="navL3">Do'stlar</span></div>
+      <div class="nav-item" data-tab="wallet" onclick="switchTab('wallet')"><span class="nav-icon">💳</span><span class="nav-label" id="navL4" data-i18n="navL4">Pul yechish</span></div>
+      <div class="nav-item" data-tab="profile" onclick="switchTab('profile')"><span class="nav-icon">👤</span><span class="nav-label" id="navL5" data-i18n="navL5">Profil</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAkzf5b2npCuazGlqce6-MYn46YISqGw1o",
+  authDomain: "taskup-df8ee.firebaseapp.com",
+  projectId: "taskup-df8ee",
+  storageBucket: "taskup-df8ee.firebasestorage.app",
+  messagingSenderId: "747576894319",
+  appId: "1:747576894319:web:650ac457a0b1dc3e227e9a",
+  measurementId: "G-P32NK7C0JE"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let confirmationResult = null;
+let currentUid = null;
+let unsubscribeUser = null;
+
+const COIN_TO_USD = 10000;
+const CASHOUT_MIN = 10000;
+const TASK_LIMITS = { video: 8, download: 3, survey: 1 };
+function getTaskLabel(id){
+  const map = { video: 'taskVideoName', download: 'taskDownloadName', survey: 'taskSurveyName' };
+  return map[id] ? t(map[id]) : id;
+}
+
+let state = {
+  phone: '', referralCode: '',
+  coins: 0, lifetimeCoins: 0,
+  taskCounts: {}, tasksCompletedTotal: 0,
+  friendsCount: 0, friendsBonus: 0, cashedOutTotal: 0,
+  streakCount: 0, lastStreakClaim: null,
+  history: []
+};
+let lastRenderedCoins = null;
+
+/* ---------------- Language ---------------- */
+let currentLang = 'uz';
+const LANG_NAMES = { uz: "O'zbekcha", en: "English", ru: "Русский" };
+
+const I18N = {
+  uz: {
+    navL1:"Bosh sahifa", navL2:"Vazifalar", navL3:"Do'stlar", navL4:"Pul yechish", navL5:"Profil",
+    splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
+    authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami",
+    btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
+    authHint:"Demo rejim: istalgan raqam va 6 xonali kod ishlaydi", obTitle:"Xush kelibsiz!",
+    obStep1T:"Vazifa bajaring", obStep1D:"Video ko'ring, ilova yuklang, so'rovnoma to'ldiring",
+    obStep2T:"Coin yig'ing", obStep2D:"Har bir vazifa uchun coin balansingizga qo'shiladi",
+    obStep3T:"Pulga aylantiring", obStep3D:"10 000 coin = $1, Payme yoki Click orqali yeching",
+    greetSub:"Topshiriqlarni bajaring va daromad qiling", balanceLbl:"Balansingiz",
+    bannerTitle:"Do'stlaringizni taklif qiling", bannerSub:"Do'stingiz har earnsanda siz 20% bonus olasiz.",
+    inviteBtn:"Taklif qilish", tasksTitle:"Vazifalar", seeAll:"Barchasini ko'rish ›",
+    dailyBonusTitle:"Kunlik bonus", statsTitle:"Statistika", statDone:"Bajarilgan",
+    statTotalCoin:"Jami coin", statInvitesLbl:"Takliflar", statCashedLbl:"Yechib olingan",
+    taskVideoName:"Video ko'rish", taskVideoDesc1:"30 soniya video ko'ring", taskVideoDesc2:"Kuniga 8 martagacha",
+    taskDownloadName:"Ilova yuklash", taskDownloadDesc1:"Ilovani yuklab o'rnating", taskDownloadDesc2:"Kuniga 3 martagacha",
+    taskSurveyName:"So'rovnomada ishtirok etish", taskSurveyDesc:"So'rovnomani to'ldiring",
+    taskInviteName:"Do'st taklif qilish", taskInviteDesc:"Do'stingiz ro'yxatdan o'tsin",
+    taskAdName:"Reklama ko'rish", taskAdDesc:"Reklamani to'liq ko'ring",
+    taskTgName:"Telegram kanalga obuna bo'lish", taskTgDesc:"Kanalga obuna bo'ling",
+    taskRateName:"O'yin o'ynab baho berish", taskRateDesc:"O'yinni o'ynang va 5 yulduz bering",
+    btnDo:"Bajarish", filterAll:"Barcha", filterSimple:"Oddiy", filterPremium:"Premium", filterBonus:"Bonus",
+    inviteHeroTitle:"Do'stlaringizni taklif qiling", inviteHeroSub:"Har bir do'stingiz uchun 20% bonus oling",
+    yourRefLink:"Sizning taklif havolangiz", btnCopy:"Nusxalash", orShare:"Yoki ulashish",
+    invitedCount:"Taklif qilinganlar", invitedBonus:"Ulardan olingan bonus",
+    cashoutBalanceLbl:"YECHISH UCHUN BALANS", choosePayMethod:"To'lov usulini tanlang", minAmount:"Minimal: 10 000 so'm",
+    enterAmount:"Summani kiriting", recentActivity:"So'nggi harakatlar", paymentHistoryLink:"To'lov tarixi ›",
+    noActivity:"Hali harakat yo'q", paymentHistoryTitle:"To'lov tarixim", backBtn:"‹ Orqaga",
+    filterAllHist:"Barchasi", filterPending:"Kutilmoqda", filterPaid:"Muvaffaqiyatli", filterCancelled:"Bekor qilingan",
+    totalEarned:"Umumiy top ilgan", currentLevel:"Joriy daraja", dailyStreakLbl:"Kunlik seriya",
+    langMenuItem:"🌐 Til / Language", leaderboardMenuItem:"🏆 Reyting", levelMenuItem:"🛡️ Level",
+    paymentHistoryMenuItem:"💳 To'lov tarixi", taskHistoryMenuItem:"✅ Vazifalar tarixi", myFriendsMenuItem:"👥 Do'stlarim",
+    helpMenuItem:"💬 Yordam / Qo'llab-quvvatlash", privacyMenuItem:"🔒 Maxfiylik siyosati", termsMenuItem:"📄 Foydalanish shartlari",
+    logoutBtn:"Chiqish", levelPageTitle:"Level", yourLevelLbl:"Sizning levelingiz", levelRewardsTitle:"Level mukofotlari",
+    leaderboardTitle:"Reyting",
+    cashoutReady:"Pulga aylantirish", cashoutNeed:"Yana", cashoutNeedSuffix:"coin kerak",
+    streakClaimed:"Olindi ✓", streakComeTomorrow:"Ertaga qayting", streakClaimToday:"Bugungi bonusni oling",
+    toastTaskDone:"coin qo'shildi!", toastLimitReached:"Bugungi limit tugadi", toastStreakBonus:"coin kunlik bonus!",
+    toastCashoutSent:"So'rov yuborildi! Payme/Click orqali ko'rib chiqiladi", toastCashoutMin:"Kamida",
+    toastCopied:"Havola nusxalandi!", toastCopyFail:"Nusxalab bo'lmadi", toastLangChanged:"Til o'zgartirildi",
+    statusPaid:"Muvaffaqiyatli", statusPending:"Kutilmoqda", statusCancelled:"Bekor qilingan",
+    dailyBonusLabel:"Kunlik bonus", cashoutRequestLabel:"Pulga aylantirish so'rovi",
+    btnClaim:"Olish", dailyClaimSub:"Har kuni bonus oling!", taskDoneToday:"Bugun tugadi",
+    helloWord:"Salom", defaultUserName:"Foydalanuvchi", levelWord:"Level"
+  },
+  en: {
+    navL1:"Home", navL2:"Tasks", navL3:"Friends", navL4:"Wallet", navL5:"Profile",
+    splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
+    authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number",
+    btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
+    authHint:"Demo mode: any number and 6-digit code works", obTitle:"Welcome!",
+    obStep1T:"Complete tasks", obStep1D:"Watch videos, install apps, fill surveys",
+    obStep2T:"Collect coins", obStep2D:"Coins are added to your balance for each task",
+    obStep3T:"Cash out", obStep3D:"10,000 coins = $1, withdraw via Payme or Click",
+    greetSub:"Complete tasks and earn money", balanceLbl:"Your balance",
+    bannerTitle:"Invite your friends", bannerSub:"Get 20% bonus every time your friend earns.",
+    inviteBtn:"Invite", tasksTitle:"Tasks", seeAll:"See all ›",
+    dailyBonusTitle:"Daily bonus", statsTitle:"Statistics", statDone:"Completed",
+    statTotalCoin:"Total coins", statInvitesLbl:"Invites", statCashedLbl:"Cashed out",
+    taskVideoName:"Watch video", taskVideoDesc1:"Watch a 30-second video", taskVideoDesc2:"Up to 8 times a day",
+    taskDownloadName:"Install app", taskDownloadDesc1:"Download and install the app", taskDownloadDesc2:"Up to 3 times a day",
+    taskSurveyName:"Take a survey", taskSurveyDesc:"Complete the survey",
+    taskInviteName:"Invite a friend", taskInviteDesc:"Have your friend sign up",
+    taskAdName:"Watch ad", taskAdDesc:"Watch the ad fully",
+    taskTgName:"Subscribe to Telegram channel", taskTgDesc:"Subscribe to the channel",
+    taskRateName:"Play & rate the game", taskRateDesc:"Play the game and give 5 stars",
+    btnDo:"Complete", filterAll:"All", filterSimple:"Simple", filterPremium:"Premium", filterBonus:"Bonus",
+    inviteHeroTitle:"Invite your friends", inviteHeroSub:"Get a 20% bonus for every friend",
+    yourRefLink:"Your invite link", btnCopy:"Copy", orShare:"Or share via",
+    invitedCount:"Friends invited", invitedBonus:"Bonus earned from them",
+    cashoutBalanceLbl:"BALANCE TO WITHDRAW", choosePayMethod:"Choose payment method", minAmount:"Minimum: 10,000 UZS",
+    enterAmount:"Enter amount", recentActivity:"Recent activity", paymentHistoryLink:"Payment history ›",
+    noActivity:"No activity yet", paymentHistoryTitle:"Payment history", backBtn:"‹ Back",
+    filterAllHist:"All", filterPending:"Pending", filterPaid:"Successful", filterCancelled:"Cancelled",
+    totalEarned:"Total earned", currentLevel:"Current level", dailyStreakLbl:"Daily streak",
+    langMenuItem:"🌐 Language", leaderboardMenuItem:"🏆 Leaderboard", levelMenuItem:"🛡️ Level",
+    paymentHistoryMenuItem:"💳 Payment history", taskHistoryMenuItem:"✅ Task history", myFriendsMenuItem:"👥 My friends",
+    helpMenuItem:"💬 Help / Support", privacyMenuItem:"🔒 Privacy policy", termsMenuItem:"📄 Terms of service",
+    logoutBtn:"Log out", levelPageTitle:"Level", yourLevelLbl:"Your level", levelRewardsTitle:"Level rewards",
+    leaderboardTitle:"Leaderboard",
+    cashoutReady:"Withdraw", cashoutNeed:"Need", cashoutNeedSuffix:"more coins",
+    streakClaimed:"Claimed ✓", streakComeTomorrow:"Come back tomorrow", streakClaimToday:"Claim today's bonus",
+    toastTaskDone:"coins added!", toastLimitReached:"Daily limit reached", toastStreakBonus:"coins daily bonus!",
+    toastCashoutSent:"Request sent! Will be reviewed via Payme/Click", toastCashoutMin:"You need at least",
+    toastCopied:"Link copied!", toastCopyFail:"Couldn't copy", toastLangChanged:"Language changed",
+    statusPaid:"Successful", statusPending:"Pending", statusCancelled:"Cancelled",
+    dailyBonusLabel:"Daily bonus", cashoutRequestLabel:"Cashout request",
+    btnClaim:"Claim", dailyClaimSub:"Claim your daily bonus!", taskDoneToday:"Done for today",
+    helloWord:"Hello", defaultUserName:"User", levelWord:"Level"
+  },
+  ru: {
+    navL1:"Главная", navL2:"Задания", navL3:"Друзья", navL4:"Вывод", navL5:"Профиль",
+    splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
+    authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона",
+    btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
+    authHint:"Демо-режим: подойдёт любой номер и 6-значный код", obTitle:"Добро пожаловать!",
+    obStep1T:"Выполняйте задания", obStep1D:"Смотрите видео, устанавливайте приложения, проходите опросы",
+    obStep2T:"Собирайте монеты", obStep2D:"Монеты начисляются на баланс за каждое задание",
+    obStep3T:"Выводите деньги", obStep3D:"10 000 монет = $1, вывод через Payme или Click",
+    greetSub:"Выполняйте задания и зарабатывайте", balanceLbl:"Ваш баланс",
+    bannerTitle:"Пригласите друзей", bannerSub:"Получайте 20% бонус каждый раз, когда друг зарабатывает.",
+    inviteBtn:"Пригласить", tasksTitle:"Задания", seeAll:"Смотреть все ›",
+    dailyBonusTitle:"Ежедневный бонус", statsTitle:"Статистика", statDone:"Выполнено",
+    statTotalCoin:"Всего монет", statInvitesLbl:"Приглашения", statCashedLbl:"Выведено",
+    taskVideoName:"Смотреть видео", taskVideoDesc1:"Посмотрите 30-секундное видео", taskVideoDesc2:"До 8 раз в день",
+    taskDownloadName:"Установить приложение", taskDownloadDesc1:"Скачайте и установите приложение", taskDownloadDesc2:"До 3 раз в день",
+    taskSurveyName:"Пройти опрос", taskSurveyDesc:"Заполните опрос",
+    taskInviteName:"Пригласить друга", taskInviteDesc:"Пусть друг зарегистрируется",
+    taskAdName:"Смотреть рекламу", taskAdDesc:"Посмотрите рекламу полностью",
+    taskTgName:"Подписаться на Telegram-канал", taskTgDesc:"Подпишитесь на канал",
+    taskRateName:"Сыграть и оценить игру", taskRateDesc:"Сыграйте в игру и поставьте 5 звёзд",
+    btnDo:"Выполнить", filterAll:"Все", filterSimple:"Простые", filterPremium:"Премиум", filterBonus:"Бонус",
+    inviteHeroTitle:"Пригласите друзей", inviteHeroSub:"Получайте 20% бонус за каждого друга",
+    yourRefLink:"Ваша реферальная ссылка", btnCopy:"Копировать", orShare:"Или поделиться через",
+    invitedCount:"Приглашено друзей", invitedBonus:"Полученный от них бонус",
+    cashoutBalanceLbl:"БАЛАНС ДЛЯ ВЫВОДА", choosePayMethod:"Выберите способ оплаты", minAmount:"Минимум: 10 000 сум",
+    enterAmount:"Введите сумму", recentActivity:"Последние операции", paymentHistoryLink:"История платежей ›",
+    noActivity:"Пока нет операций", paymentHistoryTitle:"История платежей", backBtn:"‹ Назад",
+    filterAllHist:"Все", filterPending:"В ожидании", filterPaid:"Успешно", filterCancelled:"Отменено",
+    totalEarned:"Всего заработано", currentLevel:"Текущий уровень", dailyStreakLbl:"Дней подряд",
+    langMenuItem:"🌐 Язык", leaderboardMenuItem:"🏆 Рейтинг", levelMenuItem:"🛡️ Уровень",
+    paymentHistoryMenuItem:"💳 История платежей", taskHistoryMenuItem:"✅ История заданий", myFriendsMenuItem:"👥 Мои друзья",
+    helpMenuItem:"💬 Помощь / Поддержка", privacyMenuItem:"🔒 Политика конфиденциальности", termsMenuItem:"📄 Условия использования",
+    logoutBtn:"Выйти", levelPageTitle:"Уровень", yourLevelLbl:"Ваш уровень", levelRewardsTitle:"Награды за уровень",
+    leaderboardTitle:"Рейтинг",
+    cashoutReady:"Вывести", cashoutNeed:"Нужно ещё", cashoutNeedSuffix:"монет",
+    streakClaimed:"Получено ✓", streakComeTomorrow:"Возвращайтесь завтра", streakClaimToday:"Заберите бонус сегодня",
+    toastTaskDone:"монет начислено!", toastLimitReached:"Дневной лимит исчерпан", toastStreakBonus:"монет ежедневный бонус!",
+    toastCashoutSent:"Заявка отправлена! Будет рассмотрена через Payme/Click", toastCashoutMin:"Нужно минимум",
+    toastCopied:"Ссылка скопирована!", toastCopyFail:"Не удалось скопировать", toastLangChanged:"Язык изменён",
+    statusPaid:"Успешно", statusPending:"В ожидании", statusCancelled:"Отменено",
+    dailyBonusLabel:"Ежедневный бонус", cashoutRequestLabel:"Заявка на вывод",
+    btnClaim:"Забрать", dailyClaimSub:"Забирайте бонус каждый день!", taskDoneToday:"На сегодня выполнено",
+    helloWord:"Привет", defaultUserName:"Пользователь", levelWord:"Уровень"
+  }
+};
+
+function t(key){ return (I18N[currentLang] && I18N[currentLang][key]) || I18N.uz[key] || key; }
+
+function applyStaticTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = t(key);
+  });
+}
+
+function selectLanguage(lang, el){
+  currentLang = lang;
+  document.querySelectorAll('.lang-row').forEach(r => r.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('currentLangLabel').textContent = LANG_NAMES[lang] + ' ›';
+  document.getElementById('greetName').textContent = t('defaultUserName');
+  applyStaticTranslations();
+  // Re-render dynamic content so it reflects the new language too
+  renderBalance(); renderStreak(); renderActivity(); renderPaymentHistory('all'); renderLevel();
+  showToast(t('toastLangChanged'));
+}
+
+/* ---------------- Splash ---------------- */
+function goToAuth(){
+  document.getElementById('splashScreen').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+}
+
+/* ---------------- reCAPTCHA + Auth ---------------- */
+function setupRecaptcha(){
+  if(window.recaptchaVerifier) return;
+  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'normal' });
+}
+
+function sendCode(){
+  const phone = document.getElementById('phoneInput').value.trim();
+  if(!phone.startsWith('+') || phone.length < 10){ document.getElementById('authError').textContent = "Raqamni +998 bilan to'liq kiriting"; return; }
+  document.getElementById('authError').textContent = "";
+  setupRecaptcha();
+  const btn = document.getElementById('sendCodeBtn');
+  btn.disabled = true; btn.textContent = "Yuborilmoqda...";
+
+  auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
+    .then((result) => {
+      confirmationResult = result;
+      state.phone = phone;
+      document.getElementById('phoneStep').style.display = 'none';
+      document.getElementById('codeStep').style.display = 'block';
+      btn.disabled = false; btn.textContent = t('btnSendCode');
+    })
+    .catch((err) => {
+      console.error(err);
+      document.getElementById('authError').textContent = "Xatolik: qayta urinib ko'ring";
+      btn.disabled = false; btn.textContent = t('btnSendCode');
+    });
+}
+
+function verifyCode(){
+  const code = document.getElementById('codeInput').value.trim();
+  if(code.length < 4){ document.getElementById('authError').textContent = "Kodni kiriting"; return; }
+  document.getElementById('loadingScreen').style.display = 'flex';
+  confirmationResult.confirm(code)
+    .then(() => {
+      // onAuthStateChanged handles the rest
+    })
+    .catch((err) => {
+      console.error(err);
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('authError').textContent = "Noto'g'ri kod, qayta urinib ko'ring";
+    });
+}
+
+auth.onAuthStateChanged((user) => {
+  document.getElementById('loadingScreen').style.display = 'none';
+  if(user){
+    currentUid = user.uid;
+    state.phone = user.phoneNumber || state.phone;
+    initUserData(user.uid);
+  }
+});
+
+function initUserData(uid){
+  const userRef = db.collection('users').doc(uid);
+  userRef.get().then((doc) => {
+    if(!doc.exists){
+      userRef.set({
+        phone: state.phone,
+        coins: 0, lifetimeCoins: 0,
+        taskCounts: {}, tasksCompletedTotal: 0,
+        friendsCount: 0, friendsBonus: 0, cashedOutTotal: 0,
+        streakCount: 0, lastStreakClaim: null,
+        lastReset: new Date().toDateString(),
+        referralCode: 'TASKUP-' + uid.slice(-4).toUpperCase(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('onboardScreen').style.display = 'flex';
+        subscribeUser(uid);
+      });
+    } else {
+      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('onboardScreen').style.display = 'none';
+      subscribeUser(uid);
+      enterApp();
+    }
+  }).catch(err => console.error(err));
+}
+
+function subscribeUser(uid){
+  if(unsubscribeUser) unsubscribeUser();
+  const userRef = db.collection('users').doc(uid);
+  unsubscribeUser = userRef.onSnapshot((doc) => {
+    if(!doc.exists) return;
+    const data = doc.data();
+    const today = new Date().toDateString();
+    if(data.lastReset !== today){
+      userRef.update({ taskCounts: {}, lastReset: today });
+      return;
+    }
+    state.coins = data.coins || 0;
+    state.lifetimeCoins = data.lifetimeCoins || 0;
+    state.taskCounts = data.taskCounts || {};
+    state.tasksCompletedTotal = data.tasksCompletedTotal || 0;
+    state.friendsCount = data.friendsCount || 0;
+    state.friendsBonus = data.friendsBonus || 0;
+    state.cashedOutTotal = data.cashedOutTotal || 0;
+    state.streakCount = data.streakCount || 0;
+    state.lastStreakClaim = data.lastStreakClaim || null;
+    state.referralCode = data.referralCode || state.referralCode;
+    state.phone = data.phone || state.phone;
+    renderAll();
+  }, err => console.error(err));
+  loadHistory(uid);
+}
+
+function loadHistory(uid){
+  db.collection('users').doc(uid).collection('history').orderBy('at', 'desc').limit(8).get()
+    .then((snap) => {
+      state.history = snap.docs.map(d => {
+        const x = d.data();
+        return { label: x.label, amount: x.amount, at: x.at ? x.at.toDate() : new Date() };
+      });
+      renderActivity();
+    }).catch(err => console.error(err));
+}
+
+function logActivity(label, amount){
+  if(!currentUid) return;
+  db.collection('users').doc(currentUid).collection('history').add({
+    label, amount, at: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => loadHistory(currentUid)).catch(err => console.error(err));
+}
+
+function finishOnboarding(){
+  document.getElementById('onboardScreen').style.display = 'none';
+  enterApp();
+}
+function enterApp(){
+  document.getElementById('appScreen').style.display = 'flex';
+  document.getElementById('appScreen').style.flexDirection = 'column';
+  const digits = (state.phone || '').replace(/\D/g,'').slice(-2) || '99';
+  document.getElementById('homeAvatar').textContent = digits;
+  document.getElementById('profileAvatar').textContent = digits;
+  document.getElementById('profilePhone').textContent = state.phone || '+998 -- --- -- --';
+  document.getElementById('greetName').textContent = t('defaultUserName');
+  document.getElementById('referralLink').textContent = 'taskup.uz/ref/' + state.referralCode;
+  renderAll();
+  applyStaticTranslations();
+  startDailyTimer();
+}
+function signOutUser(){
+  if(unsubscribeUser) unsubscribeUser();
+  auth.signOut();
+  currentUid = null;
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('phoneStep').style.display = 'block';
+  document.getElementById('codeStep').style.display = 'none';
+  document.getElementById('authError').textContent = '';
+  document.getElementById('phoneInput').value = '';
+  document.getElementById('codeInput').value = '';
+}
+
+/* ---------------- Tabs ---------------- */
+function switchTab(tab){
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
+  document.querySelector('.screen').scrollTop = 0;
+}
+
+/* ---------------- Toast / confetti ---------------- */
+function showToast(msg, isError){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(()=> t.className = 'toast', 1800);
+}
+function fireConfetti(){
+  const colors = ['#6C5CE7', '#3E8EFF', '#FFB020'];
+  for(let i=0;i<24;i++){
+    const p = document.createElement('div');
+    p.className = 'confetti-piece'; p.style.left = Math.random()*100 + 'vw';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration = (1.8 + Math.random()*1.2) + 's';
+    document.body.appendChild(p); setTimeout(()=> p.remove(), 3200);
+  }
+}
+
+/* ---------------- Rendering ---------------- */
+function animateCount(el, from, to, duration){
+  const start = performance.now();
+  function tick(now){
+    const t = Math.min(1, (now-start)/duration);
+    const eased = 1 - Math.pow(1-t, 3);
+    el.textContent = Math.round(from + (to-from)*eased).toLocaleString();
+    if(t < 1) requestAnimationFrame(tick); else el.textContent = to.toLocaleString();
+  }
+  requestAnimationFrame(tick);
+}
+
+function renderAll(){ renderBalance(); renderStreak(); renderActivity(); renderProfile(); renderStats(); renderFriends(); renderPaymentHistory('all'); renderLevel(); renderLeaderboard(); }
+
+function renderBalance(){
+  const coins = state.coins;
+  const coinEl = document.getElementById('coinCount');
+  const from = lastRenderedCoins === null ? coins : lastRenderedCoins;
+  animateCount(coinEl, from, coins, 500);
+  document.getElementById('coinCount2').textContent = coins.toLocaleString();
+  const somEl = document.getElementById('somEst');
+  if(somEl) somEl.textContent = (coins * 10).toLocaleString();
+  if(lastRenderedCoins !== null && coins !== lastRenderedCoins){
+    coinEl.parentElement.classList.remove('pulse'); void coinEl.parentElement.offsetWidth; coinEl.parentElement.classList.add('pulse');
+  }
+  lastRenderedCoins = coins;
+
+  const pct = Math.min(100, (coins / CASHOUT_MIN) * 100);
+  document.getElementById('cashoutProgress').style.width = pct + '%';
+  const btn = document.getElementById('cashoutBtn');
+  if(coins >= CASHOUT_MIN){ btn.textContent = t('cashoutReady'); btn.classList.add('ready'); }
+  else { btn.textContent = `${t('cashoutNeed')} ${(CASHOUT_MIN - coins).toLocaleString()} ${t('cashoutNeedSuffix')}`; btn.classList.remove('ready'); }
+
+  document.querySelectorAll('.task-btn').forEach(btn => {
+    const m = btn.getAttribute('onclick') ? btn.getAttribute('onclick').match(/completeTask\('(\w+)'/) : null;
+    if(!m) return;
+    const id = m[1]; const count = state.taskCounts[id] || 0;
+    if(count >= TASK_LIMITS[id]){ btn.disabled = true; btn.textContent = t('taskDoneToday'); } else { btn.disabled = false; btn.textContent = t('btnDo'); }
+  });
+}
+
+function renderStreak(){
+  const today = new Date().toDateString();
+  const btn = document.getElementById('streakBtn');
+  const sub = document.getElementById('streakSub');
+  const bonus = Math.min(500, 200 + state.streakCount * 50);
+  document.getElementById('dailyRewardTxt').innerHTML = `<span class="mini-coin">$</span> +${bonus}`;
+  if(state.lastStreakClaim === today){ btn.disabled = true; btn.textContent = t('streakClaimed'); sub.textContent = t('streakComeTomorrow'); }
+  else { btn.disabled = false; btn.textContent = t('btnClaim'); sub.textContent = t('dailyClaimSub'); }
+}
+
+function startDailyTimer(){
+  function update(){
+    const now = new Date();
+    const midnight = new Date(now); midnight.setHours(24,0,0,0);
+    const diff = midnight - now;
+    const h = String(Math.floor(diff/3600000)).padStart(2,'0');
+    const m = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+    const s = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+    document.getElementById('dailyTimer').textContent = `${h}:${m}:${s}`;
+  }
+  update(); setInterval(update, 1000);
+}
+
+function renderActivity(){
+  const list = document.getElementById('activityList');
+  const empty = document.getElementById('activityEmpty');
+  if(state.history.length === 0){ empty.style.display = 'block'; list.innerHTML=''; return; }
+  empty.style.display = 'none';
+  list.innerHTML = state.history.slice(0,8).map(h => {
+    const time = h.at.toLocaleDateString('uz-UZ', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+    return `<div class="activity-item"><div><div>${h.label}</div><div class="activity-time">${time}</div></div>
+      <div class="activity-amount" style="color:${h.amount<0?'var(--red)':'var(--amber)'}">${h.amount>0?'+':''}${h.amount}</div></div>`;
+  }).join('');
+}
+
+function renderProfile(){
+  document.getElementById('profLifetime').textContent = state.lifetimeCoins.toLocaleString() + ' coin';
+  document.getElementById('profLevel').textContent = getLevelInfo(state.lifetimeCoins).num + '-level';
+  document.getElementById('profStreak').textContent = state.streakCount + ' kun';
+}
+
+/* ---------------- Level / XP system ---------------- */
+const XP_PER_LEVEL = 1000;
+const LEVEL_REWARDS = [
+  { level:2, reward:100 }, { level:3, reward:150 }, { level:4, reward:200 }, { level:5, reward:300 },
+  { level:6, reward:400 }, { level:7, reward:500 }, { level:8, reward:700 }, { level:9, reward:850 }, { level:10, reward:1000 }
+];
+function getLevelInfo(xp){
+  const num = Math.floor(xp / XP_PER_LEVEL) + 1;
+  const current = (xp % XP_PER_LEVEL);
+  return { num, current, needed: XP_PER_LEVEL };
+}
+function renderLevel(){
+  const info = getLevelInfo(state.lifetimeCoins);
+  document.getElementById('levelNum').textContent = info.num;
+  const pct = Math.min(100, (info.current / info.needed) * 100);
+  const fill1 = document.getElementById('xpBarFill'); if(fill1) fill1.style.width = pct + '%';
+  const fill2 = document.getElementById('xpBarFill2'); if(fill2) fill2.style.width = pct + '%';
+  const xc = document.getElementById('xpCurrent'); if(xc) xc.textContent = info.current;
+  const xn = document.getElementById('xpNeeded'); if(xn) xn.textContent = info.needed;
+  document.getElementById('levelHeroNum').textContent = info.num;
+  document.getElementById('levelHeroTitle').textContent = info.num + '-level';
+  document.getElementById('xpLabel2').textContent = `${info.current} / ${info.needed} XP`;
+
+  document.getElementById('levelRewardsList').innerHTML = LEVEL_REWARDS.map(r => {
+    const unlocked = info.num >= r.level;
+    return `<div class="level-reward-row ${unlocked?'':'locked'}">
+      <div class="level-reward-name">${r.level}-level</div>
+      <div class="level-reward-amt"><span class="mini-coin">$</span> +${r.reward} ${unlocked?'✓':'🔒'}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------------- Leaderboard ---------------- */
+const LEADERBOARD_DATA = [
+  { name:"Jasur", coins:125680 }, { name:"Azizbek", coins:98540 }, { name:"Madina", coins:75320 },
+  { name:"Sardor", coins:65430 }, { name:"Oybek", coins:54210 }, { name:"Diyor", coins:42750 }
+];
+function renderLeaderboard(){
+  const combined = [...LEADERBOARD_DATA, { name:"Siz", coins: state.lifetimeCoins, me:true }]
+    .sort((a,b)=>b.coins-a.coins);
+  const [p1, p2, p3, ...rest] = combined;
+  document.getElementById('p1Name').textContent = p1.name; document.getElementById('p1Coin').textContent = p1.coins.toLocaleString();
+  document.getElementById('p2Name').textContent = p2.name; document.getElementById('p2Coin').textContent = p2.coins.toLocaleString();
+  document.getElementById('p3Name').textContent = p3.name; document.getElementById('p3Coin').textContent = p3.coins.toLocaleString();
+  document.getElementById('lbRestList').innerHTML = rest.map((r,i) => `
+    <div class="list-row" style="${r.me?'border-color:var(--purple)':''}">
+      <div style="width:22px; text-align:center; font-family:'Space Grotesk',sans-serif; font-weight:700; color:var(--muted)">${i+4}</div>
+      <div class="row-avatar" style="margin-left:8px">${r.name.slice(0,2).toUpperCase()}</div>
+      <div class="list-body" style="margin-left:8px"><div class="list-name">${r.name}${r.me?' (siz)':''}</div></div>
+      <div class="list-val"><span class="mini-coin">$</span> ${r.coins.toLocaleString()}</div>
+    </div>`).join('');
+}
+
+function renderStats(){
+  document.getElementById('statTasks').textContent = state.tasksCompletedTotal;
+  document.getElementById('statLifetime').textContent = state.lifetimeCoins.toLocaleString();
+  document.getElementById('statInvites').textContent = state.friendsCount;
+  document.getElementById('statCashedOut').textContent = state.cashedOutTotal.toLocaleString();
+}
+
+function renderFriends(){
+  document.getElementById('friendsCount').textContent = state.friendsCount;
+  document.getElementById('friendsBonus').textContent = state.friendsBonus.toLocaleString() + ' coin';
+}
+
+function copyReferral(){
+  const link = 'taskup.uz/ref/' + state.referralCode;
+  navigator.clipboard.writeText(link).then(()=> showToast(t('toastCopied'))).catch(()=> showToast(t('toastCopyFail'), true));
+}
+
+function filterTasks(cat, chipEl){
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  chipEl.classList.add('active');
+  document.querySelectorAll('#tab-tasks .task').forEach(t => {
+    t.style.display = (cat === 'all' || t.dataset.cat === cat) ? 'flex' : 'none';
+  });
+}
+
+function selectPayMethod(method, el){
+  document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('active'));
+  el.classList.add('active');
+  state.payMethod = method;
+}
+
+function shareVia(platform){
+  const link = 'https://taskup.uz/ref/' + state.referralCode;
+  const text = encodeURIComponent(`TaskUp orqali coin yig'ing! ${link}`);
+  const urls = {
+    telegram: `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`,
+    whatsapp: `https://wa.me/?text=${text}`,
+    instagram: null
+  };
+  if(urls[platform]) window.open(urls[platform], '_blank');
+  else { copyReferral(); showToast("Havola nusxalandi — Instagram'da ulashing"); }
+}
+
+const PAYMENT_HISTORY = [
+  { amount: 100000, method: "UZCARD", date: "15.05.2024 14:30", status: "paid" },
+  { amount: 50000, method: "HUMO", date: "10.05.2024 10:15", status: "paid" },
+  { amount: 20000, method: "Payme", date: "05.05.2024 09:45", status: "pending" },
+  { amount: 15000, method: "Click", date: "01.05.2024 11:20", status: "paid" },
+  { amount: 30000, method: "UZCARD", date: "28.04.2024 16:40", status: "cancelled" }
+];
+function getStatusLabel(status){
+  const map = { paid: 'statusPaid', pending: 'statusPending', cancelled: 'statusCancelled' };
+  return t(map[status] || status);
+}
+
+function renderPaymentHistory(filter){
+  filter = filter || 'all';
+  const list = document.getElementById('paymentHistoryList');
+  const filtered = PAYMENT_HISTORY.filter(p => filter === 'all' || p.status === filter);
+  if(filtered.length === 0){ list.innerHTML = '<div class="activity-empty">Hozircha bu bo\'limda hech narsa yo\'q</div>'; return; }
+  list.innerHTML = filtered.map(p => `
+    <div class="ph-item">
+      <div class="ph-top">
+        <div class="ph-amount">${p.amount.toLocaleString()} so'm</div>
+        <div class="ph-status ${p.status}">${getStatusLabel(p.status)}</div>
+      </div>
+      <div class="ph-meta">${p.method} • ${p.date}</div>
+    </div>`).join('');
+}
+
+function filterHistory(status, tabEl){
+  document.querySelectorAll('#tab-history .lb-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  renderPaymentHistory(status);
+}
+
+/* ---------------- Actions ---------------- */
+/* logActivity now defined above using Firestore */
+
+function completeTask(taskId, reward, dailyLimit, btnEl){
+  if(!currentUid) return;
+  const count = state.taskCounts[taskId] || 0;
+  if(count >= dailyLimit){ showToast(t('toastLimitReached'), true); return; }
+
+  const btn = btnEl || (window.event && window.event.currentTarget);
+  const originalText = btn ? btn.innerHTML : null;
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="btn-spinner"></span>'; }
+
+  const userRef = db.collection('users').doc(currentUid);
+  setTimeout(()=>{
+    db.runTransaction((tx) => {
+      return tx.get(userRef).then((doc) => {
+        const data = doc.data();
+        const currentCount = (data.taskCounts && data.taskCounts[taskId]) || 0;
+        if(currentCount >= dailyLimit) throw new Error('limit');
+        const newTaskCounts = { ...data.taskCounts, [taskId]: currentCount + 1 };
+        tx.update(userRef, {
+          coins: (data.coins || 0) + reward,
+          lifetimeCoins: (data.lifetimeCoins || 0) + reward,
+          tasksCompletedTotal: (data.tasksCompletedTotal || 0) + 1,
+          taskCounts: newTaskCounts
+        });
+      });
+    }).then(() => {
+      showToast(`+${reward} ${t('toastTaskDone')}`);
+      logActivity(getTaskLabel(taskId), reward);
+      if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
+    }).catch((err) => {
+      if(err.message === 'limit'){ showToast(t('toastLimitReached'), true); }
+      else { console.error(err); showToast('Xatolik yuz berdi', true); }
+      if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
+    });
+  }, 550);
+}
+
+function claimStreak(){
+  if(!currentUid) return;
+  const today = new Date().toDateString();
+  if(state.lastStreakClaim === today) return;
+  const yesterday = new Date(Date.now()-86400000).toDateString();
+  const continuing = state.lastStreakClaim === yesterday;
+  const newStreak = continuing ? state.streakCount + 1 : 1;
+  const bonus = Math.min(500, 200 + (newStreak-1)*50);
+
+  const userRef = db.collection('users').doc(currentUid);
+  userRef.update({
+    coins: firebase.firestore.FieldValue.increment(bonus),
+    lifetimeCoins: firebase.firestore.FieldValue.increment(bonus),
+    streakCount: newStreak,
+    lastStreakClaim: today
+  }).then(() => {
+    showToast(`🔥 +${bonus} ${t('toastStreakBonus')}`);
+    logActivity(`${t('dailyBonusLabel')} (${newStreak})`, bonus);
+  }).catch((err) => { console.error(err); showToast('Xatolik yuz berdi', true); });
+}
+
+function tryCashout(){
+  if(!currentUid) return;
+  if(state.coins < CASHOUT_MIN){ showToast(`${t('toastCashoutMin')} ${CASHOUT_MIN.toLocaleString()}`, true); return; }
+
+  const userRef = db.collection('users').doc(currentUid);
+  db.runTransaction((tx) => {
+    return tx.get(userRef).then((doc) => {
+      const data = doc.data();
+      if((data.coins || 0) < CASHOUT_MIN) throw new Error('insufficient');
+      tx.update(userRef, { coins: data.coins - CASHOUT_MIN, cashedOutTotal: (data.cashedOutTotal || 0) + CASHOUT_MIN });
+      tx.set(db.collection('cashout_requests').doc(), {
+        uid: currentUid,
+        phone: state.phone,
+        amountCoins: CASHOUT_MIN,
+        amountUsd: CASHOUT_MIN / COIN_TO_USD,
+        status: 'pending',
+        requestedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+  }).then(() => {
+    showToast(t('toastCashoutSent'));
+    logActivity(t('cashoutRequestLabel'), -CASHOUT_MIN);
+    fireConfetti();
+  }).catch((err) => {
+    console.error(err);
+    showToast('Xatolik yuz berdi', true);
+  });
+}
+
+document.getElementById('loadingScreen').style.display = 'none';
+</script>
+</body>
+</html>
