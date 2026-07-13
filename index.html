@@ -92,7 +92,7 @@
   /* ---------- Big premium balance card ---------- */
   .big-balance-card{ background:linear-gradient(135deg, #4B3FCB, #2E2670); border-radius:20px; padding:22px;
     margin-bottom:18px; position:relative; overflow:hidden; cursor:pointer; }
-  .bal-emoji-bg{ position:absolute; right:16px; top:14px; font-size:44px; opacity:0.85; transform:rotate(-6deg); }
+  .bal-emoji-bg{ position:absolute; right:16px; top:14px; opacity:0.85; transform:rotate(-6deg); color:rgba(255,255,255,0.9); }
   .big-balance-card .balance-chip-label{ font-size:12px; color:rgba(255,255,255,0.75); position:relative; }
   .big-balance-value{ font-family:'Space Grotesk', sans-serif; font-size:34px; font-weight:700; color:#fff;
     display:flex; align-items:center; gap:8px; margin:6px 0 16px; position:relative; }
@@ -127,7 +127,7 @@
     font-size:12.5px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
     transition:transform .12s ease, background .12s ease; }
   .banner-btn:active{ transform:scale(0.95); background:rgba(255,255,255,0.28); }
-  .banner-emoji{ position:absolute; right:14px; top:14px; font-size:48px; opacity:0.85; transform:rotate(8deg); }
+  .banner-emoji{ position:absolute; right:14px; top:14px; opacity:0.85; transform:rotate(8deg); color:rgba(255,255,255,0.9); }
 
   /* ---------- Section header ---------- */
   .sec-head{ display:flex; justify-content:space-between; align-items:baseline; margin:6px 0 12px; }
@@ -138,6 +138,7 @@
   .task{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px;
     display:flex; align-items:center; gap:12px; }
   .task-icon{ width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; color:#fff; }
+  .task-icon svg{ width:21px; height:21px; }
   .icon-video{ background:var(--red); } .icon-download{ background:var(--green); }
   .icon-survey{ background:var(--blue); } .icon-invite{ background:var(--orange); }
   .task-body{ flex:1; min-width:0; }
@@ -281,6 +282,9 @@
     transition:transform .12s ease, background .12s ease; }
   .copy-btn:active{ transform:scale(0.93); background:var(--purple-dim); }
   .profile-row{ display:flex; justify-content:space-between; align-items:center; padding:13px 2px; border-bottom:1px solid var(--line); font-size:14px; transition:opacity .12s ease; }
+  .row-flex{ display:flex; align-items:center; gap:12px; }
+  .row-icon{ width:20px; height:20px; color:var(--muted); flex-shrink:0; }
+  .row-icon svg{ width:20px; height:20px; }
   .profile-row:last-child{ border-bottom:none; }
   .profile-row .muted{ color:var(--muted); font-size:12.5px; }
   .signout-btn{ width:100%; margin-top:16px; padding:13px; border-radius:11px; border:1.5px solid var(--red); background:none; color:var(--red);
@@ -295,6 +299,8 @@
   .nav-item:active{ transform:scale(0.92); }
   .nav-item.active{ color:var(--purple); }
   .nav-icon{ font-size:18px; display:block; margin-bottom:3px; }
+  .nav-icon svg{ width:20px; height:20px; margin:0 auto; }
+  .icon-btn svg{ width:18px; height:18px; }
   .nav-label{ font-size:9.5px; font-family:'Space Grotesk', sans-serif; font-weight:600; }
 
   /* ---------- Language selection ---------- */
@@ -306,8 +312,8 @@
   .lang-row.selected .lang-check{ opacity:1; }
   .lang-row.selected{ background:var(--purple-dim); }
   .level-hero{ display:flex; flex-direction:column; align-items:center; padding:24px 0 6px; }
-  .level-shield{ font-size:80px; filter:drop-shadow(0 10px 20px rgba(108,92,231,0.4)); position:relative; }
-  .level-shield-num{ position:absolute; margin-top:-58px; font-family:'Space Grotesk', sans-serif; font-size:26px; font-weight:700; }
+  .level-shield{ filter:drop-shadow(0 10px 20px rgba(108,92,231,0.4)); position:relative; color:var(--purple); display:flex; justify-content:center; }
+  .level-shield-num{ position:absolute; margin-top:-46px; margin-left:32px; font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:700; color:#fff; }
   .level-hero-sub{ font-size:12px; color:var(--muted); margin-top:8px; }
   .level-hero-title{ font-family:'Space Grotesk', sans-serif; font-size:20px; font-weight:700; margin-top:2px; }
   .level-reward-row{ display:flex; align-items:center; justify-content:space-between; background:var(--bg-card);
@@ -400,8 +406,8 @@
     <!-- ---- HOME TAB ---- -->
     <div class="tab-content active" id="tab-home">
       <div class="top-icon-row">
-        <div class="icon-btn" onclick="switchTab('profile')">☰</div>
-        <div class="icon-btn" style="position:relative">🔔<span class="notif-badge" id="notifBadge">2</span></div>
+        <div class="icon-btn" onclick="switchTab('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></div>
+        <div class="icon-btn" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-badge" id="notifBadge">2</span></div>
       </div>
 
       <div class="home-header">
@@ -412,11 +418,11 @@
             <div class="greet-sub" id="greetSubTxt" data-i18n="greetSub">Topshiriqlarni bajaring va daromad qiling</div>
           </div>
         </div>
-        <div class="level-chip" onclick="switchTab('level')">🛡️ <span data-i18n="levelWord">Level</span> <span id="levelNum">1</span></div>
+        <div class="level-chip" onclick="switchTab('level')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <span data-i18n="levelWord">Level</span> <span id="levelNum">1</span></div>
       </div>
 
       <div class="big-balance-card" onclick="switchTab('wallet')">
-        <div class="bal-emoji-bg">👛</div>
+        <div class="bal-emoji-bg"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
         <div class="balance-chip-label" id="balanceLabelTxt" data-i18n="balanceLbl">Balansingiz</div>
         <div class="big-balance-value"><span class="coin-dot" style="width:24px;height:24px;font-size:13px">$</span><span id="coinCount">0</span></div>
         <div class="big-balance-actions">
@@ -431,7 +437,7 @@
       </div>
 
       <div class="banner">
-        <div class="banner-emoji">🎁</div>
+        <div class="banner-emoji"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
         <div class="banner-title" data-i18n="bannerTitle">Do'stlaringizni taklif qiling</div>
         <div class="banner-sub" data-i18n="bannerSub">Do'stingiz har earnsanda siz 20% bonus olasiz.</div>
         <button class="banner-btn" onclick="switchTab('friends')">👥 <span data-i18n="inviteBtn">Taklif qilish</span></button>
@@ -443,7 +449,7 @@
       </div>
 
       <div class="task">
-        <div class="task-icon icon-video">▶</div>
+        <div class="task-icon icon-video"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
         <div class="task-body">
           <div class="task-name" data-i18n="taskVideoName">Video ko'rish</div>
           <div class="task-desc" data-i18n="taskVideoDesc1">30 soniya video ko'ring</div>
@@ -452,7 +458,7 @@
         <button class="task-btn" onclick="completeTask('video', 50, 8, this)" data-i18n="btnDo">Bajarish</button>
       </div>
       <div class="task">
-        <div class="task-icon icon-download">⬇</div>
+        <div class="task-icon icon-download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
         <div class="task-body">
           <div class="task-name" data-i18n="taskDownloadName">Ilova yuklash</div>
           <div class="task-desc" data-i18n="taskDownloadDesc1">Ilovani yuklab o'rnating</div>
@@ -461,7 +467,7 @@
         <button class="task-btn" onclick="completeTask('download', 120, 3, this)" data-i18n="btnDo">Bajarish</button>
       </div>
       <div class="task">
-        <div class="task-icon icon-survey">📋</div>
+        <div class="task-icon icon-survey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></div>
         <div class="task-body">
           <div class="task-name" data-i18n="taskSurveyName">So'rovnomada ishtirok etish</div>
           <div class="task-desc" data-i18n="taskSurveyDesc">So'rovnomani to'ldiring</div>
@@ -470,7 +476,7 @@
         <button class="task-btn" onclick="completeTask('survey', 80, 1, this)" data-i18n="btnDo">Bajarish</button>
       </div>
       <div class="task">
-        <div class="task-icon icon-invite">👥</div>
+        <div class="task-icon icon-invite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <div class="task-body">
           <div class="task-name" data-i18n="taskInviteName">Do'st taklif qilish</div>
           <div class="task-desc" data-i18n="taskInviteDesc">Do'stingiz ro'yxatdan o'tsin</div>
@@ -509,37 +515,37 @@
       </div>
 
       <div class="task" data-cat="oddiy">
-        <div class="task-icon icon-video">▶</div>
+        <div class="task-icon icon-video"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
         <div class="task-body"><div class="task-name" data-i18n="taskVideoName">Video ko'rish</div><div class="task-desc" data-i18n="taskVideoDesc2">Kuniga 8 martagacha</div><div class="task-reward"><span class="mini-coin">$</span> +50</div></div>
         <button class="task-btn" onclick="completeTask('video', 50, 8, this)" data-i18n="btnDo">Bajarish</button>
       </div>
       <div class="task" data-cat="oddiy">
-        <div class="task-icon icon-download">⬇</div>
+        <div class="task-icon icon-download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
         <div class="task-body"><div class="task-name" data-i18n="taskDownloadName">Ilova yuklash</div><div class="task-desc" data-i18n="taskDownloadDesc2">Kuniga 3 martagacha</div><div class="task-reward"><span class="mini-coin">$</span> +120</div></div>
         <button class="task-btn" onclick="completeTask('download', 120, 3, this)" data-i18n="btnDo">Bajarish</button>
       </div>
       <div class="task" data-cat="premium">
-        <div class="task-icon icon-survey">📋</div>
+        <div class="task-icon icon-survey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></div>
         <div class="task-body"><div class="task-name" data-i18n="taskSurveyName">So'rovnomada ishtirok etish</div><div class="task-desc" data-i18n="taskSurveyDesc">So'rovnomani to'ldiring</div><div class="task-reward"><span class="mini-coin">$</span> +80</div></div>
         <button class="task-btn" onclick="completeTask('survey', 80, 1, this)" data-i18n="btnDo">Bajarish</button>
       </div>
       <div class="task" data-cat="oddiy">
-        <div class="task-icon icon-survey">📺</div>
+        <div class="task-icon icon-survey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></div>
         <div class="task-body"><div class="task-name" data-i18n="taskAdName">Reklama ko'rish</div><div class="task-desc" data-i18n="taskAdDesc">Reklamani to'liq ko'ring</div><div class="task-reward"><span class="mini-coin">$</span> +40</div></div>
         <button class="task-btn" onclick="completeTask('ad', 40, 10, this)" data-i18n="btnDo">Bajarish</button>
       </div>
       <div class="task" data-cat="bonus">
-        <div class="task-icon icon-survey">✈️</div>
+        <div class="task-icon icon-survey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
         <div class="task-body"><div class="task-name" data-i18n="taskTgName">Telegram kanalga obuna bo'lish</div><div class="task-desc" data-i18n="taskTgDesc">Kanalga obuna bo'ling</div><div class="task-reward"><span class="mini-coin">$</span> +70</div></div>
         <button class="task-btn" onclick="completeTask('telegram', 70, 1, this)" data-i18n="btnDo">Bajarish</button>
       </div>
       <div class="task" data-cat="bonus">
-        <div class="task-icon icon-invite">👥</div>
+        <div class="task-icon icon-invite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <div class="task-body"><div class="task-name" data-i18n="taskInviteName">Do'st taklif qilish</div><div class="task-desc" data-i18n="taskInviteDesc">Do'stingiz ro'yxatdan o'tsin</div><div class="task-reward"><span class="mini-coin">$</span> +1000</div></div>
         <button class="task-btn" onclick="switchTab('friends')" data-i18n="btnDo">Bajarish</button>
       </div>
       <div class="task" data-cat="premium">
-        <div class="task-icon icon-invite">⭐</div>
+        <div class="task-icon icon-invite"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
         <div class="task-body"><div class="task-name" data-i18n="taskRateName">O'yin o'ynab baho berish</div><div class="task-desc" data-i18n="taskRateDesc">O'yinni o'ynang va 5 yulduz bering</div><div class="task-reward"><span class="mini-coin">$</span> +150</div></div>
         <button class="task-btn" onclick="completeTask('rate', 150, 1, this)" data-i18n="btnDo">Bajarish</button>
       </div>
@@ -646,31 +652,31 @@
       </div>
       <div class="card" style="padding:6px 4px">
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('language')">
-          <span data-i18n="langMenuItem">🌐 Til / Language</span><span class="muted" id="currentLangLabel">O'zbekcha ›</span>
+          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span><span data-i18n="langMenuItem">Til / Language</span></span><span class="muted" id="currentLangLabel">O'zbekcha ›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('leaderboard')">
-          <span data-i18n="leaderboardMenuItem">🏆 Reyting</span><span class="muted">›</span>
+          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3a2 2 0 0 1-2 4"/><path d="M7 5H4a2 2 0 0 0 2 4"/></svg></span><span data-i18n="leaderboardMenuItem">Reyting</span></span><span class="muted">›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('level')">
-          <span data-i18n="levelMenuItem">🛡️ Level</span><span class="muted">›</span>
+          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span data-i18n="levelMenuItem">Level</span></span><span class="muted">›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('history')">
-          <span data-i18n="paymentHistoryMenuItem">💳 To'lov tarixi</span><span class="muted">›</span>
+          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span><span data-i18n="paymentHistoryMenuItem">To'lov tarixi</span></span><span class="muted">›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('tasks')">
-          <span data-i18n="taskHistoryMenuItem">✅ Vazifalar tarixi</span><span class="muted">›</span>
+          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span data-i18n="taskHistoryMenuItem">Vazifalar tarixi</span></span><span class="muted">›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('friends')">
-          <span data-i18n="myFriendsMenuItem">👥 Do'stlarim</span><span class="muted">›</span>
+          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span data-i18n="myFriendsMenuItem">Do'stlarim</span></span><span class="muted">›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="window.open('https://t.me/Taskupuz','_blank')">
-          <span data-i18n="helpMenuItem">💬 Yordam / Qo'llab-quvvatlash</span><span class="muted">›</span>
+          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span><span data-i18n="helpMenuItem">Yordam / Qo'llab-quvvatlash</span></span><span class="muted">›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="window.open('privacy-policy.html','_blank')">
-          <span data-i18n="privacyMenuItem">🔒 Maxfiylik siyosati</span><span class="muted">›</span>
+          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><span data-i18n="privacyMenuItem">Maxfiylik siyosati</span></span><span class="muted">›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer; border-bottom:none" onclick="window.open('terms-of-service.html','_blank')">
-          <span data-i18n="termsMenuItem">📄 Foydalanish shartlari</span><span class="muted">›</span>
+          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></span><span data-i18n="termsMenuItem">Foydalanish shartlari</span></span><span class="muted">›</span>
         </div>
       </div>
       <button class="signout-btn" onclick="signOutUser()" data-i18n="logoutBtn">Chiqish</button>
@@ -680,7 +686,7 @@
     <div class="tab-content" id="tab-level">
       <div class="sec-head"><div class="sec-title" data-i18n="levelPageTitle">Level</div><div class="sec-link" onclick="switchTab('profile')" data-i18n="backBtn">‹ Orqaga</div></div>
       <div class="level-hero">
-        <div class="level-shield">🛡️</div>
+        <div class="level-shield"><svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
         <div class="level-shield-num" id="levelHeroNum">1</div>
         <div class="level-hero-sub" data-i18n="yourLevelLbl">Sizning levelingiz</div>
         <div class="level-hero-title" id="levelHeroTitle">1-level</div>
@@ -694,7 +700,7 @@
 
     <!-- ---- LANGUAGE TAB ---- -->
     <div class="tab-content" id="tab-language">
-      <div class="sec-head"><div class="sec-title">🌐 Til / Language</div><div class="sec-link" onclick="switchTab('profile')" data-i18n="backBtn">‹ Orqaga</div></div>
+      <div class="sec-head"><div class="sec-title" style="display:flex; align-items:center; gap:8px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Til / Language</div><div class="sec-link" onclick="switchTab('profile')" data-i18n="backBtn">‹ Orqaga</div></div>
       <div class="card" style="padding:4px 4px">
         <div class="lang-row selected" data-lang="uz" onclick="selectLanguage('uz', this)">
           <span class="lang-flag">🇺🇿</span><span class="lang-name">O'zbekcha</span><span class="lang-check">✓</span>
@@ -739,11 +745,11 @@
 
   <div class="bottom-nav">
     <div class="bottom-nav-inner">
-      <div class="nav-item active" data-tab="home" onclick="switchTab('home')"><span class="nav-icon">🏠</span><span class="nav-label" id="navL1" data-i18n="navL1">Bosh sahifa</span></div>
-      <div class="nav-item" data-tab="tasks" onclick="switchTab('tasks')"><span class="nav-icon">✅</span><span class="nav-label" id="navL2" data-i18n="navL2">Vazifalar</span></div>
-      <div class="nav-item" data-tab="friends" onclick="switchTab('friends')"><span class="nav-icon">👥</span><span class="nav-label" id="navL3" data-i18n="navL3">Do'stlar</span></div>
-      <div class="nav-item" data-tab="wallet" onclick="switchTab('wallet')"><span class="nav-icon">💳</span><span class="nav-label" id="navL4" data-i18n="navL4">Pul yechish</span></div>
-      <div class="nav-item" data-tab="profile" onclick="switchTab('profile')"><span class="nav-icon">👤</span><span class="nav-label" id="navL5" data-i18n="navL5">Profil</span></div>
+      <div class="nav-item active" data-tab="home" onclick="switchTab('home')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></span><span class="nav-label" id="navL1" data-i18n="navL1">Bosh sahifa</span></div>
+      <div class="nav-item" data-tab="tasks" onclick="switchTab('tasks')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="nav-label" id="navL2" data-i18n="navL2">Vazifalar</span></div>
+      <div class="nav-item" data-tab="friends" onclick="switchTab('friends')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="nav-label" id="navL3" data-i18n="navL3">Do'stlar</span></div>
+      <div class="nav-item" data-tab="wallet" onclick="switchTab('wallet')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span><span class="nav-label" id="navL4" data-i18n="navL4">Pul yechish</span></div>
+      <div class="nav-item" data-tab="profile" onclick="switchTab('profile')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nav-label" id="navL5" data-i18n="navL5">Profil</span></div>
     </div>
   </div>
 </div>
@@ -825,9 +831,9 @@ const I18N = {
     noActivity:"Hali harakat yo'q", paymentHistoryTitle:"To'lov tarixim", backBtn:"‹ Orqaga",
     filterAllHist:"Barchasi", filterPending:"Kutilmoqda", filterPaid:"Muvaffaqiyatli", filterCancelled:"Bekor qilingan",
     totalEarned:"Umumiy top ilgan", currentLevel:"Joriy daraja", dailyStreakLbl:"Kunlik seriya",
-    langMenuItem:"🌐 Til / Language", leaderboardMenuItem:"🏆 Reyting", levelMenuItem:"🛡️ Level",
-    paymentHistoryMenuItem:"💳 To'lov tarixi", taskHistoryMenuItem:"✅ Vazifalar tarixi", myFriendsMenuItem:"👥 Do'stlarim",
-    helpMenuItem:"💬 Yordam / Qo'llab-quvvatlash", privacyMenuItem:"🔒 Maxfiylik siyosati", termsMenuItem:"📄 Foydalanish shartlari",
+    langMenuItem:"Til / Language", leaderboardMenuItem:"Reyting", levelMenuItem:"Level",
+    paymentHistoryMenuItem:"To'lov tarixi", taskHistoryMenuItem:"Vazifalar tarixi", myFriendsMenuItem:"Do'stlarim",
+    helpMenuItem:"Yordam / Qo'llab-quvvatlash", privacyMenuItem:"Maxfiylik siyosati", termsMenuItem:"Foydalanish shartlari",
     logoutBtn:"Chiqish", levelPageTitle:"Level", yourLevelLbl:"Sizning levelingiz", levelRewardsTitle:"Level mukofotlari",
     leaderboardTitle:"Reyting",
     cashoutReady:"Pulga aylantirish", cashoutNeed:"Yana", cashoutNeedSuffix:"coin kerak",
@@ -870,9 +876,9 @@ const I18N = {
     noActivity:"No activity yet", paymentHistoryTitle:"Payment history", backBtn:"‹ Back",
     filterAllHist:"All", filterPending:"Pending", filterPaid:"Successful", filterCancelled:"Cancelled",
     totalEarned:"Total earned", currentLevel:"Current level", dailyStreakLbl:"Daily streak",
-    langMenuItem:"🌐 Language", leaderboardMenuItem:"🏆 Leaderboard", levelMenuItem:"🛡️ Level",
-    paymentHistoryMenuItem:"💳 Payment history", taskHistoryMenuItem:"✅ Task history", myFriendsMenuItem:"👥 My friends",
-    helpMenuItem:"💬 Help / Support", privacyMenuItem:"🔒 Privacy policy", termsMenuItem:"📄 Terms of service",
+    langMenuItem:"Language", leaderboardMenuItem:"Leaderboard", levelMenuItem:"Level",
+    paymentHistoryMenuItem:"Payment history", taskHistoryMenuItem:"Task history", myFriendsMenuItem:"My friends",
+    helpMenuItem:"Help / Support", privacyMenuItem:"Privacy policy", termsMenuItem:"Terms of service",
     logoutBtn:"Log out", levelPageTitle:"Level", yourLevelLbl:"Your level", levelRewardsTitle:"Level rewards",
     leaderboardTitle:"Leaderboard",
     cashoutReady:"Withdraw", cashoutNeed:"Need", cashoutNeedSuffix:"more coins",
@@ -915,9 +921,9 @@ const I18N = {
     noActivity:"Пока нет операций", paymentHistoryTitle:"История платежей", backBtn:"‹ Назад",
     filterAllHist:"Все", filterPending:"В ожидании", filterPaid:"Успешно", filterCancelled:"Отменено",
     totalEarned:"Всего заработано", currentLevel:"Текущий уровень", dailyStreakLbl:"Дней подряд",
-    langMenuItem:"🌐 Язык", leaderboardMenuItem:"🏆 Рейтинг", levelMenuItem:"🛡️ Уровень",
-    paymentHistoryMenuItem:"💳 История платежей", taskHistoryMenuItem:"✅ История заданий", myFriendsMenuItem:"👥 Мои друзья",
-    helpMenuItem:"💬 Помощь / Поддержка", privacyMenuItem:"🔒 Политика конфиденциальности", termsMenuItem:"📄 Условия использования",
+    langMenuItem:"Язык", leaderboardMenuItem:"Рейтинг", levelMenuItem:"Уровень",
+    paymentHistoryMenuItem:"История платежей", taskHistoryMenuItem:"История заданий", myFriendsMenuItem:"Мои друзья",
+    helpMenuItem:"Помощь / Поддержка", privacyMenuItem:"Политика конфиденциальности", termsMenuItem:"Условия использования",
     logoutBtn:"Выйти", levelPageTitle:"Уровень", yourLevelLbl:"Ваш уровень", levelRewardsTitle:"Награды за уровень",
     leaderboardTitle:"Рейтинг",
     cashoutReady:"Вывести", cashoutNeed:"Нужно ещё", cashoutNeedSuffix:"монет",
