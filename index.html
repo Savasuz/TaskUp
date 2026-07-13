@@ -42,6 +42,8 @@
   .auth-tab{ flex:1; text-align:center; padding:9px; border-radius:8px; font-size:13px; font-weight:600;
     font-family:'Space Grotesk', sans-serif; color:var(--muted); cursor:pointer; }
   .auth-tab.active{ background:var(--purple); color:#fff; }
+  .forgot-pass-link{ text-align:right; font-size:12px; color:var(--purple); cursor:pointer; margin-top:-6px; margin-bottom:16px; }
+  .forgot-pass-link:active{ opacity:0.7; }
   .auth-logo{ text-align:center; font-size:34px; margin-bottom:6px; }
   .auth-title{ font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:700; margin-bottom:6px; text-align:center; }
   .auth-sub{ font-size:13px; color:var(--muted); margin-bottom:22px; text-align:center; }
@@ -357,7 +359,7 @@
   <div class="splash-check">✓</div>
   <div class="splash-title">TaskCoin</div>
   <div class="splash-sub" data-i18n="splashSub">Vazifa bajarib, pul ishlang!</div>
-  <div class="splash-chest">🎁</div>
+  <div class="splash-chest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
   <div class="splash-dots"><span class="active"></span><span></span><span></span><span></span></div>
   <button class="btn" onclick="goToAuth()" data-i18n="btnStart">Boshlash</button>
   <button class="btn-outline" onclick="goToAuth()" data-i18n="btnLogin">Kirish</button>
@@ -365,7 +367,7 @@
 
 <div id="authScreen">
   <div class="auth-card">
-    <div class="auth-logo">🪙</div>
+    <div class="auth-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 8h4a2 2 0 0 1 0 4H9m0 0h4a2 2 0 0 1 0 4H9m3-10v12"/></svg></div>
     <div class="auth-title">TaskUp</div>
     <div class="auth-sub" data-i18n="authSub">Vazifa bajaring, coin yig'ing, pulga aylantiring</div>
 
@@ -378,6 +380,7 @@
     <input type="email" id="emailInput" placeholder="email@example.com" autocomplete="email">
     <label data-i18n="lblPassword">Parol</label>
     <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="new-password">
+    <div class="forgot-pass-link" id="forgotPassLink" style="display:none" onclick="sendPasswordReset()" data-i18n="forgotPass">Parolni unutdingizmi?</div>
 
     <button class="btn" id="authSubmitBtn" onclick="submitAuth()" data-i18n="btnSignup">Ro'yxatdan o'tish</button>
     <div class="auth-error" id="authError"></div>
@@ -386,7 +389,7 @@
 
 <!-- ================= ONBOARDING ================= -->
 <div id="onboardScreen">
-  <div class="onboard-icon">👋</div>
+  <div class="onboard-icon"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.83L7 15"/></svg></div>
   <div class="onboard-title" data-i18n="obTitle">Xush kelibsiz!</div>
   <div class="onboard-steps">
     <div class="onboard-step"><div class="onboard-num">1</div>
@@ -414,7 +417,7 @@
         <div class="greet">
           <div class="greet-avatar" id="homeAvatar">--</div>
           <div>
-            <div class="greet-name"><span data-i18n="helloWord">Salom</span>, <span id="greetName">Foydalanuvchi</span>! 👋</div>
+            <div class="greet-name"><span data-i18n="helloWord">Salom</span>, <span id="greetName">Foydalanuvchi</span>! <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.83L7 15"/></svg></div>
             <div class="greet-sub" id="greetSubTxt" data-i18n="greetSub">Topshiriqlarni bajaring va daromad qiling</div>
           </div>
         </div>
@@ -440,7 +443,7 @@
         <div class="banner-emoji"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
         <div class="banner-title" data-i18n="bannerTitle">Do'stlaringizni taklif qiling</div>
         <div class="banner-sub" data-i18n="bannerSub">Do'stingiz har earnsanda siz 20% bonus olasiz.</div>
-        <button class="banner-btn" onclick="switchTab('friends')">👥 <span data-i18n="inviteBtn">Taklif qilish</span></button>
+        <button class="banner-btn" onclick="switchTab('friends')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> <span data-i18n="inviteBtn">Taklif qilish</span></button>
       </div>
 
       <div class="sec-head">
@@ -487,7 +490,7 @@
 
       <div class="daily-card">
         <div class="daily-left">
-          <b>🔥 <span data-i18n="dailyBonusTitle">Kunlik bonus</span></b>
+          <b><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-5px;color:var(--amber)"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> <span data-i18n="dailyBonusTitle">Kunlik bonus</span></b>
           <span id="streakSub">Har kuni bonus oling!</span>
           <div class="daily-reward" id="dailyRewardTxt"><span class="mini-coin">$</span> +500</div>
           <div class="daily-timer" id="dailyTimer">23:59:59</div>
@@ -497,10 +500,10 @@
 
       <div class="sec-head"><div class="sec-title" data-i18n="statsTitle">Statistika</div></div>
       <div class="stats-grid">
-        <div class="stat-box"><div class="stat-icon">✅</div><div class="stat-val" id="statTasks">0</div><div class="stat-lbl" data-i18n="statDone">Bajarilgan</div></div>
-        <div class="stat-box"><div class="stat-icon">💰</div><div class="stat-val" id="statLifetime">0</div><div class="stat-lbl" data-i18n="statTotalCoin">Jami coin</div></div>
-        <div class="stat-box"><div class="stat-icon">👥</div><div class="stat-val" id="statInvites">0</div><div class="stat-lbl" data-i18n="statInvitesLbl">Takliflar</div></div>
-        <div class="stat-box"><div class="stat-icon">💰</div><div class="stat-val" id="statCashedOut">0</div><div class="stat-lbl" data-i18n="statCashedLbl">Yechib olingan</div></div>
+        <div class="stat-box"><div class="stat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="stat-val" id="statTasks">0</div><div class="stat-lbl" data-i18n="statDone">Bajarilgan</div></div>
+        <div class="stat-box"><div class="stat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/><path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg></div><div class="stat-val" id="statLifetime">0</div><div class="stat-lbl" data-i18n="statTotalCoin">Jami coin</div></div>
+        <div class="stat-box"><div class="stat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="stat-val" id="statInvites">0</div><div class="stat-lbl" data-i18n="statInvitesLbl">Takliflar</div></div>
+        <div class="stat-box"><div class="stat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div><div class="stat-val" id="statCashedOut">0</div><div class="stat-lbl" data-i18n="statCashedLbl">Yechib olingan</div></div>
       </div>
     </div>
 
@@ -554,7 +557,7 @@
     <!-- ---- FRIENDS TAB ---- -->
     <div class="tab-content" id="tab-friends">
       <div class="invite-hero">
-        <div class="invite-emoji">🎁</div>
+        <div class="invite-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
         <div class="sec-title" style="text-align:center; margin-bottom:6px" data-i18n="inviteHeroTitle">Do'stlaringizni taklif qiling</div>
         <div style="text-align:center; font-size:12.5px; color:var(--muted)" data-i18n="inviteHeroSub">Har bir do'stingiz uchun 20% bonus oling</div>
       </div>
@@ -567,9 +570,9 @@
 
       <div class="section-label" data-i18n="orShare">Yoki ulashish</div>
       <div class="share-row">
-        <div class="share-item" onclick="shareVia('telegram')"><div class="share-icon" style="background:#2AABEE">✈️</div><span>Telegram</span></div>
-        <div class="share-item" onclick="shareVia('whatsapp')"><div class="share-icon" style="background:#25D366">💬</div><span>WhatsApp</span></div>
-        <div class="share-item" onclick="shareVia('instagram')"><div class="share-icon" style="background:linear-gradient(135deg,#F58529,#DD2A7B,#8134AF)">📷</div><span>Instagram</span></div>
+        <div class="share-item" onclick="shareVia('telegram')"><div class="share-icon" style="background:#2AABEE; color:#fff"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22 3L2 11l6 2 2 6 3-4 5 4 4-16z"/></svg></div><span>Telegram</span></div>
+        <div class="share-item" onclick="shareVia('whatsapp')"><div class="share-icon" style="background:#25D366; color:#fff"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.6 6.3A8 8 0 0 0 4 15.7L2.7 21l5.5-1.4A8 8 0 1 0 17.6 6.3zM12 18.6a6.6 6.6 0 0 1-3.4-.9l-.24-.15-2.53.66.68-2.46-.16-.25a6.6 6.6 0 1 1 5.65 3.1z"/></svg></div><span>WhatsApp</span></div>
+        <div class="share-item" onclick="shareVia('instagram')"><div class="share-icon" style="background:linear-gradient(135deg,#F58529,#DD2A7B,#8134AF); color:#fff"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><span>Instagram</span></div>
       </div>
 
       <div class="card" style="margin-top:20px">
@@ -581,7 +584,7 @@
     <!-- ---- WALLET TAB ---- -->
     <div class="tab-content" id="tab-wallet">
       <div class="wallet-hero">
-        <div class="wallet-emoji">👛</div>
+        <div class="wallet-emoji"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
         <div class="eyebrow" style="position:relative" data-i18n="cashoutBalanceLbl">YECHISH UCHUN BALANS</div>
         <div class="wallet-amount"><span class="coin-dot" style="width:20px;height:20px;font-size:11px">$</span> <span id="coinCount2">0</span></div>
         <div class="wallet-sub">= <span id="somEst">0</span> so'm</div>
@@ -719,20 +722,20 @@
       <div class="sec-head"><div class="sec-title" data-i18n="leaderboardTitle">Reyting</div><div class="sec-link" onclick="switchTab('profile')" data-i18n="backBtn">‹ Orqaga</div></div>
       <div class="podium">
         <div class="podium-slot second">
-          <div class="podium-avatar">🥈</div>
+          <div class="podium-avatar"><svg viewBox="0 0 24 24" width="22" height="22" fill="#C0C0C0" stroke="var(--bg)" stroke-width="1"><circle cx="12" cy="14" r="7"/><path d="M9 2h6l-1.5 6h-3z"/></svg></div>
           <div class="podium-name" id="p2Name">--</div>
           <div class="podium-coin"><span class="mini-coin">$</span> <span id="p2Coin">0</span></div>
           <div class="podium-bar" style="height:70px">2</div>
         </div>
         <div class="podium-slot first">
-          <div class="podium-crown">👑</div>
-          <div class="podium-avatar gold">🥇</div>
+          <div class="podium-crown"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:var(--amber)"><path d="M2 18h20l-2-9-5 4-3-7-3 7-5-4z"/></svg></div>
+          <div class="podium-avatar gold"><svg viewBox="0 0 24 24" width="26" height="26" fill="var(--amber)" stroke="var(--bg)" stroke-width="1"><circle cx="12" cy="14" r="7"/><path d="M9 2h6l-1.5 6h-3z"/></svg></div>
           <div class="podium-name" id="p1Name">--</div>
           <div class="podium-coin"><span class="mini-coin">$</span> <span id="p1Coin">0</span></div>
           <div class="podium-bar" style="height:95px">1</div>
         </div>
         <div class="podium-slot third">
-          <div class="podium-avatar">🥉</div>
+          <div class="podium-avatar"><svg viewBox="0 0 24 24" width="22" height="22" fill="#CD7F32" stroke="var(--bg)" stroke-width="1"><circle cx="12" cy="14" r="7"/><path d="M9 2h6l-1.5 6h-3z"/></svg></div>
           <div class="podium-name" id="p3Name">--</div>
           <div class="podium-coin"><span class="mini-coin">$</span> <span id="p3Coin">0</span></div>
           <div class="podium-bar" style="height:52px">3</div>
@@ -778,6 +781,47 @@ const db = firebase.firestore();
 let currentUid = null;
 let unsubscribeUser = null;
 
+/* ---------------- Sound engine (Web Audio API, fayl kerak emas) ---------------- */
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx){ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function playTone(freq, duration, type, startTime, gainPeak){
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  const t0 = ctx.currentTime + (startTime || 0);
+  gain.gain.setValueAtTime(0, t0);
+  gain.gain.linearRampToValueAtTime(gainPeak || 0.15, t0 + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(t0); osc.stop(t0 + duration + 0.02);
+}
+function sndClick(){ try{ playTone(600, 0.06, 'sine', 0, 0.08); }catch(e){} }
+function sndSuccess(){
+  try{
+    playTone(523.25, 0.12, 'sine', 0, 0.16);
+    playTone(659.25, 0.12, 'sine', 0.08, 0.16);
+    playTone(783.99, 0.18, 'sine', 0.16, 0.18);
+  }catch(e){}
+}
+function sndCoin(){
+  try{
+    playTone(988, 0.08, 'square', 0, 0.06);
+    playTone(1318, 0.12, 'square', 0.06, 0.07);
+  }catch(e){}
+}
+function sndError(){ try{ playTone(180, 0.18, 'sawtooth', 0, 0.09); }catch(e){} }
+function sndLevelUp(){
+  try{
+    [523.25,659.25,783.99,1046.5].forEach((f,i)=> playTone(f, 0.16, 'triangle', i*0.09, 0.15));
+  }catch(e){}
+}
+
 const COIN_TO_USD = 10000;
 const CASHOUT_MIN = 10000;
 const TASK_LIMITS = { video: 8, download: 3, survey: 1 };
@@ -804,7 +848,7 @@ const I18N = {
   uz: {
     navL1:"Bosh sahifa", navL2:"Vazifalar", navL3:"Do'stlar", navL4:"Pul yechish", navL5:"Profil",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
-    authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish",
+    authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
     authHint:"Telefon raqamingizga haqiqiy SMS kod yuboriladi", obTitle:"Xush kelibsiz!",
     obStep1T:"Vazifa bajaring", obStep1D:"Video ko'ring, ilova yuklang, so'rovnoma to'ldiring",
@@ -849,7 +893,7 @@ const I18N = {
   en: {
     navL1:"Home", navL2:"Tasks", navL3:"Friends", navL4:"Wallet", navL5:"Profile",
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
-    authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in",
+    authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in", forgotPass:"Forgot password?",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
     authHint:"A real SMS code will be sent to your phone", obTitle:"Welcome!",
     obStep1T:"Complete tasks", obStep1D:"Watch videos, install apps, fill surveys",
@@ -894,7 +938,7 @@ const I18N = {
   ru: {
     navL1:"Главная", navL2:"Задания", navL3:"Друзья", navL4:"Вывод", navL5:"Профиль",
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
-    authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти",
+    authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти", forgotPass:"Забыли пароль?",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
     authHint:"На ваш номер будет отправлен настоящий SMS-код", obTitle:"Добро пожаловать!",
     obStep1T:"Выполняйте задания", obStep1D:"Смотрите видео, устанавливайте приложения, проходите опросы",
@@ -974,9 +1018,24 @@ function switchAuthMode(mode){
   document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
   document.getElementById('authSubmitBtn').textContent = mode === 'signup' ? t('btnSignup') : t('btnLoginSubmit');
   document.getElementById('authError').textContent = '';
+  document.getElementById('forgotPassLink').style.display = mode === 'login' ? 'block' : 'none';
+}
+
+function sendPasswordReset(){
+  const email = document.getElementById('emailInput').value.trim();
+  const errorEl = document.getElementById('authError');
+  if(!email || !email.includes('@')){ errorEl.textContent = "Avval email kiriting, keyin havolani bosing"; return; }
+  auth.sendPasswordResetEmail(email)
+    .then(() => { errorEl.style.color = 'var(--green)'; errorEl.textContent = "Havola emailingizga yuborildi"; })
+    .catch((err) => {
+      console.error(err);
+      errorEl.style.color = '';
+      errorEl.textContent = err.code === 'auth/user-not-found' ? "Bu email bilan hisob topilmadi" : "Xatolik yuz berdi";
+    });
 }
 
 function submitAuth(){
+  sndClick();
   const email = document.getElementById('emailInput').value.trim();
   const password = document.getElementById('passwordInput').value;
   const errorEl = document.getElementById('authError');
@@ -1121,6 +1180,7 @@ function signOutUser(){
 
 /* ---------------- Tabs ---------------- */
 function switchTab(tab){
+  sndClick();
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
@@ -1131,6 +1191,7 @@ function switchTab(tab){
 function showToast(msg, isError){
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show' + (isError ? ' error' : '');
+  if(isError) sndError();
   setTimeout(()=> t.className = 'toast', 1800);
 }
 function fireConfetti(){
@@ -1237,8 +1298,15 @@ function getLevelInfo(xp){
   const current = (xp % XP_PER_LEVEL);
   return { num, current, needed: XP_PER_LEVEL };
 }
+let lastKnownLevel = null;
 function renderLevel(){
   const info = getLevelInfo(state.lifetimeCoins);
+  if(lastKnownLevel !== null && info.num > lastKnownLevel){
+    sndLevelUp();
+    showToast(`Level ${info.num}!`);
+    fireConfetti();
+  }
+  lastKnownLevel = info.num;
   document.getElementById('levelNum').textContent = info.num;
   const pct = Math.min(100, (info.current / info.needed) * 100);
   const fill1 = document.getElementById('xpBarFill'); if(fill1) fill1.style.width = pct + '%';
@@ -1253,7 +1321,7 @@ function renderLevel(){
     const unlocked = info.num >= r.level;
     return `<div class="level-reward-row ${unlocked?'':'locked'}">
       <div class="level-reward-name">${r.level}-level</div>
-      <div class="level-reward-amt"><span class="mini-coin">$</span> +${r.reward} ${unlocked?'✓':'🔒'}</div>
+      <div class="level-reward-amt"><span class="mini-coin">$</span> +${r.reward} ${unlocked?'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg>':'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'}</div>
     </div>`;
   }).join('');
 }
@@ -1292,6 +1360,7 @@ function renderFriends(){
 }
 
 function copyReferral(){
+  sndClick();
   const link = 'taskup.uz/ref/' + state.referralCode;
   navigator.clipboard.writeText(link).then(()=> showToast(t('toastCopied'))).catch(()=> showToast(t('toastCopyFail'), true));
 }
@@ -1359,6 +1428,7 @@ function filterHistory(status, tabEl){
 /* logActivity now defined above using Firestore */
 
 function completeTask(taskId, reward, dailyLimit, btnEl){
+  sndClick();
   if(!currentUid) return;
   const count = state.taskCounts[taskId] || 0;
   if(count >= dailyLimit){ showToast(t('toastLimitReached'), true); return; }
@@ -1383,6 +1453,7 @@ function completeTask(taskId, reward, dailyLimit, btnEl){
         });
       });
     }).then(() => {
+      sndCoin();
       showToast(`+${reward} ${t('toastTaskDone')}`);
       logActivity(getTaskLabel(taskId), reward);
       if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
@@ -1395,6 +1466,7 @@ function completeTask(taskId, reward, dailyLimit, btnEl){
 }
 
 function claimStreak(){
+  sndClick();
   if(!currentUid) return;
   const today = new Date().toDateString();
   if(state.lastStreakClaim === today) return;
@@ -1410,12 +1482,14 @@ function claimStreak(){
     streakCount: newStreak,
     lastStreakClaim: today
   }).then(() => {
-    showToast(`🔥 +${bonus} ${t('toastStreakBonus')}`);
+    sndCoin();
+    showToast(`+${bonus} ${t('toastStreakBonus')}`);
     logActivity(`${t('dailyBonusLabel')} (${newStreak})`, bonus);
   }).catch((err) => { console.error(err); showToast('Xatolik yuz berdi', true); });
 }
 
 function tryCashout(){
+  sndClick();
   if(!currentUid) return;
   if(state.coins < CASHOUT_MIN){ showToast(`${t('toastCashoutMin')} ${CASHOUT_MIN.toLocaleString()}`, true); return; }
 
@@ -1435,6 +1509,7 @@ function tryCashout(){
       });
     });
   }).then(() => {
+    sndSuccess();
     showToast(t('toastCashoutSent'));
     logActivity(t('cashoutRequestLabel'), -CASHOUT_MIN);
     fireConfetti();
