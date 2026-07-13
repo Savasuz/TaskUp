@@ -80,7 +80,28 @@
   .loading-text{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--muted); letter-spacing:1px; }
 
   /* ---------- Header (greeting + balance chip) ---------- */
-  .home-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:10px; }
+  .home-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:10px; }
+
+  /* ---------- Top icon row ---------- */
+  .top-icon-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .icon-btn{ width:38px; height:38px; border-radius:11px; background:var(--bg-card); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; }
+  .notif-badge{ position:absolute; top:-5px; right:-5px; background:var(--red); color:#fff; font-size:9px; font-weight:700;
+    border-radius:20px; min-width:16px; height:16px; display:flex; align-items:center; justify-content:center; padding:0 3px; }
+
+  /* ---------- Big premium balance card ---------- */
+  .big-balance-card{ background:linear-gradient(135deg, #4B3FCB, #2E2670); border-radius:20px; padding:22px;
+    margin-bottom:18px; position:relative; overflow:hidden; cursor:pointer; }
+  .bal-emoji-bg{ position:absolute; right:16px; top:14px; font-size:44px; opacity:0.85; transform:rotate(-6deg); }
+  .big-balance-card .balance-chip-label{ font-size:12px; color:rgba(255,255,255,0.75); position:relative; }
+  .big-balance-value{ font-family:'Space Grotesk', sans-serif; font-size:34px; font-weight:700; color:#fff;
+    display:flex; align-items:center; gap:8px; margin:6px 0 16px; position:relative; }
+  .big-balance-actions{ display:flex; gap:10px; position:relative; }
+  .bal-action-btn{ border:none; padding:10px 18px; border-radius:11px; font-family:'Space Grotesk', sans-serif;
+    font-weight:700; font-size:12.5px; cursor:pointer; background:rgba(255,255,255,0.14); color:#fff;
+    transition:transform .12s ease, background .12s ease; }
+  .bal-action-btn:active{ transform:scale(0.95); }
+  .bal-action-btn.primary{ background:#fff; color:var(--purple); }
   .greet{ display:flex; align-items:center; gap:12px; }
   .greet-avatar{ width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue));
     display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; flex-shrink:0; }
@@ -378,6 +399,11 @@
 
     <!-- ---- HOME TAB ---- -->
     <div class="tab-content active" id="tab-home">
+      <div class="top-icon-row">
+        <div class="icon-btn" onclick="switchTab('profile')">☰</div>
+        <div class="icon-btn" style="position:relative">🔔<span class="notif-badge" id="notifBadge">2</span></div>
+      </div>
+
       <div class="home-header">
         <div class="greet">
           <div class="greet-avatar" id="homeAvatar">--</div>
@@ -386,12 +412,16 @@
             <div class="greet-sub" id="greetSubTxt" data-i18n="greetSub">Topshiriqlarni bajaring va daromad qiling</div>
           </div>
         </div>
-        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px">
-          <div class="balance-chip" onclick="switchTab('wallet')">
-            <div class="balance-chip-label" id="balanceLabelTxt" data-i18n="balanceLbl">Balansingiz</div>
-            <div class="balance-chip-value"><span class="coin-dot">$</span><span id="coinCount">0</span></div>
-          </div>
-          <div class="level-chip" onclick="switchTab('level')">🛡️ <span data-i18n="levelWord">Level</span> <span id="levelNum">1</span></div>
+        <div class="level-chip" onclick="switchTab('level')">🛡️ <span data-i18n="levelWord">Level</span> <span id="levelNum">1</span></div>
+      </div>
+
+      <div class="big-balance-card" onclick="switchTab('wallet')">
+        <div class="bal-emoji-bg">👛</div>
+        <div class="balance-chip-label" id="balanceLabelTxt" data-i18n="balanceLbl">Balansingiz</div>
+        <div class="big-balance-value"><span class="coin-dot" style="width:24px;height:24px;font-size:13px">$</span><span id="coinCount">0</span></div>
+        <div class="big-balance-actions">
+          <button class="bal-action-btn primary" onclick="event.stopPropagation(); switchTab('wallet')" data-i18n="btnWithdraw">Pul yechish</button>
+          <button class="bal-action-btn" onclick="event.stopPropagation(); switchTab('history')" data-i18n="btnHistory">Tarix</button>
         </div>
       </div>
 
@@ -774,7 +804,7 @@ const I18N = {
     obStep1T:"Vazifa bajaring", obStep1D:"Video ko'ring, ilova yuklang, so'rovnoma to'ldiring",
     obStep2T:"Coin yig'ing", obStep2D:"Har bir vazifa uchun coin balansingizga qo'shiladi",
     obStep3T:"Pulga aylantiring", obStep3D:"10 000 coin = $1, Payme yoki Click orqali yeching",
-    greetSub:"Topshiriqlarni bajaring va daromad qiling", balanceLbl:"Balansingiz",
+    greetSub:"Topshiriqlarni bajaring va daromad qiling", balanceLbl:"Balansingiz", btnWithdraw:"Pul yechish", btnHistory:"Tarix",
     bannerTitle:"Do'stlaringizni taklif qiling", bannerSub:"Do'stingiz har earnsanda siz 20% bonus olasiz.",
     inviteBtn:"Taklif qilish", tasksTitle:"Vazifalar", seeAll:"Barchasini ko'rish ›",
     dailyBonusTitle:"Kunlik bonus", statsTitle:"Statistika", statDone:"Bajarilgan",
@@ -819,7 +849,7 @@ const I18N = {
     obStep1T:"Complete tasks", obStep1D:"Watch videos, install apps, fill surveys",
     obStep2T:"Collect coins", obStep2D:"Coins are added to your balance for each task",
     obStep3T:"Cash out", obStep3D:"10,000 coins = $1, withdraw via Payme or Click",
-    greetSub:"Complete tasks and earn money", balanceLbl:"Your balance",
+    greetSub:"Complete tasks and earn money", balanceLbl:"Your balance", btnWithdraw:"Withdraw", btnHistory:"History",
     bannerTitle:"Invite your friends", bannerSub:"Get 20% bonus every time your friend earns.",
     inviteBtn:"Invite", tasksTitle:"Tasks", seeAll:"See all ›",
     dailyBonusTitle:"Daily bonus", statsTitle:"Statistics", statDone:"Completed",
@@ -864,7 +894,7 @@ const I18N = {
     obStep1T:"Выполняйте задания", obStep1D:"Смотрите видео, устанавливайте приложения, проходите опросы",
     obStep2T:"Собирайте монеты", obStep2D:"Монеты начисляются на баланс за каждое задание",
     obStep3T:"Выводите деньги", obStep3D:"10 000 монет = $1, вывод через Payme или Click",
-    greetSub:"Выполняйте задания и зарабатывайте", balanceLbl:"Ваш баланс",
+    greetSub:"Выполняйте задания и зарабатывайте", balanceLbl:"Ваш баланс", btnWithdraw:"Вывести", btnHistory:"История",
     bannerTitle:"Пригласите друзей", bannerSub:"Получайте 20% бонус каждый раз, когда друг зарабатывает.",
     inviteBtn:"Пригласить", tasksTitle:"Задания", seeAll:"Смотреть все ›",
     dailyBonusTitle:"Ежедневный бонус", statsTitle:"Статистика", statDone:"Выполнено",
