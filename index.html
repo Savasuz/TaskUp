@@ -29,7 +29,7 @@
     box-shadow:0 10px 30px rgba(108,92,231,0.4); margin-bottom:18px; }
   .splash-title{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; }
   .splash-sub{ font-size:14px; color:var(--muted); margin-top:6px; margin-bottom:30px; }
-  .splash-chest{ font-size:100px; margin-bottom:30px; filter:drop-shadow(0 15px 25px rgba(108,92,231,0.35)); }
+  .splash-chest{ display:flex; justify-content:center; margin-bottom:30px; filter:drop-shadow(0 15px 25px rgba(108,92,231,0.35)); }
   .splash-dots{ display:flex; gap:6px; margin-bottom:30px; }
   .splash-dots span{ width:7px; height:7px; border-radius:50%; background:var(--line); }
   .splash-dots span.active{ background:var(--purple); width:20px; border-radius:5px; }
@@ -187,7 +187,7 @@
 
   /* ---------- Invite hero ---------- */
   .invite-hero{ padding:24px 10px 20px; }
-  .invite-emoji{ font-size:52px; text-align:center; margin-bottom:14px; }
+  .invite-emoji{ display:flex; justify-content:center; margin-bottom:14px; }
   .section-label{ font-size:11.5px; color:var(--muted); margin:16px 2px 8px; font-family:'JetBrains Mono', monospace; letter-spacing:0.5px; }
 
   /* ---------- Share row ---------- */
@@ -359,7 +359,35 @@
   <div class="splash-check">✓</div>
   <div class="splash-title">TaskCoin</div>
   <div class="splash-sub" data-i18n="splashSub">Vazifa bajarib, pul ishlang!</div>
-  <div class="splash-chest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+  <div class="splash-chest"><svg viewBox="0 0 200 200" width="180" height="180">
+<defs>
+  <linearGradient id="woodG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#B98A52"/><stop offset="100%" stop-color="#7C4E24"/>
+  </linearGradient>
+  <linearGradient id="lidG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#8B5A2B"/><stop offset="100%" stop-color="#5C3714"/>
+  </linearGradient>
+  <radialGradient id="coinG" cx="35%" cy="30%" r="75%">
+    <stop offset="0%" stop-color="#FFF3B0"/><stop offset="55%" stop-color="#FFC93C"/><stop offset="100%" stop-color="#C9861A"/>
+  </radialGradient>
+  <linearGradient id="glowG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#FFE27A" stop-opacity="0.55"/><stop offset="100%" stop-color="#FFE27A" stop-opacity="0"/>
+  </linearGradient>
+</defs>
+<ellipse cx="100" cy="170" rx="70" ry="12" fill="#000" opacity="0.25"/>
+<ellipse cx="100" cy="95" rx="85" ry="45" fill="url(#glowG)"/>
+<circle cx="55" cy="95" r="9" fill="url(#coinG)"/><circle cx="150" cy="88" r="7" fill="url(#coinG)"/>
+<circle cx="40" cy="115" r="6" fill="url(#coinG)"/><circle cx="165" cy="110" r="8" fill="url(#coinG)"/>
+<rect x="35" y="110" width="130" height="65" rx="10" fill="url(#woodG)"/>
+<rect x="35" y="110" width="130" height="14" fill="#4A2E12" opacity="0.5"/>
+<path d="M35 112 Q100 70 165 112 L165 128 Q100 92 35 128 Z" fill="url(#lidG)"/>
+<rect x="90" y="118" width="20" height="24" rx="4" fill="#E8B84B" stroke="#8B5A2B" stroke-width="2"/>
+<circle cx="100" cy="127" r="4" fill="#5C3714"/>
+<circle cx="90" cy="145" r="10" fill="url(#coinG)"/><circle cx="112" cy="150" r="12" fill="url(#coinG)"/>
+<circle cx="130" cy="143" r="8" fill="url(#coinG)"/><circle cx="70" cy="152" r="8" fill="url(#coinG)"/>
+<rect x="35" y="110" width="130" height="6" fill="#D9A55C"/>
+<rect x="35" y="171" width="130" height="6" rx="3" fill="#3E2510"/>
+</svg></div>
   <div class="splash-dots"><span class="active"></span><span></span><span></span><span></span></div>
   <button class="btn" onclick="goToAuth()" data-i18n="btnStart">Boshlash</button>
   <button class="btn-outline" onclick="goToAuth()" data-i18n="btnLogin">Kirish</button>
@@ -425,7 +453,26 @@
       </div>
 
       <div class="big-balance-card" onclick="switchTab('wallet')">
-        <div class="bal-emoji-bg"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
+        <div class="bal-emoji-bg"><svg viewBox="0 0 160 140" width="76" height="66">
+<defs>
+  <linearGradient id="walG" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#9E8CFF"/><stop offset="100%" stop-color="#6C5CE7"/>
+  </linearGradient>
+  <radialGradient id="coinG2" cx="35%" cy="30%" r="75%">
+    <stop offset="0%" stop-color="#FFF3B0"/><stop offset="55%" stop-color="#FFC93C"/><stop offset="100%" stop-color="#C9861A"/>
+  </radialGradient>
+</defs>
+<circle cx="128" cy="24" r="10" fill="url(#coinG2)"/>
+<circle cx="145" cy="45" r="7" fill="url(#coinG2)"/>
+<circle cx="112" cy="12" r="6" fill="url(#coinG2)"/>
+<rect x="10" y="45" width="120" height="80" rx="16" fill="url(#walG)"/>
+<rect x="10" y="45" width="120" height="80" rx="16" fill="#000" opacity="0.08"/>
+<rect x="10" y="45" width="120" height="24" rx="12" fill="#8477F2"/>
+<rect x="90" y="78" width="42" height="30" rx="8" fill="#4B3FCB"/>
+<circle cx="111" cy="93" r="7" fill="#FFD873"/>
+<circle cx="30" cy="95" r="11" fill="url(#coinG2)"/>
+<circle cx="52" cy="107" r="8" fill="url(#coinG2)"/>
+</svg></div>
         <div class="balance-chip-label" id="balanceLabelTxt" data-i18n="balanceLbl">Balansingiz</div>
         <div class="big-balance-value"><span class="coin-dot" style="width:24px;height:24px;font-size:13px">$</span><span id="coinCount">0</span></div>
         <div class="big-balance-actions">
@@ -440,7 +487,22 @@
       </div>
 
       <div class="banner">
-        <div class="banner-emoji"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+        <div class="banner-emoji"><svg viewBox="0 0 140 140" width="60" height="60">
+<defs>
+  <linearGradient id="giftG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#FF8FD8"/><stop offset="100%" stop-color="#8B5CF6"/>
+  </linearGradient>
+  <linearGradient id="ribbonG" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#FFE27A"/><stop offset="100%" stop-color="#FFB020"/>
+  </linearGradient>
+</defs>
+<rect x="20" y="55" width="100" height="70" rx="8" fill="url(#giftG)"/>
+<rect x="20" y="55" width="100" height="70" rx="8" fill="#000" opacity="0.06"/>
+<rect x="12" y="35" width="116" height="26" rx="6" fill="#A56CFF"/>
+<rect x="58" y="35" width="24" height="90" fill="url(#ribbonG)"/>
+<path d="M70 35 C 40 35 40 5 60 8 C 75 10 72 30 70 35 Z" fill="url(#ribbonG)"/>
+<path d="M70 35 C 100 35 100 5 80 8 C 65 10 68 30 70 35 Z" fill="url(#ribbonG)"/>
+</svg></div>
         <div class="banner-title" data-i18n="bannerTitle">Do'stlaringizni taklif qiling</div>
         <div class="banner-sub" data-i18n="bannerSub">Do'stingiz har earnsanda siz 20% bonus olasiz.</div>
         <button class="banner-btn" onclick="switchTab('friends')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> <span data-i18n="inviteBtn">Taklif qilish</span></button>
@@ -557,7 +619,22 @@
     <!-- ---- FRIENDS TAB ---- -->
     <div class="tab-content" id="tab-friends">
       <div class="invite-hero">
-        <div class="invite-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+        <div class="invite-emoji"><svg viewBox="0 0 140 140" width="90" height="90">
+<defs>
+  <linearGradient id="giftG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#FF8FD8"/><stop offset="100%" stop-color="#8B5CF6"/>
+  </linearGradient>
+  <linearGradient id="ribbonG" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#FFE27A"/><stop offset="100%" stop-color="#FFB020"/>
+  </linearGradient>
+</defs>
+<rect x="20" y="55" width="100" height="70" rx="8" fill="url(#giftG)"/>
+<rect x="20" y="55" width="100" height="70" rx="8" fill="#000" opacity="0.06"/>
+<rect x="12" y="35" width="116" height="26" rx="6" fill="#A56CFF"/>
+<rect x="58" y="35" width="24" height="90" fill="url(#ribbonG)"/>
+<path d="M70 35 C 40 35 40 5 60 8 C 75 10 72 30 70 35 Z" fill="url(#ribbonG)"/>
+<path d="M70 35 C 100 35 100 5 80 8 C 65 10 68 30 70 35 Z" fill="url(#ribbonG)"/>
+</svg></div>
         <div class="sec-title" style="text-align:center; margin-bottom:6px" data-i18n="inviteHeroTitle">Do'stlaringizni taklif qiling</div>
         <div style="text-align:center; font-size:12.5px; color:var(--muted)" data-i18n="inviteHeroSub">Har bir do'stingiz uchun 20% bonus oling</div>
       </div>
