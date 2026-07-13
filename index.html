@@ -38,6 +38,10 @@
   .btn-outline:active{ transform:scale(0.98); }
   #authScreen{ display:none; flex-direction:column; justify-content:center; min-height:100vh; padding:0 20px; }
   .auth-card{ background:var(--bg-card); border:1px solid var(--line); border-radius:18px; padding:28px 22px; }
+  .auth-tabs{ display:flex; gap:8px; margin-bottom:18px; background:var(--bg); border-radius:10px; padding:4px; }
+  .auth-tab{ flex:1; text-align:center; padding:9px; border-radius:8px; font-size:13px; font-weight:600;
+    font-family:'Space Grotesk', sans-serif; color:var(--muted); cursor:pointer; }
+  .auth-tab.active{ background:var(--purple); color:#fff; }
   .auth-logo{ text-align:center; font-size:34px; margin-bottom:6px; }
   .auth-title{ font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:700; margin-bottom:6px; text-align:center; }
   .auth-sub{ font-size:13px; color:var(--muted); margin-bottom:22px; text-align:center; }
@@ -337,19 +341,19 @@
     <div class="auth-logo">🪙</div>
     <div class="auth-title">TaskUp</div>
     <div class="auth-sub" data-i18n="authSub">Vazifa bajaring, coin yig'ing, pulga aylantiring</div>
-    <div id="phoneStep">
-      <label data-i18n="lblPhone">Telefon raqami</label>
-      <input type="tel" id="phoneInput" placeholder="+998901234567" autocomplete="tel">
-      <div id="recaptcha-container" style="margin-bottom:14px"></div>
-      <button class="btn" id="sendCodeBtn" onclick="sendCode()" data-i18n="btnSendCode">SMS kod yuborish</button>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tabSignup" onclick="switchAuthMode('signup')" data-i18n="tabSignup">Ro'yxatdan o'tish</div>
+      <div class="auth-tab" id="tabLogin" onclick="switchAuthMode('login')" data-i18n="tabLogin">Kirish</div>
     </div>
-    <div id="codeStep" style="display:none">
-      <label data-i18n="lblCode">SMS orqali kelgan kod</label>
-      <input type="text" id="codeInput" placeholder="123456" inputmode="numeric" maxlength="6">
-      <button class="btn" onclick="verifyCode()" data-i18n="btnConfirm">Tasdiqlash</button>
-    </div>
+
+    <label data-i18n="lblEmail">Email</label>
+    <input type="email" id="emailInput" placeholder="email@example.com" autocomplete="email">
+    <label data-i18n="lblPassword">Parol</label>
+    <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="new-password">
+
+    <button class="btn" id="authSubmitBtn" onclick="submitAuth()" data-i18n="btnSignup">Ro'yxatdan o'tish</button>
     <div class="auth-error" id="authError"></div>
-    <div class="auth-hint" data-i18n="authHint">Telefon raqamingizga haqiqiy SMS kod yuboriladi</div>
   </div>
 </div>
 
@@ -735,7 +739,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let confirmationResult = null;
 let currentUid = null;
 let unsubscribeUser = null;
 
@@ -748,7 +751,7 @@ function getTaskLabel(id){
 }
 
 let state = {
-  phone: '', referralCode: '',
+  email: '', referralCode: '',
   coins: 0, lifetimeCoins: 0,
   taskCounts: {}, tasksCompletedTotal: 0,
   friendsCount: 0, friendsBonus: 0, cashedOutTotal: 0,
@@ -765,7 +768,7 @@ const I18N = {
   uz: {
     navL1:"Bosh sahifa", navL2:"Vazifalar", navL3:"Do'stlar", navL4:"Pul yechish", navL5:"Profil",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
-    authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami",
+    authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
     authHint:"Telefon raqamingizga haqiqiy SMS kod yuboriladi", obTitle:"Xush kelibsiz!",
     obStep1T:"Vazifa bajaring", obStep1D:"Video ko'ring, ilova yuklang, so'rovnoma to'ldiring",
@@ -810,7 +813,7 @@ const I18N = {
   en: {
     navL1:"Home", navL2:"Tasks", navL3:"Friends", navL4:"Wallet", navL5:"Profile",
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
-    authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number",
+    authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
     authHint:"A real SMS code will be sent to your phone", obTitle:"Welcome!",
     obStep1T:"Complete tasks", obStep1D:"Watch videos, install apps, fill surveys",
@@ -855,7 +858,7 @@ const I18N = {
   ru: {
     navL1:"Главная", navL2:"Задания", navL3:"Друзья", navL4:"Вывод", navL5:"Профиль",
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
-    authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона",
+    authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
     authHint:"На ваш номер будет отправлен настоящий SMS-код", obTitle:"Добро пожаловать!",
     obStep1T:"Выполняйте задания", obStep1D:"Смотрите видео, устанавливайте приложения, проходите опросы",
@@ -926,53 +929,48 @@ function goToAuth(){
   document.getElementById('authScreen').style.display = 'flex';
 }
 
-/* ---------------- reCAPTCHA + Auth ---------------- */
-function setupRecaptcha(){
-  if(window.recaptchaVerifier) return;
-  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'normal' });
+/* ---------------- Email/Parol Auth ---------------- */
+let authMode = 'signup';
+
+function switchAuthMode(mode){
+  authMode = mode;
+  document.getElementById('tabSignup').classList.toggle('active', mode === 'signup');
+  document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('authSubmitBtn').textContent = mode === 'signup' ? t('btnSignup') : t('btnLoginSubmit');
+  document.getElementById('authError').textContent = '';
 }
 
-function sendCode(){
-  const phone = document.getElementById('phoneInput').value.trim();
-  if(!phone.startsWith('+') || phone.length < 10){ document.getElementById('authError').textContent = "Raqamni +998 bilan to'liq kiriting"; return; }
-  document.getElementById('authError').textContent = "";
-  setupRecaptcha();
-  const btn = document.getElementById('sendCodeBtn');
-  btn.disabled = true; btn.textContent = "Yuborilmoqda...";
+function submitAuth(){
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passwordInput').value;
+  const errorEl = document.getElementById('authError');
+  errorEl.textContent = '';
 
-  auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
-    .then((result) => {
-      confirmationResult = result;
-      state.phone = phone;
-      document.getElementById('phoneStep').style.display = 'none';
-      document.getElementById('codeStep').style.display = 'block';
-      btn.disabled = false; btn.textContent = t('btnSendCode');
-    })
-    .catch((err) => {
-      console.error(err);
-      let msg = "Xatolik: qayta urinib ko'ring";
-      if(err.code === 'auth/unauthorized-domain') msg = "Bu domen ruxsat etilmagan. Admin bilan bog'laning.";
-      else if(err.code === 'auth/invalid-phone-number') msg = "Telefon raqami noto'g'ri formatda";
-      else if(err.code === 'auth/too-many-requests') msg = "Juda ko'p urinish. Birozdan keyin qayta urinib ko'ring";
-      else if(err.code === 'auth/quota-exceeded') msg = "Kunlik SMS limiti tugadi. Ertaga qayta urinib ko'ring";
-      document.getElementById('authError').textContent = msg;
-      btn.disabled = false; btn.textContent = t('btnSendCode');
-      if(window.recaptchaVerifier){ window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; }
-    });
-}
+  if(!email || !email.includes('@')){ errorEl.textContent = "To'g'ri email kiriting"; return; }
+  if(password.length < 6){ errorEl.textContent = "Parol kamida 6 belgidan iborat bo'lishi kerak"; return; }
 
-function verifyCode(){
-  const code = document.getElementById('codeInput').value.trim();
-  if(code.length < 4){ document.getElementById('authError').textContent = "Kodni kiriting"; return; }
-  document.getElementById('loadingScreen').style.display = 'flex';
-  confirmationResult.confirm(code)
+  const btn = document.getElementById('authSubmitBtn');
+  btn.disabled = true; btn.textContent = "...";
+
+  const action = authMode === 'signup'
+    ? auth.createUserWithEmailAndPassword(email, password)
+    : auth.signInWithEmailAndPassword(email, password);
+
+  action
     .then(() => {
       // onAuthStateChanged handles the rest
     })
     .catch((err) => {
       console.error(err);
-      document.getElementById('loadingScreen').style.display = 'none';
-      document.getElementById('authError').textContent = "Noto'g'ri kod, qayta urinib ko'ring";
+      let msg = "Xatolik: qayta urinib ko'ring";
+      if(err.code === 'auth/email-already-in-use') msg = "Bu email allaqachon ro'yxatdan o'tgan. 'Kirish' ni tanlang";
+      else if(err.code === 'auth/invalid-email') msg = "Email formati noto'g'ri";
+      else if(err.code === 'auth/weak-password') msg = "Parol juda oddiy, kuchliroq parol tanlang";
+      else if(err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') msg = "Email yoki parol noto'g'ri";
+      else if(err.code === 'auth/too-many-requests') msg = "Juda ko'p urinish. Birozdan keyin qayta urinib ko'ring";
+      errorEl.textContent = msg;
+      btn.disabled = false;
+      btn.textContent = authMode === 'signup' ? t('btnSignup') : t('btnLoginSubmit');
     });
 }
 
@@ -980,7 +978,7 @@ auth.onAuthStateChanged((user) => {
   document.getElementById('loadingScreen').style.display = 'none';
   if(user){
     currentUid = user.uid;
-    state.phone = user.phoneNumber || state.phone;
+    state.email = user.email || state.email;
     initUserData(user.uid);
   }
 });
@@ -990,7 +988,7 @@ function initUserData(uid){
   userRef.get().then((doc) => {
     if(!doc.exists){
       userRef.set({
-        phone: state.phone,
+        email: state.email,
         coins: 0, lifetimeCoins: 0,
         taskCounts: {}, tasksCompletedTotal: 0,
         friendsCount: 0, friendsBonus: 0, cashedOutTotal: 0,
@@ -1033,7 +1031,7 @@ function subscribeUser(uid){
     state.streakCount = data.streakCount || 0;
     state.lastStreakClaim = data.lastStreakClaim || null;
     state.referralCode = data.referralCode || state.referralCode;
-    state.phone = data.phone || state.phone;
+    state.email = data.email || state.email;
     renderAll();
   }, err => console.error(err));
   loadHistory(uid);
@@ -1064,10 +1062,10 @@ function finishOnboarding(){
 function enterApp(){
   document.getElementById('appScreen').style.display = 'flex';
   document.getElementById('appScreen').style.flexDirection = 'column';
-  const digits = (state.phone || '').replace(/\D/g,'').slice(-2) || '99';
-  document.getElementById('homeAvatar').textContent = digits;
-  document.getElementById('profileAvatar').textContent = digits;
-  document.getElementById('profilePhone').textContent = state.phone || '+998 -- --- -- --';
+  const initials = (state.email || '??').slice(0,2).toUpperCase();
+  document.getElementById('homeAvatar').textContent = initials;
+  document.getElementById('profileAvatar').textContent = initials;
+  document.getElementById('profilePhone').textContent = state.email || '';
   document.getElementById('greetName').textContent = t('defaultUserName');
   document.getElementById('referralLink').textContent = 'taskup.uz/ref/' + state.referralCode;
   renderAll();
@@ -1080,11 +1078,9 @@ function signOutUser(){
   currentUid = null;
   document.getElementById('appScreen').style.display = 'none';
   document.getElementById('authScreen').style.display = 'flex';
-  document.getElementById('phoneStep').style.display = 'block';
-  document.getElementById('codeStep').style.display = 'none';
   document.getElementById('authError').textContent = '';
-  document.getElementById('phoneInput').value = '';
-  document.getElementById('codeInput').value = '';
+  document.getElementById('emailInput').value = '';
+  document.getElementById('passwordInput').value = '';
 }
 
 /* ---------------- Tabs ---------------- */
@@ -1395,7 +1391,7 @@ function tryCashout(){
       tx.update(userRef, { coins: data.coins - CASHOUT_MIN, cashedOutTotal: (data.cashedOutTotal || 0) + CASHOUT_MIN });
       tx.set(db.collection('cashout_requests').doc(), {
         uid: currentUid,
-        phone: state.phone,
+        email: state.email,
         amountCoins: CASHOUT_MIN,
         amountUsd: CASHOUT_MIN / COIN_TO_USD,
         status: 'pending',
