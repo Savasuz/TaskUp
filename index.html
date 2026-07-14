@@ -458,6 +458,11 @@
         <div class="xp-bar-label"><span id="xpCurrent">0</span> / <span id="xpNeeded">1000</span> XP</div>
       </div>
 
+      <div class="xp-bar-row" style="margin-top:6px">
+        <div class="xp-bar-track"><div class="xp-bar-fill" id="dailyCapFill" style="background:linear-gradient(90deg,#FFC93C,#FF9F1C)"></div></div>
+        <div class="xp-bar-label" data-i18n-none><span id="dailyEarnedLabel">0</span> / <span id="dailyCapLabel">3000</span> <span data-i18n="dailyCapSuffix">kunlik limit</span></div>
+      </div>
+
       <div class="banner">
         <div class="banner-emoji"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
         <div class="banner-title" data-i18n="bannerTitle">Do'stlaringizni taklif qiling</div>
@@ -860,8 +865,12 @@ function sndLevelUp(){
 }
 
 const COIN_TO_USD = 10000;
+const COIN_TO_SOM = 1.2; // 10000 tanga = 12000 so'm
 const CASHOUT_MIN = 10000;
 const TASK_LIMITS = { video: 8, download: 3, survey: 1 };
+const DAILY_CAP_BASE = 3000;
+const DAILY_CAP_PER_LEVEL = 500;
+function getDailyCap(level){ return DAILY_CAP_BASE + (Math.max(1, level) - 1) * DAILY_CAP_PER_LEVEL; }
 function getTaskLabel(id){
   const map = { video: 'taskVideoName', download: 'taskDownloadName', survey: 'taskSurveyName' };
   return map[id] ? t(map[id]) : id;
@@ -870,7 +879,7 @@ function getTaskLabel(id){
 let state = {
   email: '', referralCode: '',
   coins: 0, lifetimeCoins: 0,
-  taskCounts: {}, tasksCompletedTotal: 0,
+  taskCounts: {}, tasksCompletedTotal: 0, dailyEarned: 0,
   friendsCount: 0, friendsBonus: 0, cashedOutTotal: 0,
   streakCount: 0, lastStreakClaim: null,
   history: []
@@ -883,7 +892,7 @@ const LANG_NAMES = { uz: "O'zbekcha", en: "English", ru: "Русский" };
 
 const I18N = {
   uz: {
-    navL1:"Bosh sahifa", navL2:"Vazifalar", navL3:"Do'stlar", navL4:"Pul yechish", navL5:"Profil",
+    navL1:"Bosh sahifa", navL2:"Vazifalar", navL3:"Do'stlar", navL4:"Pul yechish", navL5:"Profil", dailyCapSuffix:"kunlik limit",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
@@ -919,7 +928,7 @@ const I18N = {
     leaderboardTitle:"Reyting",
     cashoutReady:"Pulga aylantirish", cashoutNeed:"Yana", cashoutNeedSuffix:"coin kerak",
     streakClaimed:"Olindi ✓", streakComeTomorrow:"Ertaga qayting", streakClaimToday:"Bugungi bonusni oling",
-    toastTaskDone:"coin qo'shildi!", toastLimitReached:"Bugungi limit tugadi", toastStreakBonus:"coin kunlik bonus!",
+    toastTaskDone:"coin qo'shildi!", toastLimitReached:"Bugungi limit tugadi", toastDailyCapReached:"Kunlik ishlash limitiga yetdingiz", toastStreakBonus:"coin kunlik bonus!",
     toastCashoutSent:"So'rov yuborildi! Payme/Click orqali ko'rib chiqiladi", toastCashoutMin:"Kamida",
     toastCopied:"Havola nusxalandi!", toastCopyFail:"Nusxalab bo'lmadi", toastLangChanged:"Til o'zgartirildi",
     statusPaid:"Muvaffaqiyatli", statusPending:"Kutilmoqda", statusCancelled:"Bekor qilingan",
@@ -928,7 +937,7 @@ const I18N = {
     helloWord:"Salom", defaultUserName:"Foydalanuvchi", levelWord:"Level"
   },
   en: {
-    navL1:"Home", navL2:"Tasks", navL3:"Friends", navL4:"Wallet", navL5:"Profile",
+    navL1:"Home", navL2:"Tasks", navL3:"Friends", navL4:"Wallet", navL5:"Profile", dailyCapSuffix:"daily cap",
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
     authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in", forgotPass:"Forgot password?",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
@@ -964,7 +973,7 @@ const I18N = {
     leaderboardTitle:"Leaderboard",
     cashoutReady:"Withdraw", cashoutNeed:"Need", cashoutNeedSuffix:"more coins",
     streakClaimed:"Claimed ✓", streakComeTomorrow:"Come back tomorrow", streakClaimToday:"Claim today's bonus",
-    toastTaskDone:"coins added!", toastLimitReached:"Daily limit reached", toastStreakBonus:"coins daily bonus!",
+    toastTaskDone:"coins added!", toastLimitReached:"Daily limit reached", toastDailyCapReached:"You've reached today's earning cap", toastStreakBonus:"coins daily bonus!",
     toastCashoutSent:"Request sent! Will be reviewed via Payme/Click", toastCashoutMin:"You need at least",
     toastCopied:"Link copied!", toastCopyFail:"Couldn't copy", toastLangChanged:"Language changed",
     statusPaid:"Successful", statusPending:"Pending", statusCancelled:"Cancelled",
@@ -973,7 +982,7 @@ const I18N = {
     helloWord:"Hello", defaultUserName:"User", levelWord:"Level"
   },
   ru: {
-    navL1:"Главная", navL2:"Задания", navL3:"Друзья", navL4:"Вывод", navL5:"Профиль",
+    navL1:"Главная", navL2:"Задания", navL3:"Друзья", navL4:"Вывод", navL5:"Профиль", dailyCapSuffix:"дневной лимит",
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
     authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти", forgotPass:"Забыли пароль?",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
@@ -1009,7 +1018,7 @@ const I18N = {
     leaderboardTitle:"Рейтинг",
     cashoutReady:"Вывести", cashoutNeed:"Нужно ещё", cashoutNeedSuffix:"монет",
     streakClaimed:"Получено ✓", streakComeTomorrow:"Возвращайтесь завтра", streakClaimToday:"Заберите бонус сегодня",
-    toastTaskDone:"монет начислено!", toastLimitReached:"Дневной лимит исчерпан", toastStreakBonus:"монет ежедневный бонус!",
+    toastTaskDone:"монет начислено!", toastLimitReached:"Дневной лимит исчерпан", toastDailyCapReached:"Дневной лимит заработка исчерпан", toastStreakBonus:"монет ежедневный бонус!",
     toastCashoutSent:"Заявка отправлена! Будет рассмотрена через Payme/Click", toastCashoutMin:"Нужно минимум",
     toastCopied:"Ссылка скопирована!", toastCopyFail:"Не удалось скопировать", toastLangChanged:"Язык изменён",
     statusPaid:"Успешно", statusPending:"В ожидании", statusCancelled:"Отменено",
@@ -1122,7 +1131,7 @@ function initUserData(uid){
       userRef.set({
         email: state.email,
         coins: 0, lifetimeCoins: 0,
-        taskCounts: {}, tasksCompletedTotal: 0,
+        taskCounts: {}, tasksCompletedTotal: 0, dailyEarned: 0,
         friendsCount: 0, friendsBonus: 0, cashedOutTotal: 0,
         streakCount: 0, lastStreakClaim: null,
         lastReset: new Date().toDateString(),
@@ -1150,12 +1159,13 @@ function subscribeUser(uid){
     const data = doc.data();
     const today = new Date().toDateString();
     if(data.lastReset !== today){
-      userRef.update({ taskCounts: {}, lastReset: today });
+      userRef.update({ taskCounts: {}, dailyEarned: 0, lastReset: today });
       return;
     }
     state.coins = data.coins || 0;
     state.lifetimeCoins = data.lifetimeCoins || 0;
     state.taskCounts = data.taskCounts || {};
+    state.dailyEarned = data.dailyEarned || 0;
     state.tasksCompletedTotal = data.tasksCompletedTotal || 0;
     state.friendsCount = data.friendsCount || 0;
     state.friendsBonus = data.friendsBonus || 0;
@@ -1263,7 +1273,7 @@ function renderBalance(){
   animateCount(coinEl, from, coins, 500);
   document.getElementById('coinCount2').textContent = coins.toLocaleString();
   const somEl = document.getElementById('somEst');
-  if(somEl) somEl.textContent = (coins * 10).toLocaleString();
+  if(somEl) somEl.textContent = Math.round(coins * COIN_TO_SOM).toLocaleString();
   if(lastRenderedCoins !== null && coins !== lastRenderedCoins){
     coinEl.parentElement.classList.remove('pulse'); void coinEl.parentElement.offsetWidth; coinEl.parentElement.classList.add('pulse');
   }
@@ -1353,6 +1363,13 @@ function renderLevel(){
   document.getElementById('levelHeroNum').textContent = info.num;
   document.getElementById('levelHeroTitle').textContent = info.num + '-level';
   document.getElementById('xpLabel2').textContent = `${info.current} / ${info.needed} XP`;
+
+  const cap = getDailyCap(info.num);
+  const earned = Math.min(state.dailyEarned || 0, cap);
+  const capPct = Math.min(100, (earned / cap) * 100);
+  const dcFill = document.getElementById('dailyCapFill'); if(dcFill) dcFill.style.width = capPct + '%';
+  const dcEarned = document.getElementById('dailyEarnedLabel'); if(dcEarned) dcEarned.textContent = earned;
+  const dcCap = document.getElementById('dailyCapLabel'); if(dcCap) dcCap.textContent = cap;
 
   document.getElementById('levelRewardsList').innerHTML = LEVEL_REWARDS.map(r => {
     const unlocked = info.num >= r.level;
@@ -1469,6 +1486,8 @@ function completeTask(taskId, reward, dailyLimit, btnEl){
   if(!currentUid) return;
   const count = state.taskCounts[taskId] || 0;
   if(count >= dailyLimit){ showToast(t('toastLimitReached'), true); return; }
+  const cap = getDailyCap(getLevelInfo(state.lifetimeCoins).num);
+  if((state.dailyEarned || 0) >= cap){ showToast(t('toastDailyCapReached') || `Kunlik limit (${cap} tanga) tugadi`, true); return; }
 
   const btn = btnEl || (window.event && window.event.currentTarget);
   const originalText = btn ? btn.innerHTML : null;
@@ -1481,11 +1500,16 @@ function completeTask(taskId, reward, dailyLimit, btnEl){
         const data = doc.data();
         const currentCount = (data.taskCounts && data.taskCounts[taskId]) || 0;
         if(currentCount >= dailyLimit) throw new Error('limit');
+        const dailyEarnedSoFar = data.dailyEarned || 0;
+        const dailyCap = getDailyCap(getLevelInfo(data.lifetimeCoins || 0).num);
+        if(dailyEarnedSoFar >= dailyCap) throw new Error('dailycap');
+        const actualReward = Math.min(reward, dailyCap - dailyEarnedSoFar);
         const newTaskCounts = { ...data.taskCounts, [taskId]: currentCount + 1 };
         tx.update(userRef, {
-          coins: (data.coins || 0) + reward,
-          lifetimeCoins: (data.lifetimeCoins || 0) + reward,
+          coins: (data.coins || 0) + actualReward,
+          lifetimeCoins: (data.lifetimeCoins || 0) + actualReward,
           tasksCompletedTotal: (data.tasksCompletedTotal || 0) + 1,
+          dailyEarned: dailyEarnedSoFar + actualReward,
           taskCounts: newTaskCounts
         });
       });
@@ -1496,6 +1520,7 @@ function completeTask(taskId, reward, dailyLimit, btnEl){
       if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
     }).catch((err) => {
       if(err.message === 'limit'){ showToast(t('toastLimitReached'), true); }
+      else if(err.message === 'dailycap'){ showToast(t('toastDailyCapReached') || 'Kunlik limit tugadi', true); }
       else { console.error(err); showToast('Xatolik yuz berdi', true); }
       if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
     });
