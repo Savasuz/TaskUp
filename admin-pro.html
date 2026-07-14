@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskUp — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0A0B10; --bg-alt:#14151D; --bg-card:#181A24; --line:#242631;
+    --text:#F2F3F7; --muted:#8A8D9B; --purple:#6C5CE7; --purple-dim:rgba(108,92,231,0.16);
+    --green:#2ECC8F; --amber:#FFB020; --red:#FF5C6C; --blue:#3E8EFF; --orange:#FF8A3D; }
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html,body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+  .app{ max-width:480px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; }
+  .screen{ flex:1; padding:14px 16px 96px; overflow-y:auto; }
+
+  /* ---- Login gate ---- */
+  #adminLogin{ display:flex; align-items:center; justify-content:center; min-height:100vh; padding:0 20px; }
+  .login-card{ background:var(--bg-card); border:1px solid var(--line); border-radius:18px; padding:28px; width:100%; max-width:340px; }
+  .login-card h2{ font-family:'Space Grotesk',sans-serif; margin-bottom:16px; font-size:20px; }
+  .login-card input{ width:100%; background:var(--bg); border:1px solid var(--line); color:var(--text);
+    padding:13px 14px; border-radius:10px; margin-bottom:12px; font-size:14px; outline:none; }
+  .login-card input:focus{ border-color:var(--purple); }
+  .login-card button{ width:100%; padding:14px; border:none; border-radius:11px;
+    background:linear-gradient(135deg,#7B6EF0,#6C5CE7); color:#fff; font-weight:700; cursor:pointer;
+    font-family:'Space Grotesk',sans-serif; box-shadow:0 6px 18px rgba(108,92,231,0.35); }
+  .login-err{ color:var(--red); font-size:12.5px; margin-top:8px; text-align:center; min-height:16px; }
+
+  /* ---- Top bar ---- */
+  #adminApp{ display:none; }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; padding:16px 16px 4px; }
+  .topbar-left{ display:flex; align-items:center; gap:10px; }
+  .menu-ico{ font-size:20px; color:var(--muted); }
+  .brand-name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px; }
+  .brand-sub{ font-size:10.5px; color:var(--muted); }
+  .bell{ position:relative; font-size:19px; color:var(--muted); }
+  .bell .dot{ position:absolute; top:-3px; right:-4px; background:var(--red); color:#fff; font-size:9px; font-weight:700;
+    border-radius:20px; padding:1px 5px; }
+  .back-topbar{ display:flex; align-items:center; gap:12px; padding:16px; }
+  .back-btn{ font-size:20px; cursor:pointer; color:var(--text); }
+  .back-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px; flex:1; }
+
+  .view{ display:none; }
+  .view.active{ display:block; animation:fadeIn .25s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---- Greeting ---- */
+  .greet-card{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:14px 16px;
+    display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .greet-avatar{ width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--purple),var(--blue));
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-family:'Space Grotesk',sans-serif; flex-shrink:0; }
+  .greet-text b{ font-size:14.5px; display:block; }
+  .greet-text span{ font-size:11.5px; color:var(--muted); }
+  .super-badge{ margin-left:auto; background:var(--purple-dim); color:var(--purple); font-size:10.5px; font-weight:700;
+    padding:5px 10px; border-radius:20px; font-family:'Space Grotesk',sans-serif; }
+
+  /* ---- Balance hero ---- */
+  .bal-hero{ background:linear-gradient(135deg,#4B3FCB,#2E2670); border-radius:18px; padding:20px; margin-bottom:14px; position:relative; overflow:hidden; }
+  .bal-hero-top{ display:flex; align-items:center; gap:6px; font-size:12px; color:rgba(255,255,255,0.75); }
+  .bal-amount{ font-family:'Space Grotesk',sans-serif; font-size:28px; font-weight:700; margin:6px 0 3px; }
+  .bal-growth{ font-size:12px; color:#B8FFDF; }
+  .bal-emoji{ position:absolute; right:16px; top:20px; font-size:38px; opacity:0.9; }
+
+  /* ---- Stat grid 2x2 ---- */
+  .stat2-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  .stat2{ background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:14px; }
+  .stat2-top{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .stat2-ico{ width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+  .stat2-lbl{ font-size:11px; color:var(--muted); }
+  .stat2-val{ font-family:'Space Grotesk',sans-serif; font-size:19px; font-weight:700; }
+  .stat2-growth{ font-size:10.5px; color:var(--green); margin-top:2px; }
+
+  /* ---- Section head ---- */
+  .sec-head{ display:flex; justify-content:space-between; align-items:baseline; margin:4px 0 10px; }
+  .sec-title{ font-family:'Space Grotesk',sans-serif; font-size:15.5px; font-weight:700; }
+  .sec-link{ font-size:12px; color:var(--purple); font-weight:600; cursor:pointer; }
+
+  /* ---- Activity / list rows ---- */
+  .act-row{ display:flex; align-items:center; gap:10px; padding:11px 0; border-bottom:1px solid var(--line); }
+  .act-row:last-child{ border-bottom:none; }
+  .row-avatar{ width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--purple),var(--blue));
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+  .act-body{ flex:1; min-width:0; }
+  .act-name{ font-size:13px; font-weight:600; }
+  .act-desc{ font-size:11px; color:var(--muted); margin-top:1px; }
+  .act-right{ text-align:right; flex-shrink:0; }
+  .act-amount{ font-family:'JetBrains Mono',monospace; font-size:12.5px; font-weight:700; }
+  .act-amount.pos{ color:var(--green); }
+  .act-time{ font-size:10px; color:var(--muted); margin-top:2px; }
+
+  .card{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:14px; }
+
+  /* ---- Filter chips ---- */
+  .chips{ display:flex; gap:8px; margin-bottom:14px; overflow-x:auto; }
+  .chip{ flex-shrink:0; padding:8px 15px; border-radius:20px; background:var(--bg-card); border:1px solid var(--line);
+    font-size:12px; font-family:'Space Grotesk',sans-serif; font-weight:600; color:var(--muted); cursor:pointer; }
+  .chip.active{ background:var(--purple); color:#fff; border-color:var(--purple); }
+
+  /* ---- Search ---- */
+  .search-box{ display:flex; align-items:center; gap:8px; background:var(--bg-card); border:1px solid var(--line);
+    border-radius:12px; padding:11px 14px; margin-bottom:16px; }
+  .search-box input{ flex:1; background:none; border:none; outline:none; color:var(--text); font-size:13.5px; }
+  .search-box input::placeholder{ color:var(--muted); }
+
+  /* ---- Overview stat (single row cards) ---- */
+  .overview-card{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:16px;
+    display:flex; align-items:center; justify-content:space-between; }
+  .overview-lbl{ font-size:12.5px; color:var(--muted); }
+  .overview-val{ font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; margin-top:3px; }
+  .overview-growth{ font-size:11.5px; color:var(--green); margin-top:3px; }
+  .overview-emoji{ font-size:34px; }
+
+  /* ---- User / payment row ---- */
+  .list-row{ display:flex; align-items:center; gap:12px; padding:13px 0; border-bottom:1px solid var(--line); }
+  .list-row:last-child{ border-bottom:none; }
+  .list-body{ flex:1; min-width:0; }
+  .list-name{ font-size:13.5px; font-weight:600; }
+  .list-meta{ font-size:10.5px; color:var(--muted); margin-top:2px; font-family:'JetBrains Mono',monospace; }
+  .list-right{ text-align:right; flex-shrink:0; }
+  .list-val{ font-size:12.5px; font-weight:700; font-family:'JetBrains Mono',monospace; }
+  .list-status{ font-size:10px; font-weight:700; margin-top:3px; }
+  .status-faol, .status-paid{ color:var(--green); }
+  .status-nofaol, .status-pending{ color:var(--amber); }
+  .status-ban, .status-rejected{ color:var(--red); }
+
+  /* ---- Task row with toggle ---- */
+  .task-row{ display:flex; align-items:center; gap:12px; background:var(--bg-card); border:1px solid var(--line);
+    border-radius:14px; padding:13px 14px; margin-bottom:9px; }
+  .task-ico{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:16px; color:#fff; flex-shrink:0; }
+  .ic-video{ background:var(--red); } .ic-download{ background:var(--green); } .ic-survey{ background:var(--blue); }
+  .ic-invite{ background:var(--orange); } .ic-ad{ background:#00C0FA; } .ic-tg{ background:#2AABEE; }
+  .task-body{ flex:1; min-width:0; }
+  .task-name{ font-size:13.5px; font-weight:700; }
+  .task-meta{ font-size:10.5px; color:var(--muted); margin-top:1px; }
+  .task-count{ font-size:10.5px; color:var(--muted); text-align:right; margin-right:2px; flex-shrink:0; }
+
+  /* ---- Toggle switch ---- */
+  .switch{ width:42px; height:24px; border-radius:20px; background:var(--line); position:relative; cursor:pointer; flex-shrink:0; transition:background .2s ease; }
+  .switch.on{ background:var(--green); }
+  .switch::after{ content:''; position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:#fff; transition:transform .2s ease; }
+  .switch.on::after{ transform:translateX(18px); }
+
+  /* ---- FAB ---- */
+  .fab{ position:absolute; top:14px; right:16px; width:34px; height:34px; border-radius:10px; background:var(--purple);
+    color:#fff; display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; font-weight:700; }
+
+  /* ---- Form ---- */
+  label{ font-size:11.5px; color:var(--muted); display:block; margin-bottom:6px; margin-top:14px; font-family:'Space Grotesk',sans-serif; font-weight:600; }
+  label:first-child{ margin-top:0; }
+  select, input[type=text], input[type=number], textarea{
+    width:100%; background:var(--bg-card); border:1px solid var(--line); color:var(--text);
+    padding:12px 14px; border-radius:11px; font-size:14px; outline:none; font-family:'Inter',sans-serif; }
+  select:focus, input:focus, textarea:focus{ border-color:var(--purple); }
+  textarea{ resize:vertical; min-height:70px; }
+  .icon-picker{ display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
+  .icon-opt{ width:42px; height:42px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+    font-size:17px; color:#fff; cursor:pointer; border:2px solid transparent; }
+  .icon-opt.selected{ border-color:#fff; }
+  .form-toggle-row{ display:flex; align-items:center; justify-content:space-between; margin-top:16px; }
+  .submit-btn{ width:100%; margin-top:22px; padding:14px; border:none; border-radius:12px;
+    background:linear-gradient(135deg,#7B6EF0,#6C5CE7); color:#fff; font-weight:700; cursor:pointer;
+    font-family:'Space Grotesk',sans-serif; font-size:14.5px; box-shadow:0 6px 18px rgba(108,92,231,0.35); }
+
+  /* ---- Settings menu ---- */
+  .settings-row{ display:flex; align-items:center; gap:13px; padding:14px 4px; border-bottom:1px solid var(--line); cursor:pointer; }
+  .settings-row:last-child{ border-bottom:none; }
+  .settings-ico{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:16px; color:#fff; flex-shrink:0; }
+  .settings-body b{ font-size:13.5px; display:block; }
+  .settings-body span{ font-size:11px; color:var(--muted); }
+  .settings-arrow{ margin-left:auto; color:var(--muted); }
+
+  /* ---- Bottom nav ---- */
+  .bottom-nav{ position:fixed; bottom:0; left:0; right:0; background:rgba(10,11,16,0.94); backdrop-filter:blur(14px);
+    border-top:1px solid var(--line); z-index:30; }
+  .bottom-nav-inner{ max-width:480px; margin:0 auto; display:flex; }
+  .nav-item{ flex:1; text-align:center; padding:11px 0 9px; cursor:pointer; color:var(--muted); }
+  .nav-item.active{ color:var(--purple); }
+  .nav-icon{ font-size:18px; display:block; margin-bottom:3px; }
+  .nav-label{ font-size:9px; font-family:'Space Grotesk',sans-serif; font-weight:600; }
+
+  .toast{ position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--purple); color:#fff; padding:10px 20px; border-radius:30px;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px;
+    opacity:0; transition:all .3s ease; pointer-events:none; z-index:60; white-space:nowrap; }
+  </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<!-- ================= LOGIN GATE ================= -->
+<div id="adminLogin">
+  <div class="login-card">
+    <h2>🛡️ Admin kirish</h2>
+    <input type="email" id="adminUser" placeholder="Email" autocomplete="email">
+    <input type="password" id="adminPass" placeholder="Parol" autocomplete="current-password">
+    <button onclick="adminLogin()" id="adminLoginBtn">Kirish</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ================= ADMIN APP ================= -->
+<div class="app" id="adminApp">
+
+  <!-- ---- ASOSIY ---- -->
+  <div class="view active" id="view-home">
+    <div class="topbar">
+      <div class="topbar-left"><span class="menu-ico">☰</span>
+        <div><div class="brand-name">TaskUp</div><div class="brand-sub">Admin Panel</div></div>
+      </div>
+      <div class="bell">🔔<span class="dot" id="notifCount">3</span></div>
+    </div>
+    <div class="screen" style="padding-top:6px">
+      <div class="greet-card">
+        <div class="greet-avatar">🛡️</div>
+        <div class="greet-text"><b>Xush kelibsiz, Admin!</b><span id="todayDate">Bugun</span></div>
+        <div class="super-badge">Super Admin</div>
+      </div>
+
+      <div class="bal-hero">
+        <div class="bal-emoji">👛</div>
+        <div class="bal-hero-top">👁 Umumiy balans</div>
+        <div class="bal-amount"><span id="totalBalance">0</span> so'm</div>
+        <div class="bal-growth">↑ 18.7% o'tgan 30 kun ichida</div>
+      </div>
+
+      <div class="stat2-grid">
+        <div class="stat2" onclick="switchView('users')">
+          <div class="stat2-top"><div class="stat2-ico" style="background:rgba(108,92,231,0.15); color:var(--purple)">👥</div><div class="stat2-lbl">Foydalanuvchilar</div></div>
+          <div class="stat2-val" id="statUsersHome">0</div><div class="stat2-growth">↑ 12.5%</div>
+        </div>
+        <div class="stat2" onclick="switchView('tasks')">
+          <div class="stat2-top"><div class="stat2-ico" style="background:rgba(62,142,255,0.15); color:var(--blue)">☑️</div><div class="stat2-lbl">Vazifalar</div></div>
+          <div class="stat2-val" id="statTasksHome">0</div><div class="stat2-growth">↑ 8.2%</div>
+        </div>
+        <div class="stat2" onclick="switchView('payments')">
+          <div class="stat2-top"><div class="stat2-ico" style="background:rgba(46,204,143,0.15); color:var(--green)">💳</div><div class="stat2-lbl">To'lovlar</div></div>
+          <div class="stat2-val" id="statPaymentsHome">0</div><div class="stat2-growth">↑ 15.3%</div>
+        </div>
+        <div class="stat2">
+          <div class="stat2-top"><div class="stat2-ico" style="background:rgba(255,92,108,0.15); color:var(--red)">📈</div><div class="stat2-lbl">Platforma daromadi</div></div>
+          <div class="stat2-val" id="statRevenueHome">0</div><div class="stat2-growth">↑ 20.1%</div>
+        </div>
+      </div>
+
+      <div class="sec-head"><div class="sec-title">So'nggi faoliyatlar</div><div class="sec-link" onclick="switchView('payments')">Barchasi ›</div></div>
+      <div class="card" style="padding:4px 14px" id="recentActivityCard"></div>
+    </div>
+  </div>
+
+  <!-- ---- FOYDALANUVCHILAR ---- -->
+  <div class="view" id="view-users">
+    <div class="back-topbar"><span class="back-btn" onclick="switchView('home')">←</span><div class="back-title">Foydalanuvchilar</div>🔍</div>
+    <div class="screen" style="padding-top:0">
+      <div class="chips">
+        <div class="chip active" data-f="all" onclick="filterUsers('all',this)">Barchasi</div>
+        <div class="chip" data-f="faol" onclick="filterUsers('faol',this)">Faol</div>
+        <div class="chip" data-f="ban" onclick="filterUsers('ban',this)">Ban qilingan</div>
+      </div>
+      <div class="overview-card">
+        <div><div class="overview-lbl">Jami foydalanuvchilar</div><div class="overview-val" id="usersTotalVal">0</div><div class="overview-growth">↑ 12.5% o'tgan 30 kun</div></div>
+        <div class="overview-emoji">👥</div>
+      </div>
+      <div class="search-box">🔍<input type="text" id="userSearch" placeholder="Foydalanuvchi qidirish..." oninput="renderUsers()"></div>
+      <div id="usersList"></div>
+    </div>
+  </div>
+
+  <!-- ---- VAZIFALAR ---- -->
+  <div class="view" id="view-tasks">
+    <div class="back-topbar" style="position:relative">
+      <span class="back-btn" onclick="switchView('home')">←</span><div class="back-title">Vazifalar</div>
+      <div class="fab" onclick="switchView('addTask')">+</div>
+    </div>
+    <div class="screen" style="padding-top:0">
+      <div class="chips">
+        <div class="chip active" data-f="all" onclick="filterTasksAdmin('all',this)">Barchasi</div>
+        <div class="chip" data-f="on" onclick="filterTasksAdmin('on',this)">Faol</div>
+        <div class="chip" data-f="off" onclick="filterTasksAdmin('off',this)">Nofaol</div>
+      </div>
+      <div id="tasksAdminList"></div>
+    </div>
+  </div>
+
+  <!-- ---- YANGI VAZIFA QO'SHISH ---- -->
+  <div class="view" id="view-addTask">
+    <div class="back-topbar"><span class="back-btn" onclick="switchView('tasks')">←</span><div class="back-title">Yangi vazifa qo'shish</div></div>
+    <div class="screen" style="padding-top:0">
+      <label>Kategoriya</label>
+      <select id="newTaskType"><option value="oddiy">Oddiy</option><option value="premium">Premium</option><option value="bonus">Bonus</option></select>
+      <label>Vazifa nomi</label>
+      <input type="text" id="newTaskName" placeholder="Vazifa nomini kiriting">
+      <label>Vazifa haqida</label>
+      <textarea id="newTaskDesc" placeholder="Vazifa haqida qisqacha yozing"></textarea>
+      <label>Mukofot (tanga)</label>
+      <input type="number" id="newTaskReward" placeholder="Mukofot miqdorini kiriting">
+      <label>Kunlik limit (necha marta bajarish mumkin)</label>
+      <input type="number" id="newTaskDailyLimit" placeholder="Masalan: 5" value="1">
+      <label>Icon tanlang</label>
+      <div class="icon-picker">
+        <div class="icon-opt ic-video selected" onclick="selectIcon(this,'video')">▶</div>
+        <div class="icon-opt ic-download" onclick="selectIcon(this,'download')">⬇</div>
+        <div class="icon-opt ic-survey" onclick="selectIcon(this,'survey')">📋</div>
+        <div class="icon-opt ic-invite" onclick="selectIcon(this,'invite')">👥</div>
+        <div class="icon-opt ic-ad" onclick="selectIcon(this,'ad')">📣</div>
+        <div class="icon-opt ic-tg" onclick="selectIcon(this,'telegram')">✈️</div>
+        <div class="icon-opt ic-invite" onclick="selectIcon(this,'rate')">⭐</div>
+      </div>
+      <div class="form-toggle-row"><span style="font-size:13.5px; font-weight:600">Vazifani faollashtirish</span>
+        <div class="switch on" id="newTaskActiveSwitch" onclick="this.classList.toggle('on')"></div></div>
+      <button class="submit-btn" onclick="submitNewTask()">Vazifani qo'shish</button>
+    </div>
+  </div>
+
+  <!-- ---- TO'LOVLAR ---- -->
+  <div class="view" id="view-payments">
+    <div class="back-topbar"><span class="back-btn" onclick="switchView('home')">←</span><div class="back-title">To'lovlar</div>🔍</div>
+    <div class="screen" style="padding-top:0">
+      <div class="chips">
+        <div class="chip active" data-f="all" onclick="filterPayments('all',this)">Barchasi</div>
+        <div class="chip" data-f="pending" onclick="filterPayments('pending',this)">Kutmoqda</div>
+        <div class="chip" data-f="paid" onclick="filterPayments('paid',this)">To'landi</div>
+        <div class="chip" data-f="rejected" onclick="filterPayments('rejected',this)">Rad etildi</div>
+      </div>
+      <div class="overview-card">
+        <div><div class="overview-lbl">Jami to'lovlar</div><div class="overview-val" id="paymentsTotalVal">0</div><div class="overview-growth">↑ 15.3% o'tgan 30 kun</div></div>
+        <div class="overview-emoji">👛</div>
+      </div>
+      <div id="paymentsList"></div>
+    </div>
+  </div>
+
+  <!-- ---- SOZLAMALAR ---- -->
+  <div class="view" id="view-settings">
+    <div class="back-topbar"><div class="back-title">Sozlamalar</div></div>
+    <div class="screen" style="padding-top:0">
+      <div class="card" style="padding:2px 12px">
+        <div class="settings-row"><div class="settings-ico" style="background:var(--blue)">⚙️</div>
+          <div class="settings-body"><b>Umumiy sozlamalar</b><span>Platforma nomi, logo, valyuta</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row"><div class="settings-ico" style="background:var(--orange)">💳</div>
+          <div class="settings-body"><b>To'lov usullari</b><span>To'lov metodlarini boshqarish</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row"><div class="settings-ico" style="background:var(--purple)">📣</div>
+          <div class="settings-body"><b>Reklama sozlamalari</b><span>Reklama birliklari va joylari</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row"><div class="settings-ico" style="background:var(--amber)">🔔</div>
+          <div class="settings-body"><b>Bildirishnomalar</b><span>Foydalanuvchi bildirishnomalari</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row"><div class="settings-ico" style="background:var(--red)">🔒</div>
+          <div class="settings-body"><b>Xavfsizlik</b><span>Admin va xavfsizlik sozlamalari</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row"><div class="settings-ico" style="background:var(--green)">💾</div>
+          <div class="settings-body"><b>Zaxira nusxa</b><span>Ma'lumotlar zaxira nusxasini olish</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row" style="border-bottom:none"><div class="settings-ico" style="background:var(--muted)">ℹ️</div>
+          <div class="settings-body"><b>Tizim haqida</b><span>Versiya 1.0.0</span></div><span class="settings-arrow">›</span></div>
+      </div>
+      <button class="submit-btn" style="background:none; border:1.5px solid var(--red); color:var(--red); box-shadow:none" onclick="adminLogout()">Chiqish</button>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <div class="nav-item active" data-v="home" onclick="switchView('home')"><span class="nav-icon">🏠</span><span class="nav-label">Asosiy</span></div>
+      <div class="nav-item" data-v="users" onclick="switchView('users')"><span class="nav-icon">👥</span><span class="nav-label">Foydalanuvchilar</span></div>
+      <div class="nav-item" data-v="tasks" onclick="switchView('tasks')"><span class="nav-icon">☑️</span><span class="nav-label">Vazifalar</span></div>
+      <div class="nav-item" data-v="payments" onclick="switchView('payments')"><span class="nav-icon">💳</span><span class="nav-label">To'lovlar</span></div>
+      <div class="nav-item" data-v="settings" onclick="switchView('settings')"><span class="nav-icon">⚙️</span><span class="nav-label">Sozlamalar</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAkzf5b2npCuazGlqce6-MYn46YISqGw1o",
+  authDomain: "taskup-df8ee.firebaseapp.com",
+  projectId: "taskup-df8ee",
+  storageBucket: "taskup-df8ee.firebasestorage.app",
+  messagingSenderId: "747576894319",
+  appId: "1:747576894319:web:650ac457a0b1dc3e227e9a",
+  measurementId: "G-P32NK7C0JE"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentAdminUid = null;
+let usersUnsub = null, tasksUnsub = null, paymentsUnsub = null;
+let users = [], tasksData = [], payments = [];
+
+window.addEventListener('error', function(e){
+  if(e.message && e.message !== 'Script error.') console.error('Xato:', e.message, 'Qator:', e.lineno);
+});
+
+/* ---------------- AUTH ---------------- */
+function adminLogin(){
+  const email = document.getElementById('adminUser').value.trim();
+  const pass = document.getElementById('adminPass').value;
+  const btn = document.getElementById('adminLoginBtn');
+  const err = document.getElementById('loginErr');
+  err.textContent = '';
+  if(!email || !pass){ err.textContent = "Email va parolni kiriting"; return; }
+  btn.disabled = true; btn.textContent = 'Tekshirilmoqda...';
+  auth.signInWithEmailAndPassword(email, pass).then((cred) => {
+    return db.collection('admins').doc(cred.user.uid).get().then((doc) => {
+      if(!doc.exists){
+        err.textContent = "Sizda admin huquqi yo'q";
+        auth.signOut();
+        btn.disabled = false; btn.textContent = 'Kirish';
+        return;
+      }
+      currentAdminUid = cred.user.uid;
+      enterAdminApp();
+      btn.disabled = false; btn.textContent = 'Kirish';
+    });
+  }).catch((error) => {
+    let msg = "Kirishda xatolik yuz berdi";
+    if(['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-email'].includes(error.code)) msg = "Email yoki parol noto'g'ri";
+    err.textContent = msg;
+    btn.disabled = false; btn.textContent = 'Kirish';
+  });
+}
+function enterAdminApp(){
+  document.getElementById('adminLogin').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'flex';
+  document.getElementById('adminApp').style.flexDirection = 'column';
+  document.getElementById('todayDate').textContent = 'Bugun ' + new Date().toLocaleDateString('uz-UZ', {day:'numeric', month:'long', year:'numeric'});
+  subscribeUsers(); subscribeTasks(); subscribePayments();
+}
+function adminLogout(){
+  if(usersUnsub) usersUnsub(); if(tasksUnsub) tasksUnsub(); if(paymentsUnsub) paymentsUnsub();
+  auth.signOut();
+  currentAdminUid = null;
+  document.getElementById('adminApp').style.display = 'none';
+  document.getElementById('adminLogin').style.display = 'flex';
+  document.getElementById('adminUser').value=''; document.getElementById('adminPass').value='';
+}
+
+function switchView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.v===name));
+}
+function showToast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.className='toast show'; setTimeout(()=>el.className='toast',1800); }
+function initials(str){ return (str||'?').slice(0,2).toUpperCase(); }
+function fmt(n){ return Math.round(n||0).toLocaleString('uz-UZ'); }
+
+/* ---------------- HOME ---------------- */
+function renderHome(){
+  const totalCoins = users.reduce((s,u)=>s+u.coins,0);
+  const totalSom = Math.round(totalCoins * 1.2);
+  document.getElementById('totalBalance').textContent = fmt(totalSom);
+  document.getElementById('statUsersHome').textContent = fmt(users.length);
+  document.getElementById('statTasksHome').textContent = fmt(tasksData.length);
+  document.getElementById('statPaymentsHome').textContent = fmt(payments.length);
+  const paidRevenue = payments.filter(p=>p.status==='paid').reduce((s,p)=>s+(p.amountSom || Math.round((p.amountCoins||0)*1.2)),0);
+  document.getElementById('statRevenueHome').textContent = fmt(paidRevenue);
+
+  const recent = [...payments].slice(0,4);
+  document.getElementById('recentActivityCard').innerHTML = recent.length ? recent.map(p => `
+    <div class="act-row">
+      <div class="row-avatar">${initials(p.email)}</div>
+      <div class="act-body"><div class="act-name">${p.email||'—'}</div><div class="act-desc">Pul yechish so'rovi</div></div>
+      <div class="act-right"><div class="act-amount pos">${fmt(p.amountSom || Math.round((p.amountCoins||0)*1.2))} so'm</div><div class="act-time status-${p.status}">${p.status==='paid'?"To'landi":p.status==='pending'?'Kutmoqda':'Rad etildi'}</div></div>
+    </div>`).join('') : '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12.5px">Hozircha faoliyat yo\'q</div>';
+}
+
+/* ---------------- USERS ---------------- */
+let userFilter = 'all';
+function subscribeUsers(){
+  usersUnsub = db.collection('users').onSnapshot((snap) => {
+    users = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      users.push({ uid: doc.id, email: d.email || '(no email)', coins: d.coins||0, lifetimeCoins: d.lifetimeCoins||0, cashedOutTotal: d.cashedOutTotal||0, banned: d.banned===true });
+    });
+    renderHome(); renderUsers();
+  }, err => console.error(err));
+}
+function filterUsers(f, el){ userFilter=f; document.querySelectorAll('#view-users .chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); renderUsers(); }
+function renderUsers(){
+  document.getElementById('usersTotalVal').textContent = fmt(users.length);
+  const q = (document.getElementById('userSearch').value || '').toLowerCase();
+  const filtered = users.filter(u => {
+    const statusMatch = userFilter==='all' || (userFilter==='ban' && u.banned) || (userFilter==='faol' && !u.banned);
+    return statusMatch && u.email.toLowerCase().includes(q);
+  });
+  document.getElementById('usersList').innerHTML = filtered.length ? filtered.map(u => `
+    <div class="list-row">
+      <div class="row-avatar">${initials(u.email)}</div>
+      <div class="list-body"><div class="list-name">${u.email}</div><div class="list-meta">ID: ${u.uid.slice(0,8)}</div></div>
+      <div class="list-right">
+        <div class="list-val">${fmt(u.coins)} coin</div>
+        <div class="list-status ${u.banned?'status-ban':'status-faol'}">● ${u.banned?'Ban qilingan':'Faol'}</div>
+        <div style="margin-top:5px"><span onclick="toggleBanUser('${u.uid}', ${u.banned})" style="color:${u.banned?'var(--green)':'var(--red)'};font-size:10px;cursor:pointer">${u.banned?'✓ Blokdan chiqarish':'✕ Bloklash'}</span></div>
+      </div>
+    </div>`).join('') : '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">Hech narsa topilmadi</div>';
+}
+function toggleBanUser(uid, currentlyBanned){
+  db.collection('users').doc(uid).update({ banned: !currentlyBanned }).then(() => {
+    showToast(!currentlyBanned ? "Foydalanuvchi bloklandi" : "Blokdan chiqarildi");
+  }).catch(err => { console.error(err); showToast("Xatolik yuz berdi"); });
+}
+
+/* ---------------- TASKS ---------------- */
+let taskFilter = 'all';
+const ADMIN_ICON_EMOJI = { video:'▶', download:'⬇', survey:'📋', invite:'👥', ad:'📣', telegram:'✈️', rate:'⭐' };
+const ADMIN_ICON_CLASS = { video:'ic-video', download:'ic-download', survey:'ic-survey', invite:'ic-invite', ad:'ic-ad', telegram:'ic-tg', rate:'ic-invite' };
+function subscribeTasks(){
+  tasksUnsub = db.collection('tasks').orderBy('order').onSnapshot((snap) => {
+    tasksData = [];
+    snap.forEach(doc => { tasksData.push({ id: doc.id, ...doc.data() }); });
+    renderHome(); renderTasksAdmin();
+  }, err => console.error(err));
+}
+function filterTasksAdmin(f, el){ taskFilter=f; document.querySelectorAll('#view-tasks .chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); renderTasksAdmin(); }
+function renderTasksAdmin(){
+  const filtered = tasksData.filter(t => taskFilter==='all' || (taskFilter==='on' && t.active) || (taskFilter==='off' && !t.active));
+  document.getElementById('tasksAdminList').innerHTML = filtered.length ? filtered.map((t) => `
+    <div class="task-row">
+      <div class="task-ico ${ADMIN_ICON_CLASS[t.icon]||'ic-video'}">${ADMIN_ICON_EMOJI[t.icon]||'▶'}</div>
+      <div class="task-body"><div class="task-name">${t.name}</div><div class="task-meta">${t.desc||''} • +${t.reward} coin • kuniga ${t.dailyLimit}</div></div>
+      <span onclick="deleteTask('${t.id}')" style="color:var(--red);font-size:15px;cursor:pointer;padding:0 4px">✕</span>
+      <div class="switch ${t.active?'on':''}" onclick="toggleTaskActive('${t.id}', ${!!t.active})"></div>
+    </div>`).join('') : '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">Vazifalar yo\'q</div>';
+}
+function toggleTaskActive(id, currentActive){
+  db.collection('tasks').doc(id).update({ active: !currentActive }).then(() => {
+    showToast(!currentActive ? "Vazifa yoqildi" : "Vazifa o'chirildi");
+  }).catch(err => { console.error(err); showToast("Xatolik"); });
+}
+function deleteTask(id){
+  if(!confirm("Vazifani o'chirmoqchimisiz?")) return;
+  db.collection('tasks').doc(id).delete().then(()=>showToast("Vazifa o'chirildi")).catch(err=>{ console.error(err); showToast("Xatolik"); });
+}
+
+let selectedIconKey = 'video';
+function selectIcon(el, key){
+  document.querySelectorAll('.icon-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected'); selectedIconKey = key;
+}
+function submitNewTask(){
+  const name = document.getElementById('newTaskName').value.trim();
+  const desc = document.getElementById('newTaskDesc').value.trim();
+  const reward = parseInt(document.getElementById('newTaskReward').value) || 0;
+  const dailyLimit = parseInt(document.getElementById('newTaskDailyLimit').value) || 1;
+  const category = document.getElementById('newTaskType').value;
+  const active = document.getElementById('newTaskActiveSwitch').classList.contains('on');
+  if(!name || !reward){ showToast("Nomi va mukofotni kiriting"); return; }
+  const maxOrder = tasksData.reduce((m,t)=>Math.max(m, t.order||0), 0);
+  db.collection('tasks').add({ name, desc, reward, dailyLimit, icon: selectedIconKey, category, active, order: maxOrder+1 }).then(() => {
+    showToast("Vazifa qo'shildi!");
+    document.getElementById('newTaskName').value=''; document.getElementById('newTaskDesc').value=''; document.getElementById('newTaskReward').value=''; document.getElementById('newTaskDailyLimit').value='1';
+    switchView('tasks');
+  }).catch(err => { console.error(err); showToast("Xatolik yuz berdi"); });
+}
+
+/* ---------------- PAYMENTS ---------------- */
+let paymentFilter = 'all';
+function subscribePayments(){
+  paymentsUnsub = db.collection('cashout_requests').onSnapshot((snap) => {
+    payments = [];
+    snap.forEach(doc => { payments.push({ id: doc.id, ...doc.data() }); });
+    payments.sort((a,b)=>((b.requestedAt&&b.requestedAt.seconds)||0)-((a.requestedAt&&a.requestedAt.seconds)||0));
+    renderHome(); renderPayments();
+  }, err => console.error(err));
+}
+function filterPayments(f, el){ paymentFilter=f; document.querySelectorAll('#view-payments .chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); renderPayments(); }
+function renderPayments(){
+  document.getElementById('paymentsTotalVal').textContent = fmt(payments.length);
+  const filtered = payments.filter(p => paymentFilter==='all' || p.status===paymentFilter);
+  document.getElementById('paymentsList').innerHTML = filtered.length ? filtered.map((p) => `
+    <div class="list-row">
+      <div class="row-avatar">${initials(p.email)}</div>
+      <div class="list-body"><div class="list-name">${p.email||'—'}</div><div class="list-meta">${(p.payMethod||'uzcard').toUpperCase()} • ${fmt(p.amountCoins)} coin</div></div>
+      <div class="list-right"><div class="list-val">${fmt(p.amountSom || Math.round((p.amountCoins||0)*1.2))} so'm</div>
+        <div class="list-status status-${p.status}">${p.status==='paid'?"● To'landi":p.status==='pending'?"● Kutmoqda":"● Rad etildi"}</div>
+        ${p.status==='pending' ? `<div style="margin-top:5px"><span onclick="approvePayment('${p.id}')" style="color:var(--green);font-size:10px;cursor:pointer;margin-right:8px">✓ Tasdiqlash</span><span onclick="rejectPayment('${p.id}','${p.uid}',${p.amountCoins})" style="color:var(--red);font-size:10px;cursor:pointer">✕ Rad etish</span></div>` : ``}
+      </div>
+    </div>`).join('') : '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">So\'rovlar yo\'q</div>';
+}
+function approvePayment(id){
+  db.collection('cashout_requests').doc(id).update({ status: 'paid' }).then(()=>showToast("To'lov tasdiqlandi")).catch(err=>{ console.error(err); showToast("Xatolik"); });
+}
+function rejectPayment(id, uid, amountCoins){
+  const reqRef = db.collection('cashout_requests').doc(id);
+  const userRef = db.collection('users').doc(uid);
+  db.runTransaction((tx) => {
+    return tx.get(userRef).then((doc) => {
+      const data = doc.data() || {};
+      tx.update(userRef, { coins: (data.coins||0) + amountCoins, cashedOutTotal: Math.max(0,(data.cashedOutTotal||0) - amountCoins) });
+      tx.update(reqRef, { status: 'rejected' });
+    });
+  }).then(() => showToast("To'lov rad etildi, tanga qaytarildi")).catch(err => { console.error(err); showToast("Xatolik yuz berdi"); });
+}
+
+/* Keep admin session across reloads */
+auth.onAuthStateChanged((user) => {
+  if(user){
+    db.collection('admins').doc(user.uid).get().then((doc) => {
+      if(doc.exists){ currentAdminUid = user.uid; enterAdminApp(); }
+    });
+  }
+});
+</script>
+</body>
+</html>
