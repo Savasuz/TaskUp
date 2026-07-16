@@ -363,6 +363,56 @@
   @keyframes fall{ to{ transform:translateY(110vh) rotate(360deg); opacity:0.2; } }
   .pulse{ animation:pulse 0.4s ease; }
   @keyframes pulse{ 0%{ transform:scale(1); } 40%{ transform:scale(1.06); } 100%{ transform:scale(1); } }
+
+  /* ---------- HOME redesign (TaskCoin style) — faqat bosh sahifa ---------- */
+  #tab-home .icon-btn{ background:transparent; border:none; width:34px; height:34px; }
+  #tab-home .icon-btn svg{ width:21px; height:21px; }
+  #tab-home .greet-avatar{ width:48px; height:48px; border-radius:16px;
+    background:linear-gradient(135deg,#8B7BFF,#5B4BD6);
+    box-shadow:0 6px 16px rgba(108,92,231,0.4), inset 0 1px 0 rgba(255,255,255,0.25); }
+  #tab-home .greet-name{ font-size:16px; }
+
+  #tab-home .big-balance-card{
+    background:linear-gradient(160deg,#2A1E56 0%,#1B1433 48%,#141021 100%);
+    border:1px solid rgba(124,92,255,0.45);
+    box-shadow:0 12px 36px rgba(108,92,231,0.28), inset 0 1px 0 rgba(255,255,255,0.07);
+    border-radius:22px; padding:20px; margin-bottom:16px; }
+  #tab-home .bal-glow{ position:absolute; right:-30px; top:-30px; width:150px; height:150px; border-radius:50%;
+    background:radial-gradient(circle, rgba(124,92,255,0.35), transparent 70%); pointer-events:none; }
+  #tab-home .bal-emoji-bg{ color:#8B7BFF; opacity:1; right:20px; top:22px;
+    filter:drop-shadow(0 8px 18px rgba(108,92,231,0.55)); }
+  #tab-home .bal-coin-deco{ position:absolute; right:-7px; top:-9px; width:22px; height:22px; border-radius:50%;
+    background:linear-gradient(135deg,#FFD86B,#FFB020); color:#2A1800; font-size:11px; font-weight:800;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(255,176,32,0.5); }
+  #tab-home .big-balance-value{ font-size:36px; margin:8px 0 4px; }
+  #tab-home .bal-som{ font-size:12.5px; color:rgba(255,255,255,0.55); font-family:'JetBrains Mono',monospace;
+    margin-bottom:16px; position:relative; }
+  #tab-home .bal-action-btn{ flex:1; padding:13px 18px; border-radius:13px; font-size:13px;
+    background:rgba(255,255,255,0.09); border:1px solid rgba(255,255,255,0.12); }
+  #tab-home .bal-action-btn.primary{ background:linear-gradient(135deg,#8B7BFF,#6C5CE7); color:#fff; border:none;
+    box-shadow:0 6px 18px rgba(108,92,231,0.5), inset 0 1px 0 rgba(255,255,255,0.2); }
+
+  #tab-home .daily-card{ border:1px solid rgba(46,204,143,0.4); border-radius:18px; gap:12px;
+    background:linear-gradient(135deg, rgba(46,204,143,0.12), var(--bg-card) 60%);
+    margin:2px 0 20px; }
+  #tab-home .daily-gift{ width:46px; height:46px; border-radius:14px; flex-shrink:0; color:#fff;
+    background:linear-gradient(135deg,#3EE6A4,#1FA871); display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 16px rgba(46,204,143,0.35), inset 0 1px 0 rgba(255,255,255,0.25); }
+  #tab-home .daily-left{ flex:1; min-width:0; }
+  #tab-home .daily-left b{ color:var(--text); }
+  #tab-home .daily-btn{ background:linear-gradient(135deg,#3EE6A4,#2ECC8F); color:#0B2A1D;
+    box-shadow:0 5px 16px rgba(46,204,143,0.35), inset 0 1px 0 rgba(255,255,255,0.35); border-radius:13px; }
+  #tab-home .daily-btn:disabled{ background:var(--line); color:var(--muted); }
+
+  #tab-home .task{ border-radius:18px; }
+  #tab-home .task-icon{ border-radius:14px; box-shadow:0 5px 14px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.2); }
+  #tab-home .stat-box{ border-radius:16px; }
+
+  .bottom-nav{ background:rgba(13,11,20,0.96); }
+  .nav-item{ position:relative; padding:12px 0 10px; }
+  .nav-item.active::before{ content:''; position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:26px; height:3px; border-radius:0 0 4px 4px; background:var(--purple);
+    box-shadow:0 2px 10px rgba(124,92,255,0.9); }
 </style>
 </head>
 <body>
@@ -444,9 +494,11 @@
       </div>
 
       <div class="big-balance-card" onclick="switchTab('wallet')">
-        <div class="bal-emoji-bg"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
+        <div class="bal-glow"></div>
+        <div class="bal-emoji-bg"><svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg><span class="bal-coin-deco">$</span></div>
         <div class="balance-chip-label" id="balanceLabelTxt" data-i18n="balanceLbl">Balansingiz</div>
-        <div class="big-balance-value"><span class="coin-dot" style="width:24px;height:24px;font-size:13px">$</span><span id="coinCount">0</span></div>
+        <div class="big-balance-value"><span class="coin-dot" style="width:26px;height:26px;font-size:14px">$</span><span id="coinCount">0</span></div>
+        <div class="bal-som">= <span id="somEstHome">0</span> so'm</div>
         <div class="big-balance-actions">
           <button class="bal-action-btn primary" onclick="event.stopPropagation(); switchTab('wallet')" data-i18n="btnWithdraw">Pul yechish</button>
           <button class="bal-action-btn" onclick="event.stopPropagation(); switchTab('history')" data-i18n="btnHistory">Tarix</button>
@@ -463,11 +515,15 @@
         <div class="xp-bar-label" data-i18n-none><span id="dailyEarnedLabel">0</span> / <span id="dailyCapLabel">3000</span> <span data-i18n="dailyCapSuffix">kunlik limit</span></div>
       </div>
 
-      <div class="banner">
-        <div class="banner-emoji"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
-        <div class="banner-title" data-i18n="bannerTitle">Do'stlaringizni taklif qiling</div>
-        <div class="banner-sub" data-i18n="bannerSub">Do'stingiz har earnsanda siz 20% bonus olasiz.</div>
-        <button class="banner-btn" onclick="switchTab('friends')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> <span data-i18n="inviteBtn">Taklif qilish</span></button>
+      <div class="daily-card">
+        <div class="daily-gift"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+        <div class="daily-left">
+          <b><span data-i18n="dailyBonusTitle">Kunlik bonus</span></b>
+          <span id="streakSub">Har kuni bonus oling!</span>
+          <div class="daily-reward" id="dailyRewardTxt"><span class="mini-coin">$</span> +500</div>
+          <div class="daily-timer" id="dailyTimer">23:59:59</div>
+        </div>
+        <button class="daily-btn" id="streakBtn" onclick="claimStreak()">Olish</button>
       </div>
 
       <div class="sec-head">
@@ -477,14 +533,11 @@
 
       <div id="homeTaskList"></div>
 
-      <div class="daily-card">
-        <div class="daily-left">
-          <b><svg viewBox="0 0 24 24" width="22" height="22" fill="var(--amber)" style="vertical-align:-6px"><path d="M12 2c1 3-2 4-2 7a4 4 0 0 0 8 0c0-1-1-2-1-2 2 1 3 3 3 5a6 6 0 0 1-12 0c0-4 3-6 4-10z"/></svg> <span data-i18n="dailyBonusTitle">Kunlik bonus</span></b>
-          <span id="streakSub">Har kuni bonus oling!</span>
-          <div class="daily-reward" id="dailyRewardTxt"><span class="mini-coin">$</span> +500</div>
-          <div class="daily-timer" id="dailyTimer">23:59:59</div>
-        </div>
-        <button class="daily-btn" id="streakBtn" onclick="claimStreak()">Olish</button>
+      <div class="banner">
+        <div class="banner-emoji"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+        <div class="banner-title" data-i18n="bannerTitle">Do'stlaringizni taklif qiling</div>
+        <div class="banner-sub" data-i18n="bannerSub">Do'stingiz har earnsanda siz 20% bonus olasiz.</div>
+        <button class="banner-btn" onclick="switchTab('friends')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> <span data-i18n="inviteBtn">Taklif qilish</span></button>
       </div>
 
       <div class="sec-head"><div class="sec-title" data-i18n="statsTitle">Statistika</div></div>
@@ -721,10 +774,10 @@
 
   <div class="bottom-nav">
     <div class="bottom-nav-inner">
-      <div class="nav-item active" data-tab="home" onclick="switchTab('home')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></span><span class="nav-label" id="navL1" data-i18n="navL1">Bosh sahifa</span></div>
+      <div class="nav-item active" data-tab="home" onclick="switchTab('home')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></span><span class="nav-label" id="navL1" data-i18n="navL1">Asosiy</span></div>
       <div class="nav-item" data-tab="tasks" onclick="switchTab('tasks')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="nav-label" id="navL2" data-i18n="navL2">Vazifalar</span></div>
       <div class="nav-item" data-tab="friends" onclick="switchTab('friends')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="nav-label" id="navL3" data-i18n="navL3">Do'stlar</span></div>
-      <div class="nav-item" data-tab="wallet" onclick="switchTab('wallet')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span><span class="nav-label" id="navL4" data-i18n="navL4">Pul yechish</span></div>
+      <div class="nav-item" data-tab="wallet" onclick="switchTab('wallet')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span><span class="nav-label" id="navL4" data-i18n="navL4">Pul</span></div>
       <div class="nav-item" data-tab="profile" onclick="switchTab('profile')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nav-label" id="navL5" data-i18n="navL5">Profil</span></div>
     </div>
   </div>
@@ -825,7 +878,7 @@ const LANG_NAMES = { uz: "O'zbekcha", en: "English", ru: "Русский" };
 
 const I18N = {
   uz: {
-    navL1:"Bosh sahifa", navL2:"Vazifalar", navL3:"Do'stlar", navL4:"Pul yechish", navL5:"Profil", dailyCapSuffix:"kunlik limit",
+    navL1:"Asosiy", navL2:"Vazifalar", navL3:"Do'stlar", navL4:"Pul", navL5:"Profil", dailyCapSuffix:"kunlik limit",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
@@ -1209,6 +1262,8 @@ function renderBalance(){
   document.getElementById('coinCount2').textContent = coins.toLocaleString();
   const somEl = document.getElementById('somEst');
   if(somEl) somEl.textContent = Math.round(coins * COIN_TO_SOM).toLocaleString();
+  const somHomeEl = document.getElementById('somEstHome');
+  if(somHomeEl) somHomeEl.textContent = Math.round(coins * COIN_TO_SOM).toLocaleString();
   if(lastRenderedCoins !== null && coins !== lastRenderedCoins){
     coinEl.parentElement.classList.remove('pulse'); void coinEl.parentElement.offsetWidth; coinEl.parentElement.classList.add('pulse');
   }
