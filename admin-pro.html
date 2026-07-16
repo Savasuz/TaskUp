@@ -456,9 +456,12 @@ const firebaseConfig = {
   appId: "1:747576894319:web:650ac457a0b1dc3e227e9a",
   measurementId: "G-P32NK7C0JE"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+// Admin panel ALOHIDA nomlangan app ishlatadi — shu tufayli uning login
+// sessiyasi foydalanuvchi ilovasi (index.html) sessiyasidan ajratilgan:
+// foydalanuvchi ilovasiga oddiy akkaunt bilan kirilsa, admin sessiyasi buzilmaydi.
+const adminFbApp = firebase.initializeApp(firebaseConfig, 'adminSession');
+const auth = adminFbApp.auth();
+const db = adminFbApp.firestore();
 
 let currentAdminUid = null;
 let usersUnsub = null, tasksUnsub = null, paymentsUnsub = null;
@@ -693,7 +696,7 @@ function submitSendCoins(){
     btn.disabled = false;
   }).catch(err => {
     console.error(err);
-    showToast(err.message === 'notfound' ? t('userNotFound') : t('errGeneric'));
+    showToast(err.message === 'notfound' ? t('userNotFound') : (t('errGeneric') + ': ' + (err.code || err.message || '')));
     btn.disabled = false;
   });
 }
@@ -946,7 +949,11 @@ auth.onAuthStateChanged((user) => {
   if(user){
     db.collection('admins').doc(user.uid).get().then((doc) => {
       if(doc.exists){ currentAdminUid = user.uid; enterAdminApp(); }
+      else if(currentAdminUid){ adminLogout(); }
     });
+  } else if(currentAdminUid){
+    // Sessiya yo'qolgan — jim buzilib ishlamaslikning oldini olamiz
+    adminLogout();
   }
 });
 
