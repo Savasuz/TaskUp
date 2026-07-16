@@ -1,0 +1,11 @@
+{
+  "appId": "uz.taskup.app",
+  "appName": "TaskUp",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
