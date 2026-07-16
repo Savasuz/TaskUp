@@ -26,6 +26,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Yangiliklar: barcha tizimga kirganlar o'qiydi, faqat adminlar e'lon qiladi.
+    match /news/{newsId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if isAdmin();
+    }
+
     // Foydalanuvchi profili: egasi yoki admin (ban qilish, tanga qaytarish uchun).
     match /users/{uid} {
       allow read, write: if isOwner(uid) || isAdmin();

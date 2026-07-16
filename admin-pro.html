@@ -209,7 +209,7 @@
       <div class="topbar-left"><span class="menu-ico">☰</span>
         <div><div class="brand-name">TaskUp</div><div class="brand-sub">Admin Panel</div></div>
       </div>
-      <div class="bell">🔔<span class="dot" id="notifCount">3</span></div>
+      <div class="bell" onclick="switchView('news')" style="cursor:pointer">🔔<span class="dot" id="notifCount">0</span></div>
     </div>
     <div class="screen" style="padding-top:6px">
       <div class="greet-card">
@@ -313,6 +313,20 @@
     </div>
   </div>
 
+  <!-- ---- YANGILIKLAR ---- -->
+  <div class="view" id="view-news">
+    <div class="back-topbar"><span class="back-btn" onclick="switchView('home')">←</span><div class="back-title">Yangiliklar</div></div>
+    <div class="screen" style="padding-top:0">
+      <label>Sarlavha</label>
+      <input type="text" id="newsTitleInput" placeholder="Yangilik sarlavhasi">
+      <label>Matn</label>
+      <textarea id="newsTextInput" placeholder="Yangilik matnini yozing — foydalanuvchilarga qo'ng'iroqcha orqali ko'rinadi"></textarea>
+      <button class="submit-btn" onclick="submitNews()">E'lon qilish</button>
+      <div class="sec-head" style="margin-top:24px"><div class="sec-title">E'lon qilingan yangiliklar</div></div>
+      <div id="newsAdminList"></div>
+    </div>
+  </div>
+
   <!-- ---- TO'LOVLAR ---- -->
   <div class="view" id="view-payments">
     <div class="back-topbar"><span class="back-btn" onclick="switchView('home')">←</span><div class="back-title">To'lovlar</div>🔍</div>
@@ -342,8 +356,8 @@
           <div class="settings-body"><b>To'lov usullari</b><span>To'lov metodlarini boshqarish</span></div><span class="settings-arrow">›</span></div>
         <div class="settings-row"><div class="settings-ico" style="background:var(--purple)">📣</div>
           <div class="settings-body"><b>Reklama sozlamalari</b><span>Reklama birliklari va joylari</span></div><span class="settings-arrow">›</span></div>
-        <div class="settings-row"><div class="settings-ico" style="background:var(--amber)">🔔</div>
-          <div class="settings-body"><b>Bildirishnomalar</b><span>Foydalanuvchi bildirishnomalari</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row" onclick="switchView('news')"><div class="settings-ico" style="background:var(--amber)">🔔</div>
+          <div class="settings-body"><b>Bildirishnomalar</b><span>Yangiliklar e'lon qilish</span></div><span class="settings-arrow">›</span></div>
         <div class="settings-row"><div class="settings-ico" style="background:var(--red)">🔒</div>
           <div class="settings-body"><b>Xavfsizlik</b><span>Admin va xavfsizlik sozlamalari</span></div><span class="settings-arrow">›</span></div>
         <div class="settings-row"><div class="settings-ico" style="background:var(--green)">💾</div>
@@ -423,10 +437,10 @@ function enterAdminApp(){
   document.getElementById('adminApp').style.display = 'flex';
   document.getElementById('adminApp').style.flexDirection = 'column';
   document.getElementById('todayDate').textContent = 'Bugun ' + new Date().toLocaleDateString('uz-UZ', {day:'numeric', month:'long', year:'numeric'});
-  subscribeUsers(); subscribeTasks(); subscribePayments();
+  subscribeUsers(); subscribeTasks(); subscribePayments(); subscribeNews();
 }
 function adminLogout(){
-  if(usersUnsub) usersUnsub(); if(tasksUnsub) tasksUnsub(); if(paymentsUnsub) paymentsUnsub();
+  if(usersUnsub) usersUnsub(); if(tasksUnsub) tasksUnsub(); if(paymentsUnsub) paymentsUnsub(); if(newsUnsub) newsUnsub();
   auth.signOut();
   currentAdminUid = null;
   document.getElementById('adminApp').style.display = 'none';
@@ -553,6 +567,44 @@ function submitNewTask(){
     document.getElementById('newTaskName').value=''; document.getElementById('newTaskDesc').value=''; document.getElementById('newTaskReward').value=''; document.getElementById('newTaskDailyLimit').value='1';
     switchView('tasks');
   }).catch(err => { console.error(err); showToast("Xatolik yuz berdi"); });
+}
+
+/* ---------------- NEWS ---------------- */
+let newsUnsub = null, newsData = [];
+function escHtml(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function subscribeNews(){
+  newsUnsub = db.collection('news').onSnapshot((snap) => {
+    newsData = [];
+    snap.forEach(doc => newsData.push({ id: doc.id, ...doc.data() }));
+    newsData.sort((a,b)=>((b.createdAt&&b.createdAt.seconds)||0)-((a.createdAt&&a.createdAt.seconds)||0));
+    document.getElementById('notifCount').textContent = newsData.length;
+    renderNewsAdmin();
+  }, err => console.error(err));
+}
+function renderNewsAdmin(){
+  document.getElementById('newsAdminList').innerHTML = newsData.length ? newsData.map(n => {
+    const when = n.createdAt && n.createdAt.seconds ? new Date(n.createdAt.seconds*1000).toLocaleString('uz-UZ', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}) : '';
+    const preview = (n.text||'').slice(0,60) + ((n.text||'').length > 60 ? '…' : '');
+    return `
+    <div class="task-row">
+      <div class="task-ico ic-ad">📣</div>
+      <div class="task-body"><div class="task-name">${escHtml(n.title||'')}</div><div class="task-meta">${escHtml(preview)}${preview && when ? ' • ' : ''}${when}</div></div>
+      <span onclick="deleteNews('${n.id}')" style="color:var(--red);font-size:15px;cursor:pointer;padding:0 4px">✕</span>
+    </div>`;
+  }).join('') : '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">Yangiliklar yo\'q</div>';
+}
+function submitNews(){
+  const title = document.getElementById('newsTitleInput').value.trim();
+  const text = document.getElementById('newsTextInput').value.trim();
+  if(!title){ showToast("Sarlavhani kiriting"); return; }
+  db.collection('news').add({ title, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
+    showToast("Yangilik e'lon qilindi!");
+    document.getElementById('newsTitleInput').value=''; document.getElementById('newsTextInput').value='';
+  }).catch(err => { console.error(err); showToast("Xatolik yuz berdi"); });
+}
+function deleteNews(id){
+  if(!confirm("Yangilikni o'chirmoqchimisiz?")) return;
+  db.collection('news').doc(id).delete().then(()=>showToast("O'chirildi")).catch(err=>{ console.error(err); showToast("Xatolik"); });
 }
 
 /* ---------------- PAYMENTS ---------------- */
