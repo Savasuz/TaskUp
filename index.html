@@ -656,6 +656,13 @@
         <div class="pay-radio"></div>
       </div>
 
+      <div class="section-label" data-i18n="cardDetails">Karta ma'lumotlari</div>
+      <input type="text" id="cardNumber" placeholder="8600 1234 5678 9012" inputmode="numeric" maxlength="19" oninput="formatCardNumber(this)" autocomplete="cc-number" style="margin-bottom:10px">
+      <div style="display:flex; gap:10px">
+        <input type="text" id="cardExpiry" placeholder="MM/YY" inputmode="numeric" maxlength="5" oninput="formatCardExpiry(this)" autocomplete="cc-exp" style="margin-bottom:10px; flex:0 0 110px">
+        <input type="text" id="cardHolder" placeholder="Karta egasi (Ism Familiya)" autocomplete="cc-name" style="margin-bottom:10px; flex:1">
+      </div>
+
       <div class="section-label" data-i18n="enterAmount">Summani kiriting</div>
       <input type="text" id="cashoutAmount" placeholder="10000" value="10000" inputmode="numeric" style="margin-bottom:6px">
       <div class="progress-track"><div class="progress-fill" id="cashoutProgress"></div></div>
@@ -913,6 +920,7 @@ const I18N = {
   uz: {
     navL1:"Asosiy", navL2:"Vazifalar", navL3:"Do'stlar", navL4:"Pul", navL5:"Profil", dailyCapSuffix:"kunlik limit",
     newsTitle:"Yangiliklar", newsEmpty:"Hozircha yangiliklar yo'q",
+    cardDetails:"Karta ma'lumotlari", toastCardNumber:"Karta raqamini to'liq kiriting (16 raqam)", toastCardExpiry:"Amal qilish sanasini kiriting (MM/YY)", toastCardHolder:"Karta egasi ism-familiyasini kiriting",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
@@ -959,6 +967,7 @@ const I18N = {
   en: {
     navL1:"Home", navL2:"Tasks", navL3:"Friends", navL4:"Wallet", navL5:"Profile", dailyCapSuffix:"daily cap",
     newsTitle:"News", newsEmpty:"No news yet",
+    cardDetails:"Card details", toastCardNumber:"Enter the full card number (16 digits)", toastCardExpiry:"Enter the expiry date (MM/YY)", toastCardHolder:"Enter the cardholder name",
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
     authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in", forgotPass:"Forgot password?",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
@@ -1005,6 +1014,7 @@ const I18N = {
   ru: {
     navL1:"Главная", navL2:"Задания", navL3:"Друзья", navL4:"Вывод", navL5:"Профиль", dailyCapSuffix:"дневной лимит",
     newsTitle:"Новости", newsEmpty:"Пока новостей нет",
+    cardDetails:"Данные карты", toastCardNumber:"Введите полный номер карты (16 цифр)", toastCardExpiry:"Введите срок действия (ММ/ГГ)", toastCardHolder:"Введите имя владельца карты",
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
     authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти", forgotPass:"Забыли пароль?",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
@@ -1697,10 +1707,26 @@ function claimStreak(){
   }).catch((err) => { console.error(err); showToast('Xatolik yuz berdi', true); });
 }
 
+function formatCardNumber(el){
+  const digits = el.value.replace(/\D/g, '').slice(0, 16);
+  el.value = digits.replace(/(\d{4})(?=\d)/g, '$1 ');
+}
+function formatCardExpiry(el){
+  const d = el.value.replace(/\D/g, '').slice(0, 4);
+  el.value = d.length > 2 ? d.slice(0, 2) + '/' + d.slice(2) : d;
+}
+
 function tryCashout(){
   sndClick();
   if(!currentUid) return;
   if(state.coins < CASHOUT_MIN){ showToast(`${t('toastCashoutMin')} ${CASHOUT_MIN.toLocaleString()}`, true); return; }
+
+  const cardNumber = (document.getElementById('cardNumber').value || '').replace(/\s/g, '');
+  const cardExpiry = (document.getElementById('cardExpiry').value || '').trim();
+  const cardHolder = (document.getElementById('cardHolder').value || '').trim();
+  if(cardNumber.length !== 16){ showToast(t('toastCardNumber'), true); return; }
+  if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardExpiry)){ showToast(t('toastCardExpiry'), true); return; }
+  if(cardHolder.length < 3){ showToast(t('toastCardHolder'), true); return; }
 
   const userRef = db.collection('users').doc(currentUid);
   db.runTransaction((tx) => {
@@ -1712,7 +1738,9 @@ function tryCashout(){
         uid: currentUid,
         email: state.email,
         amountCoins: CASHOUT_MIN,
-        amountUsd: CASHOUT_MIN / COIN_TO_USD,
+        amountSom: Math.round(CASHOUT_MIN * COIN_TO_SOM),
+        payMethod: state.payMethod || 'uzcard',
+        cardNumber, cardExpiry, cardHolder,
         status: 'pending',
         requestedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
