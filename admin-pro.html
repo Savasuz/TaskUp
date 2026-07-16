@@ -505,9 +505,11 @@ let taskFilter = 'all';
 const ADMIN_ICON_EMOJI = { video:'▶', download:'⬇', survey:'📋', invite:'👥', ad:'📣', telegram:'✈️', rate:'⭐' };
 const ADMIN_ICON_CLASS = { video:'ic-video', download:'ic-download', survey:'ic-survey', invite:'ic-invite', ad:'ic-ad', telegram:'ic-tg', rate:'ic-invite' };
 function subscribeTasks(){
-  tasksUnsub = db.collection('tasks').orderBy('order').onSnapshot((snap) => {
+  // orderBy('order') `order` maydoni yo'q hujjatlarni tashlab yuboradi — sort client tomonda
+  tasksUnsub = db.collection('tasks').onSnapshot((snap) => {
     tasksData = [];
     snap.forEach(doc => { tasksData.push({ id: doc.id, ...doc.data() }); });
+    tasksData.sort((a,b) => (a.order||0) - (b.order||0));
     renderHome(); renderTasksAdmin();
   }, err => console.error(err));
 }
