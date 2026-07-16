@@ -1,0 +1,43 @@
+name: Firebase deploy (functions + rules)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'functions/**'
+      - 'firestore.rules'
+      - 'firebase.json'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HAS_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}
+    steps:
+      - name: Check secret
+        if: env.HAS_SA != 'true'
+        run: |
+          echo "::error::FIREBASE_SERVICE_ACCOUNT secret topilmadi."
+          echo "GitHub -> Settings -> Secrets and variables -> Actions -> New repository secret"
+          echo "Nomi: FIREBASE_SERVICE_ACCOUNT, qiymati: Google Cloud service account JSON kaliti"
+          exit 1
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Write service account key
+        env:
+          SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
+
+      - name: Install functions dependencies
+        run: npm --prefix functions install
+
+      - name: Deploy functions + firestore rules
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
+        run: npx firebase-tools@latest deploy --only functions,firestore:rules --project taskup-df8ee --non-interactive --force
