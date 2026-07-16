@@ -475,42 +475,7 @@
         <div class="sec-link" onclick="switchTab('tasks')" data-i18n="seeAll">Barchasini ko'rish ›</div>
       </div>
 
-      <div class="task">
-        <div class="task-icon icon-video"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
-        <div class="task-body">
-          <div class="task-name" data-i18n="taskVideoName">Video ko'rish</div>
-          <div class="task-desc" data-i18n="taskVideoDesc1">30 soniya video ko'ring</div>
-          <div class="task-reward"><span class="mini-coin">$</span> +50</div>
-        </div>
-        <button class="task-btn" onclick="completeTask('video', 50, 8, this)" data-i18n="btnDo">Bajarish</button>
-      </div>
-      <div class="task">
-        <div class="task-icon icon-download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
-        <div class="task-body">
-          <div class="task-name" data-i18n="taskDownloadName">Ilova yuklash</div>
-          <div class="task-desc" data-i18n="taskDownloadDesc1">Ilovani yuklab o'rnating</div>
-          <div class="task-reward"><span class="mini-coin">$</span> +120</div>
-        </div>
-        <button class="task-btn" onclick="completeTask('download', 120, 3, this)" data-i18n="btnDo">Bajarish</button>
-      </div>
-      <div class="task">
-        <div class="task-icon icon-survey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></div>
-        <div class="task-body">
-          <div class="task-name" data-i18n="taskSurveyName">So'rovnomada ishtirok etish</div>
-          <div class="task-desc" data-i18n="taskSurveyDesc">So'rovnomani to'ldiring</div>
-          <div class="task-reward"><span class="mini-coin">$</span> +80</div>
-        </div>
-        <button class="task-btn" onclick="completeTask('survey', 80, 1, this)" data-i18n="btnDo">Bajarish</button>
-      </div>
-      <div class="task">
-        <div class="task-icon icon-invite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-        <div class="task-body">
-          <div class="task-name" data-i18n="taskInviteName">Do'st taklif qilish</div>
-          <div class="task-desc" data-i18n="taskInviteDesc">Do'stingiz ro'yxatdan o'tsin</div>
-          <div class="task-reward"><span class="mini-coin">$</span> +1000</div>
-        </div>
-        <button class="task-btn" onclick="switchTab('friends')" data-i18n="btnDo">Bajarish</button>
-      </div>
+      <div id="homeTaskList"></div>
 
       <div class="daily-card">
         <div class="daily-left">
@@ -541,41 +506,7 @@
         <div class="chip" data-filter="bonus" onclick="filterTasks('bonus', this)" data-i18n="filterBonus">Bonus</div>
       </div>
 
-      <div class="task" data-cat="oddiy">
-        <div class="task-icon icon-video"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
-        <div class="task-body"><div class="task-name" data-i18n="taskVideoName">Video ko'rish</div><div class="task-desc" data-i18n="taskVideoDesc2">Kuniga 8 martagacha</div><div class="task-reward"><span class="mini-coin">$</span> +50</div></div>
-        <button class="task-btn" onclick="completeTask('video', 50, 8, this)" data-i18n="btnDo">Bajarish</button>
-      </div>
-      <div class="task" data-cat="oddiy">
-        <div class="task-icon icon-download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
-        <div class="task-body"><div class="task-name" data-i18n="taskDownloadName">Ilova yuklash</div><div class="task-desc" data-i18n="taskDownloadDesc2">Kuniga 3 martagacha</div><div class="task-reward"><span class="mini-coin">$</span> +120</div></div>
-        <button class="task-btn" onclick="completeTask('download', 120, 3, this)" data-i18n="btnDo">Bajarish</button>
-      </div>
-      <div class="task" data-cat="premium">
-        <div class="task-icon icon-survey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></div>
-        <div class="task-body"><div class="task-name" data-i18n="taskSurveyName">So'rovnomada ishtirok etish</div><div class="task-desc" data-i18n="taskSurveyDesc">So'rovnomani to'ldiring</div><div class="task-reward"><span class="mini-coin">$</span> +80</div></div>
-        <button class="task-btn" onclick="completeTask('survey', 80, 1, this)" data-i18n="btnDo">Bajarish</button>
-      </div>
-      <div class="task" data-cat="oddiy">
-        <div class="task-icon icon-survey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></div>
-        <div class="task-body"><div class="task-name" data-i18n="taskAdName">Reklama ko'rish</div><div class="task-desc" data-i18n="taskAdDesc">Reklamani to'liq ko'ring</div><div class="task-reward"><span class="mini-coin">$</span> +40</div></div>
-        <button class="task-btn" onclick="completeTask('ad', 40, 10, this)" data-i18n="btnDo">Bajarish</button>
-      </div>
-      <div class="task" data-cat="bonus">
-        <div class="task-icon icon-survey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
-        <div class="task-body"><div class="task-name" data-i18n="taskTgName">Telegram kanalga obuna bo'lish</div><div class="task-desc" data-i18n="taskTgDesc">Kanalga obuna bo'ling</div><div class="task-reward"><span class="mini-coin">$</span> +70</div></div>
-        <button class="task-btn" onclick="completeTask('telegram', 70, 1, this)" data-i18n="btnDo">Bajarish</button>
-      </div>
-      <div class="task" data-cat="bonus">
-        <div class="task-icon icon-invite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-        <div class="task-body"><div class="task-name" data-i18n="taskInviteName">Do'st taklif qilish</div><div class="task-desc" data-i18n="taskInviteDesc">Do'stingiz ro'yxatdan o'tsin</div><div class="task-reward"><span class="mini-coin">$</span> +1000</div></div>
-        <button class="task-btn" onclick="switchTab('friends')" data-i18n="btnDo">Bajarish</button>
-      </div>
-      <div class="task" data-cat="premium">
-        <div class="task-icon icon-invite"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
-        <div class="task-body"><div class="task-name" data-i18n="taskRateName">O'yin o'ynab baho berish</div><div class="task-desc" data-i18n="taskRateDesc">O'yinni o'ynang va 5 yulduz bering</div><div class="task-reward"><span class="mini-coin">$</span> +150</div></div>
-        <button class="task-btn" onclick="completeTask('rate', 150, 1, this)" data-i18n="btnDo">Bajarish</button>
-      </div>
+      <div id="allTaskList"></div>
     </div>
 
     <!-- ---- FRIENDS TAB ---- -->
@@ -872,8 +803,10 @@ const DAILY_CAP_BASE = 3000;
 const DAILY_CAP_PER_LEVEL = 500;
 function getDailyCap(level){ return DAILY_CAP_BASE + (Math.max(1, level) - 1) * DAILY_CAP_PER_LEVEL; }
 function getTaskLabel(id){
-  const map = { video: 'taskVideoName', download: 'taskDownloadName', survey: 'taskSurveyName' };
-  return map[id] ? t(map[id]) : id;
+  const map = { video: 'taskVideoName', download: 'taskDownloadName', survey: 'taskSurveyName', ad: 'taskAdName', telegram: 'taskTgName', invite: 'taskInviteName', rate: 'taskRateName' };
+  if(map[id]) return t(map[id]);
+  const ct = (typeof catalogTasks !== 'undefined') && catalogTasks.find(x => x.id === id);
+  return (ct && ct.name) || id;
 }
 
 let state = {
@@ -1120,6 +1053,7 @@ auth.onAuthStateChanged((user) => {
   if(user){
     currentUid = user.uid;
     state.email = user.email || state.email;
+    subscribeTasksCatalog();
     initUserData(user.uid);
   }
 });
@@ -1216,6 +1150,7 @@ function enterApp(){
 }
 function signOutUser(){
   if(unsubscribeUser) unsubscribeUser();
+  if(unsubscribeTasks){ unsubscribeTasks(); unsubscribeTasks = null; }
   auth.signOut();
   currentUid = null;
   document.getElementById('appScreen').style.display = 'none';
@@ -1419,12 +1354,84 @@ function copyReferral(){
   navigator.clipboard.writeText(link).then(()=> showToast(t('toastCopied'))).catch(()=> showToast(t('toastCopyFail'), true));
 }
 
-function filterTasks(cat, chipEl){
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  chipEl.classList.add('active');
-  document.querySelectorAll('#tab-tasks .task').forEach(t => {
-    t.style.display = (cat === 'all' || t.dataset.cat === cat) ? 'flex' : 'none';
+/* ---------------- Tasks catalog (Firestore `tasks` collection) ---------------- */
+let unsubscribeTasks = null;
+let catalogTasks = [];
+let currentTaskFilter = 'all';
+
+const TASK_ICON_SVG = {
+  video: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  survey: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>',
+  invite: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  ad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>',
+  telegram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+  rate: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>'
+};
+const TASK_ICON_CLASS = { video:'icon-video', download:'icon-download', survey:'icon-survey', invite:'icon-invite', ad:'icon-survey', telegram:'icon-survey', rate:'icon-invite' };
+
+/* Firestore `tasks` collection bo'sh bo'lsa ko'rsatiladigan standart vazifalar */
+const DEFAULT_TASKS = [
+  { id:'video', nameKey:'taskVideoName', descKey:'taskVideoDesc2', reward:50, dailyLimit:8, icon:'video', category:'oddiy' },
+  { id:'download', nameKey:'taskDownloadName', descKey:'taskDownloadDesc2', reward:120, dailyLimit:3, icon:'download', category:'oddiy' },
+  { id:'survey', nameKey:'taskSurveyName', descKey:'taskSurveyDesc', reward:80, dailyLimit:1, icon:'survey', category:'premium' },
+  { id:'ad', nameKey:'taskAdName', descKey:'taskAdDesc', reward:40, dailyLimit:10, icon:'ad', category:'oddiy' },
+  { id:'telegram', nameKey:'taskTgName', descKey:'taskTgDesc', reward:70, dailyLimit:1, icon:'telegram', category:'bonus' },
+  { id:'invite', nameKey:'taskInviteName', descKey:'taskInviteDesc', reward:1000, dailyLimit:1, icon:'invite', category:'bonus', action:'friends' },
+  { id:'rate', nameKey:'taskRateName', descKey:'taskRateDesc', reward:150, dailyLimit:1, icon:'rate', category:'premium' }
+];
+
+function escapeHtml(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function subscribeTasksCatalog(){
+  if(unsubscribeTasks) unsubscribeTasks();
+  // Diqqat: where + orderBy birga composite index talab qiladi, shuning uchun sort client tomonda
+  unsubscribeTasks = db.collection('tasks').where('active', '==', true).onSnapshot((snap) => {
+    catalogTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    catalogTasks.sort((a,b) => (a.order||0) - (b.order||0));
+    renderTaskLists();
+  }, err => { console.error('Vazifalarni yuklashda xato:', err); renderTaskLists(); });
+}
+
+function taskRowHtml(task){
+  const isDefault = !!task.nameKey;
+  const name = isDefault ? `<span data-i18n="${task.nameKey}">${escapeHtml(t(task.nameKey))}</span>` : escapeHtml(task.name);
+  const desc = isDefault ? `<span data-i18n="${task.descKey}">${escapeHtml(t(task.descKey))}</span>` : escapeHtml(task.desc || '');
+  const reward = Number(task.reward) || 0;
+  const dailyLimit = Number(task.dailyLimit) || 1;
+  const action = task.action === 'friends' ? "switchTab('friends')" : `completeTask('${escapeHtml(task.id)}', ${reward}, ${dailyLimit}, this)`;
+  return `
+      <div class="task" data-cat="${escapeHtml(task.category || 'oddiy')}">
+        <div class="task-icon ${TASK_ICON_CLASS[task.icon] || 'icon-video'}">${TASK_ICON_SVG[task.icon] || TASK_ICON_SVG.video}</div>
+        <div class="task-body">
+          <div class="task-name">${name}</div>
+          <div class="task-desc">${desc}</div>
+          <div class="task-reward"><span class="mini-coin">$</span> +${reward.toLocaleString()}</div>
+        </div>
+        <button class="task-btn" onclick="${action}" data-i18n="btnDo">${t('btnDo')}</button>
+      </div>`;
+}
+
+function renderTaskLists(){
+  const tasks = catalogTasks.length ? catalogTasks : DEFAULT_TASKS;
+  const homeEl = document.getElementById('homeTaskList');
+  const allEl = document.getElementById('allTaskList');
+  if(homeEl) homeEl.innerHTML = tasks.slice(0, 4).map(taskRowHtml).join('');
+  if(allEl) allEl.innerHTML = tasks.map(taskRowHtml).join('');
+  applyTaskFilter();
+}
+
+function applyTaskFilter(){
+  document.querySelectorAll('#tab-tasks .task').forEach(el => {
+    el.style.display = (currentTaskFilter === 'all' || el.dataset.cat === currentTaskFilter) ? 'flex' : 'none';
   });
+}
+
+function filterTasks(cat, chipEl){
+  currentTaskFilter = cat;
+  document.querySelectorAll('#tab-tasks .chip').forEach(c => c.classList.remove('active'));
+  chipEl.classList.add('active');
+  applyTaskFilter();
 }
 
 function selectPayMethod(method, el){
@@ -1581,6 +1588,7 @@ function tryCashout(){
   });
 }
 
+renderTaskLists();
 document.getElementById('loadingScreen').style.display = 'none';
 </script>
 </body>
