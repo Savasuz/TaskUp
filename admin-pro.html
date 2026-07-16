@@ -147,10 +147,12 @@
   /* ---- Form ---- */
   label{ font-size:11.5px; color:var(--muted); display:block; margin-bottom:6px; margin-top:14px; font-family:'Space Grotesk',sans-serif; font-weight:600; }
   label:first-child{ margin-top:0; }
-  select, input[type=text], input[type=number], textarea{
+  select, input[type=text], input[type=number], input[type=url], input[type=date], textarea{
     width:100%; background:var(--bg-card); border:1px solid var(--line); color:var(--text);
     padding:12px 14px; border-radius:11px; font-size:14px; outline:none; font-family:'Inter',sans-serif; }
   select:focus, input:focus, textarea:focus{ border-color:var(--purple); }
+  input[type=date]{ color-scheme:dark; }
+  .form-hint{ font-size:11.5px; color:var(--muted); margin-top:6px; line-height:1.5; }
   textarea{ resize:vertical; min-height:70px; }
   .icon-picker{ display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
   .icon-opt{ width:42px; height:42px; border-radius:11px; display:flex; align-items:center; justify-content:center;
@@ -287,6 +289,26 @@
   <div class="view" id="view-addTask">
     <div class="back-topbar"><span class="back-btn" onclick="switchView('tasks')">←</span><div class="back-title" data-i18n="addTaskTitle">Yangi vazifa qo'shish</div></div>
     <div class="screen" style="padding-top:0">
+      <label data-i18n="lblTaskKind">Vazifa turi</label>
+      <select id="newTaskKind" onchange="onTaskKindChange()">
+        <option value="link" data-i18n="kindLink">Oddiy havola</option>
+        <option value="rewarded_ad" data-i18n="kindRewarded">Rewarded Ad (AdMob)</option>
+        <option value="app_install" data-i18n="kindApp">Ilova yuklash</option>
+        <option value="telegram" data-i18n="kindTg">Telegram</option>
+        <option value="youtube" data-i18n="kindYt">YouTube</option>
+        <option value="survey" data-i18n="kindSurvey">So'rovnoma</option>
+      </select>
+      <div id="taskUrlWrap">
+        <label data-i18n="lblTaskUrl">Vazifa havolasi</label>
+        <input type="url" id="newTaskUrl" placeholder="https://t.me/taskupuz">
+      </div>
+      <div id="admobHint" class="form-hint" style="display:none">⚠️ <span data-i18n="admobHint">Rewarded Ad uchun havola kerak emas — reklamani AdMob o'zi ko'rsatadi. Ad Unit ID bu yerga yozilmaydi, u Android ilova sozlamalarida saqlanadi.</span></div>
+      <label data-i18n="lblVerify">Tekshirish usuli</label>
+      <select id="newTaskVerify">
+        <option value="auto" data-i18n="verifyAuto">Avtomatik</option>
+        <option value="manual" data-i18n="verifyManual">Qo'lda</option>
+        <option value="admob" data-i18n="verifyAdmob">AdMob tekshiruvi</option>
+      </select>
       <label data-i18n="lblCategory">Kategoriya</label>
       <select id="newTaskType"><option value="oddiy" data-i18n="catSimple">Oddiy</option><option value="premium" data-i18n="catPremium">Premium</option><option value="bonus" data-i18n="catBonus">Bonus</option></select>
       <label data-i18n="lblTaskName">Vazifa nomi</label>
@@ -297,6 +319,12 @@
       <input type="number" id="newTaskReward" placeholder="Mukofot miqdorini kiriting">
       <label data-i18n="lblDailyLimit">Kunlik limit (necha marta bajarish mumkin)</label>
       <input type="number" id="newTaskDailyLimit" placeholder="Masalan: 5" value="1">
+      <label data-i18n="lblTotalLimit">Umumiy bajarish limiti (ixtiyoriy, bo'sh = cheksiz)</label>
+      <input type="number" id="newTaskTotalLimit" placeholder="Masalan: 1000">
+      <label data-i18n="lblStartDate">Boshlanish sanasi (ixtiyoriy)</label>
+      <input type="date" id="newTaskStart">
+      <label data-i18n="lblEndDate">Tugash sanasi (ixtiyoriy)</label>
+      <input type="date" id="newTaskEnd">
       <label data-i18n="lblIcon">Icon tanlang</label>
       <div class="icon-picker">
         <div class="icon-opt ic-video selected" onclick="selectIcon(this,'video')">▶</div>
@@ -510,6 +538,12 @@ const ADMIN_I18N = {
     lblCategory:"Kategoriya", lblTaskName:"Vazifa nomi", lblTaskDesc:"Vazifa haqida", lblReward:"Mukofot (tanga)",
     lblDailyLimit:"Kunlik limit (necha marta bajarish mumkin)", lblIcon:"Icon tanlang", lblActivate:"Vazifani faollashtirish", btnAddTask:"Vazifani qo'shish",
     catSimple:"Oddiy", catPremium:"Premium", catBonus:"Bonus",
+    lblTaskKind:"Vazifa turi", kindLink:"Oddiy havola", kindRewarded:"Rewarded Ad (AdMob)", kindApp:"Ilova yuklash", kindTg:"Telegram", kindYt:"YouTube", kindSurvey:"So'rovnoma",
+    kind_link:"🔗 Oddiy havola", kind_rewarded_ad:"📺 Rewarded Ad", kind_app_install:"⬇ Ilova yuklash", kind_telegram:"✈️ Telegram", kind_youtube:"▶ YouTube", kind_survey:"📋 So'rovnoma",
+    lblTaskUrl:"Vazifa havolasi", lblVerify:"Tekshirish usuli", verifyAuto:"Avtomatik", verifyManual:"Qo'lda", verifyAdmob:"AdMob tekshiruvi",
+    lblTotalLimit:"Umumiy bajarish limiti (ixtiyoriy, bo'sh = cheksiz)", lblStartDate:"Boshlanish sanasi (ixtiyoriy)", lblEndDate:"Tugash sanasi (ixtiyoriy)",
+    admobHint:"Rewarded Ad uchun havola kerak emas — reklamani AdMob o'zi ko'rsatadi. Ad Unit ID bu yerga yozilmaydi, u Android ilova sozlamalarida saqlanadi.",
+    urlRequired:"Vazifa havolasini kiriting (https:// bilan)", badDates:"Tugash sanasi boshlanishdan oldin bo'lishi mumkin emas",
     paymentsTitle:"To'lovlar", totalPayments:"Jami to'lovlar", noRequests:"So'rovlar yo'q", noCard:"Karta ma'lumotlari kiritilmagan",
     newsTitle:"Yangiliklar", lblNewsTitle:"Sarlavha", lblNewsText:"Matn", btnPublish:"E'lon qilish", publishedNews:"E'lon qilingan yangiliklar", noNews:"Yangiliklar yo'q",
     settingsTitle:"Sozlamalar", btnLogout:"Chiqish",
@@ -545,6 +579,12 @@ const ADMIN_I18N = {
     lblCategory:"Category", lblTaskName:"Task name", lblTaskDesc:"About the task", lblReward:"Reward (coins)",
     lblDailyLimit:"Daily limit (times per day)", lblIcon:"Choose an icon", lblActivate:"Activate task", btnAddTask:"Add task",
     catSimple:"Simple", catPremium:"Premium", catBonus:"Bonus",
+    lblTaskKind:"Task type", kindLink:"Simple link", kindRewarded:"Rewarded Ad (AdMob)", kindApp:"App install", kindTg:"Telegram", kindYt:"YouTube", kindSurvey:"Survey",
+    kind_link:"🔗 Simple link", kind_rewarded_ad:"📺 Rewarded Ad", kind_app_install:"⬇ App install", kind_telegram:"✈️ Telegram", kind_youtube:"▶ YouTube", kind_survey:"📋 Survey",
+    lblTaskUrl:"Task link", lblVerify:"Verification method", verifyAuto:"Automatic", verifyManual:"Manual", verifyAdmob:"AdMob verification",
+    lblTotalLimit:"Total completion limit (optional, empty = unlimited)", lblStartDate:"Start date (optional)", lblEndDate:"End date (optional)",
+    admobHint:"Rewarded Ad needs no link — AdMob shows the ad itself. The Ad Unit ID is not entered here; it is stored in the Android app configuration.",
+    urlRequired:"Enter the task link (starting with https://)", badDates:"End date cannot be before the start date",
     paymentsTitle:"Payments", totalPayments:"Total payments", noRequests:"No requests", noCard:"No card details provided",
     newsTitle:"News", lblNewsTitle:"Title", lblNewsText:"Text", btnPublish:"Publish", publishedNews:"Published news", noNews:"No news",
     settingsTitle:"Settings", btnLogout:"Log out",
@@ -580,6 +620,12 @@ const ADMIN_I18N = {
     lblCategory:"Категория", lblTaskName:"Название задания", lblTaskDesc:"О задании", lblReward:"Награда (монеты)",
     lblDailyLimit:"Дневной лимит (раз в день)", lblIcon:"Выберите иконку", lblActivate:"Активировать задание", btnAddTask:"Добавить задание",
     catSimple:"Обычное", catPremium:"Премиум", catBonus:"Бонус",
+    lblTaskKind:"Тип задания", kindLink:"Обычная ссылка", kindRewarded:"Rewarded Ad (AdMob)", kindApp:"Установка приложения", kindTg:"Telegram", kindYt:"YouTube", kindSurvey:"Опрос",
+    kind_link:"🔗 Обычная ссылка", kind_rewarded_ad:"📺 Rewarded Ad", kind_app_install:"⬇ Установка", kind_telegram:"✈️ Telegram", kind_youtube:"▶ YouTube", kind_survey:"📋 Опрос",
+    lblTaskUrl:"Ссылка задания", lblVerify:"Способ проверки", verifyAuto:"Автоматически", verifyManual:"Вручную", verifyAdmob:"Проверка AdMob",
+    lblTotalLimit:"Общий лимит выполнений (необязательно, пусто = без лимита)", lblStartDate:"Дата начала (необязательно)", lblEndDate:"Дата окончания (необязательно)",
+    admobHint:"Для Rewarded Ad ссылка не нужна — рекламу показывает сам AdMob. Ad Unit ID сюда не вводится, он хранится в конфигурации Android-приложения.",
+    urlRequired:"Введите ссылку задания (начиная с https://)", badDates:"Дата окончания не может быть раньше даты начала",
     paymentsTitle:"Платежи", totalPayments:"Всего платежей", noRequests:"Нет запросов", noCard:"Данные карты не указаны",
     newsTitle:"Новости", lblNewsTitle:"Заголовок", lblNewsText:"Текст", btnPublish:"Опубликовать", publishedNews:"Опубликованные новости", noNews:"Нет новостей",
     settingsTitle:"Настройки", btnLogout:"Выйти",
@@ -749,7 +795,7 @@ function renderTasksAdmin(){
   document.getElementById('tasksAdminList').innerHTML = filtered.length ? filtered.map((t) => `
     <div class="task-row">
       <div class="task-ico ${ADMIN_ICON_CLASS[t.icon]||'ic-video'}">${ADMIN_ICON_EMOJI[t.icon]||'▶'}</div>
-      <div class="task-body"><div class="task-name">${escHtml(t.name)}</div><div class="task-meta">${escHtml(t.desc||'')} • +${t.reward} coin • ${window.t('perDay')} ${t.dailyLimit}</div></div>
+      <div class="task-body"><div class="task-name">${escHtml(t.name)}</div><div class="task-meta">${escHtml(t.desc||'')} • +${t.reward} coin • ${window.t('perDay')} ${t.dailyLimit}</div><div class="task-meta">${window.t('kind_'+(t.kind||'link'))}${t.url ? ' • ' + escHtml(t.url.length > 34 ? t.url.slice(0,34)+'…' : t.url) : ''}${(t.totalLimit||0) > 0 ? ' • ' + (t.completedCount||0) + '/' + t.totalLimit : ''}</div></div>
       <span onclick="deleteTask('${t.id}')" style="color:var(--red);font-size:15px;cursor:pointer;padding:0 4px">✕</span>
       <div class="switch ${t.active?'on':''}" onclick="toggleTaskActive('${t.id}', ${!!t.active})"></div>
     </div>`).join('') : `<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">${t('noTasks')}</div>`;
@@ -769,6 +815,14 @@ function selectIcon(el, key){
   document.querySelectorAll('.icon-opt').forEach(o=>o.classList.remove('selected'));
   el.classList.add('selected'); selectedIconKey = key;
 }
+function onTaskKindChange(){
+  const kind = document.getElementById('newTaskKind').value;
+  const isAd = kind === 'rewarded_ad';
+  document.getElementById('taskUrlWrap').style.display = isAd ? 'none' : 'block';
+  document.getElementById('admobHint').style.display = isAd ? 'block' : 'none';
+  if(isAd) document.getElementById('newTaskVerify').value = 'admob';
+  else if(document.getElementById('newTaskVerify').value === 'admob') document.getElementById('newTaskVerify').value = 'auto';
+}
 function submitNewTask(){
   const name = document.getElementById('newTaskName').value.trim();
   const desc = document.getElementById('newTaskDesc').value.trim();
@@ -776,11 +830,31 @@ function submitNewTask(){
   const dailyLimit = parseInt(document.getElementById('newTaskDailyLimit').value) || 1;
   const category = document.getElementById('newTaskType').value;
   const active = document.getElementById('newTaskActiveSwitch').classList.contains('on');
+  const kind = document.getElementById('newTaskKind').value;
+  const url = document.getElementById('newTaskUrl').value.trim();
+  const verify = kind === 'rewarded_ad' ? 'admob' : document.getElementById('newTaskVerify').value;
+  const totalLimit = parseInt(document.getElementById('newTaskTotalLimit').value) || 0;
+  const startVal = document.getElementById('newTaskStart').value;
+  const endVal = document.getElementById('newTaskEnd').value;
+
   if(!name || !reward){ showToast(t('fillNameReward')); return; }
+  if(kind !== 'rewarded_ad'){
+    if(!url || !/^https?:\/\/.+/.test(url)){ showToast(t('urlRequired')); return; }
+  }
+  const startAt = startVal ? new Date(startVal + 'T00:00:00').getTime() : null;
+  const endAt = endVal ? new Date(endVal + 'T23:59:59').getTime() : null;
+  if(startAt && endAt && endAt < startAt){ showToast(t('badDates')); return; }
+
   const maxOrder = tasksData.reduce((m,x)=>Math.max(m, x.order||0), 0);
-  db.collection('tasks').add({ name, desc, reward, dailyLimit, icon: selectedIconKey, category, active, order: maxOrder+1 }).then(() => {
+  db.collection('tasks').add({
+    name, desc, reward, dailyLimit, icon: selectedIconKey, category, active,
+    kind, url: kind === 'rewarded_ad' ? '' : url, verify,
+    totalLimit, completedCount: 0, startAt, endAt,
+    order: maxOrder+1
+  }).then(() => {
     showToast(t('taskAdded'));
-    document.getElementById('newTaskName').value=''; document.getElementById('newTaskDesc').value=''; document.getElementById('newTaskReward').value=''; document.getElementById('newTaskDailyLimit').value='1';
+    ['newTaskName','newTaskDesc','newTaskReward','newTaskUrl','newTaskTotalLimit','newTaskStart','newTaskEnd'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('newTaskDailyLimit').value='1';
     switchView('tasks');
   }).catch(err => { console.error(err); showToast(t('errGeneric')); });
 }

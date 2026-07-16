@@ -931,6 +931,7 @@ const I18N = {
     newsTitle:"Yangiliklar", newsEmpty:"Hozircha yangiliklar yo'q",
     cardDetails:"Karta ma'lumotlari", toastCardNumber:"Karta raqamini to'liq kiriting (16 raqam)", toastCardExpiry:"Amal qilish sanasini kiriting (MM/YY)", toastCardHolder:"Karta egasi ism-familiyasini kiriting",
     enterRefCode:"Sizni taklif qilishganmi? Kodni kiriting", btnRedeem:"Faollashtirish", toastEnterCode:"Taklif kodini kiriting", toastRefRedeemed:"tanga! Referral faollashdi", toastRefAlready:"Siz allaqachon kod kiritgansiz", toastRefNotFound:"Bunday kod topilmadi", toastRefOwn:"O'z kodingizni kirita olmaysiz", toastRefError:"Xatolik yuz berdi",
+    btnClaim:"Olish", adSoon:"Ilovada tez orada", toastNotStarted:"Vazifa hali boshlanmagan", toastEnded:"Vazifa muddati tugagan", toastTotalLimit:"Vazifa umumiy limiti tugagan",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
@@ -979,6 +980,7 @@ const I18N = {
     newsTitle:"News", newsEmpty:"No news yet",
     cardDetails:"Card details", toastCardNumber:"Enter the full card number (16 digits)", toastCardExpiry:"Enter the expiry date (MM/YY)", toastCardHolder:"Enter the cardholder name",
     enterRefCode:"Were you invited? Enter the code", btnRedeem:"Activate", toastEnterCode:"Enter the referral code", toastRefRedeemed:"coins! Referral activated", toastRefAlready:"You already used a code", toastRefNotFound:"Code not found", toastRefOwn:"You can't use your own code", toastRefError:"Something went wrong",
+    btnClaim:"Claim", adSoon:"Soon in the app", toastNotStarted:"Task hasn't started yet", toastEnded:"Task has ended", toastTotalLimit:"Task completion limit reached",
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
     authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in", forgotPass:"Forgot password?",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
@@ -1027,6 +1029,7 @@ const I18N = {
     newsTitle:"Новости", newsEmpty:"Пока новостей нет",
     cardDetails:"Данные карты", toastCardNumber:"Введите полный номер карты (16 цифр)", toastCardExpiry:"Введите срок действия (ММ/ГГ)", toastCardHolder:"Введите имя владельца карты",
     enterRefCode:"Вас пригласили? Введите код", btnRedeem:"Активировать", toastEnterCode:"Введите реферальный код", toastRefRedeemed:"монет! Реферал активирован", toastRefAlready:"Вы уже использовали код", toastRefNotFound:"Код не найден", toastRefOwn:"Нельзя использовать свой код", toastRefError:"Произошла ошибка",
+    btnClaim:"Получить", adSoon:"Скоро в приложении", toastNotStarted:"Задание ещё не началось", toastEnded:"Задание завершено", toastTotalLimit:"Лимит задания исчерпан",
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
     authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти", forgotPass:"Забыли пароль?",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
@@ -1561,7 +1564,17 @@ function taskRowHtml(task){
   const desc = isDefault ? `<span data-i18n="${task.descKey}">${escapeHtml(t(task.descKey))}</span>` : escapeHtml(task.desc || '');
   const reward = Number(task.reward) || 0;
   const dailyLimit = Number(task.dailyLimit) || 1;
-  const action = task.action === 'friends' ? "switchTab('friends')" : `completeTask('${escapeHtml(task.id)}', ${reward}, ${dailyLimit}, this)`;
+  let btnHtml;
+  if(!isDefault && task.kind === 'rewarded_ad'){
+    // AdMob Rewarded Ad — Android ilovaga SDK ulangach yoqiladi
+    btnHtml = `<button class="task-btn" disabled data-i18n="adSoon">${t('adSoon')}</button>`;
+  } else {
+    let action;
+    if(task.action === 'friends') action = "switchTab('friends')";
+    else if(!isDefault && task.url) action = `startLinkTask('${escapeHtml(task.id)}', '${encodeURIComponent(task.url)}', ${reward}, ${dailyLimit}, this)`;
+    else action = `completeTask('${escapeHtml(task.id)}', ${reward}, ${dailyLimit}, this)`;
+    btnHtml = `<button class="task-btn" onclick="${action}" data-i18n="btnDo">${t('btnDo')}</button>`;
+  }
   return `
       <div class="task" data-cat="${escapeHtml(task.category || 'oddiy')}">
         <div class="task-icon ${TASK_ICON_CLASS[task.icon] || 'icon-video'}">${TASK_ICON_SVG[task.icon] || TASK_ICON_SVG.video}</div>
@@ -1570,8 +1583,33 @@ function taskRowHtml(task){
           <div class="task-desc">${desc}</div>
           <div class="task-reward"><span class="mini-coin">$</span> +${reward.toLocaleString()}</div>
         </div>
-        <button class="task-btn" onclick="${action}" data-i18n="btnDo">${t('btnDo')}</button>
+        ${btnHtml}
       </div>`;
+}
+
+/* Havolali vazifa: avval havola ochiladi, 10 soniyadan keyin "Olish" tugmasi chiqadi */
+function startLinkTask(taskId, encodedUrl, reward, dailyLimit, btnEl){
+  sndClick();
+  if(!currentUid) return;
+  const count = state.taskCounts[taskId] || 0;
+  if(count >= dailyLimit){ showToast(t('toastLimitReached'), true); return; }
+  window.open(decodeURIComponent(encodedUrl), '_blank');
+  const btn = btnEl;
+  if(!btn) return;
+  btn.disabled = true;
+  btn.removeAttribute('data-i18n');
+  let secs = 10;
+  btn.textContent = secs + 's';
+  const iv = setInterval(() => {
+    secs--;
+    if(secs > 0){ btn.textContent = secs + 's'; }
+    else {
+      clearInterval(iv);
+      btn.disabled = false;
+      btn.textContent = t('btnClaim');
+      btn.onclick = function(){ completeTask(taskId, reward, dailyLimit, btn); };
+    }
+  }, 1000);
 }
 
 function renderTaskLists(){
@@ -1675,6 +1713,9 @@ function completeTask(taskId, reward, dailyLimit, btnEl){
       if(msg === 'limit'){ showToast(t('toastLimitReached'), true); }
       else if(msg === 'dailycap'){ showToast(t('toastDailyCapReached') || 'Kunlik limit tugadi', true); }
       else if(msg === 'banned'){ showToast('Hisobingiz bloklangan', true); }
+      else if(msg === 'not-started'){ showToast(t('toastNotStarted'), true); }
+      else if(msg === 'ended'){ showToast(t('toastEnded'), true); }
+      else if(msg === 'total-limit'){ showToast(t('toastTotalLimit'), true); }
       else { console.error(err); showToast('Xatolik yuz berdi', true); }
       if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
     });

@@ -47,27 +47,39 @@ exports.completeTask = onCall(async (req) => {
   const taskId = String((req.data && req.data.taskId) || '').trim();
   if (!taskId || taskId.length > 100) throw new HttpsError('invalid-argument', 'bad-task-id');
 
-  let reward, limit, label;
-  const taskSnap = await db.collection('tasks').doc(taskId).get();
-  if (taskSnap.exists) {
-    const t = taskSnap.data();
-    if (t.active !== true) throw new HttpsError('failed-precondition', 'task-inactive');
-    reward = Math.floor(Number(t.reward)) || 0;
-    limit = Math.floor(Number(t.dailyLimit)) || 1;
-    label = t.name || taskId;
-  } else if (DEFAULT_TASKS[taskId]) {
-    ({ reward, dailyLimit: limit, label } = DEFAULT_TASKS[taskId]);
-  } else {
-    throw new HttpsError('not-found', 'task-not-found');
-  }
-  if (reward <= 0) throw new HttpsError('failed-precondition', 'bad-task');
+  const taskRef = db.collection('tasks').doc(taskId);
+  const preSnap = await taskRef.get();
+  if (!preSnap.exists && !DEFAULT_TASKS[taskId]) throw new HttpsError('not-found', 'task-not-found');
+  const isCatalogTask = preSnap.exists;
 
   const userRef = db.collection('users').doc(uid);
   return db.runTransaction(async (tx) => {
-    const doc = await tx.get(userRef);
-    if (!doc.exists) throw new HttpsError('not-found', 'user-not-found');
-    const d = doc.data();
+    const userDoc = await tx.get(userRef);
+    const taskDoc = isCatalogTask ? await tx.get(taskRef) : null;
+
+    if (!userDoc.exists) throw new HttpsError('not-found', 'user-not-found');
+    const d = userDoc.data();
     if (d.banned === true) throw new HttpsError('permission-denied', 'banned');
+
+    let reward, limit, label, td = null;
+    if (taskDoc && taskDoc.exists) {
+      td = taskDoc.data();
+      if (td.active !== true) throw new HttpsError('failed-precondition', 'task-inactive');
+      const now = Date.now();
+      if (td.startAt && now < td.startAt) throw new HttpsError('failed-precondition', 'not-started');
+      if (td.endAt && now > td.endAt) throw new HttpsError('failed-precondition', 'ended');
+      if ((td.totalLimit || 0) > 0 && (td.completedCount || 0) >= td.totalLimit) {
+        throw new HttpsError('resource-exhausted', 'total-limit');
+      }
+      reward = Math.floor(Number(td.reward)) || 0;
+      limit = Math.floor(Number(td.dailyLimit)) || 1;
+      label = td.name || taskId;
+    } else if (DEFAULT_TASKS[taskId]) {
+      ({ reward, dailyLimit: limit, label } = DEFAULT_TASKS[taskId]);
+    } else {
+      throw new HttpsError('not-found', 'task-not-found');
+    }
+    if (reward <= 0) throw new HttpsError('failed-precondition', 'bad-task');
 
     const today = new Date().toDateString();
     let taskCounts = d.taskCounts || {};
@@ -89,6 +101,9 @@ exports.completeTask = onCall(async (req) => {
       taskCounts: { ...taskCounts, [taskId]: count + 1 },
       lastReset: today
     });
+    if (td && (td.totalLimit || 0) > 0) {
+      tx.update(taskRef, { completedCount: (td.completedCount || 0) + 1 });
+    }
     tx.set(userRef.collection('history').doc(), {
       label, amount: actual, at: FieldValue.serverTimestamp()
     });
