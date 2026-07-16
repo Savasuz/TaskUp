@@ -413,6 +413,27 @@
   .nav-item.active::before{ content:''; position:absolute; top:0; left:50%; transform:translateX(-50%);
     width:26px; height:3px; border-radius:0 0 4px 4px; background:var(--purple);
     box-shadow:0 2px 10px rgba(124,92,255,0.9); }
+
+  /* ---------- Yangiliklar (bell) overlay ---------- */
+  #newsOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.72); backdrop-filter:blur(4px);
+    z-index:80; align-items:flex-end; justify-content:center; }
+  #newsOverlay.show{ display:flex; }
+  .news-panel{ background:var(--bg-alt); border:1px solid var(--line); border-bottom:none;
+    border-radius:22px 22px 0 0; width:100%; max-width:480px; max-height:75vh; overflow-y:auto;
+    padding:18px 16px 28px; animation:sheetUp .25s ease; }
+  @keyframes sheetUp{ from{ transform:translateY(40px); opacity:0; } to{ transform:translateY(0); opacity:1; } }
+  .news-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .news-close{ width:32px; height:32px; border-radius:50%; background:var(--bg-card); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); font-size:13px; }
+  .news-item{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:10px; }
+  .news-item.unread{ border-color:rgba(124,92,255,0.55);
+    background:linear-gradient(135deg, rgba(108,92,231,0.10), var(--bg-card) 60%); }
+  .news-item-title{ font-size:14px; font-weight:700; font-family:'Space Grotesk',sans-serif;
+    display:flex; align-items:center; gap:7px; }
+  .news-dot{ width:7px; height:7px; border-radius:50%; background:var(--purple); flex-shrink:0; }
+  .news-item-text{ font-size:12.5px; color:var(--muted); margin-top:5px; line-height:1.5; white-space:pre-wrap; }
+  .news-item-time{ font-size:10.5px; color:var(--muted); margin-top:8px; font-family:'JetBrains Mono',monospace; opacity:0.8; }
+  .news-empty{ text-align:center; color:var(--muted); font-size:13px; padding:30px 0; }
 </style>
 </head>
 <body>
@@ -479,7 +500,7 @@
     <div class="tab-content active" id="tab-home">
       <div class="top-icon-row">
         <div class="icon-btn" onclick="switchTab('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></div>
-        <div class="icon-btn" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-badge" id="notifBadge">2</span></div>
+        <div class="icon-btn" style="position:relative" onclick="openNews()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-badge" id="notifBadge" style="display:none">0</span></div>
       </div>
 
       <div class="home-header">
@@ -783,6 +804,17 @@
   </div>
 </div>
 
+<!-- ---- YANGILIKLAR (bell) OVERLAY ---- -->
+<div id="newsOverlay" onclick="if(event.target===this) closeNews()">
+  <div class="news-panel">
+    <div class="news-head">
+      <div class="sec-title" data-i18n="newsTitle">Yangiliklar</div>
+      <div class="news-close" onclick="closeNews()">✕</div>
+    </div>
+    <div id="newsList"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Firebase SDK -->
@@ -853,8 +885,9 @@ const COIN_TO_SOM = 1.2; // 10000 tanga = 12000 so'm
 const CASHOUT_MIN = 10000;
 const TASK_LIMITS = { video: 8, download: 3, survey: 1 };
 const DAILY_CAP_BASE = 3000;
-const DAILY_CAP_PER_LEVEL = 500;
-function getDailyCap(level){ return DAILY_CAP_BASE + (Math.max(1, level) - 1) * DAILY_CAP_PER_LEVEL; }
+const DAILY_CAP_PER_LEVEL = 250;
+const DAILY_CAP_MAX_LEVEL = 10; // 10-darajadan keyin limit oshmaydi
+function getDailyCap(level){ return DAILY_CAP_BASE + (Math.min(Math.max(1, level), DAILY_CAP_MAX_LEVEL) - 1) * DAILY_CAP_PER_LEVEL; }
 function getTaskLabel(id){
   const map = { video: 'taskVideoName', download: 'taskDownloadName', survey: 'taskSurveyName', ad: 'taskAdName', telegram: 'taskTgName', invite: 'taskInviteName', rate: 'taskRateName' };
   if(map[id]) return t(map[id]);
@@ -879,6 +912,7 @@ const LANG_NAMES = { uz: "O'zbekcha", en: "English", ru: "Русский" };
 const I18N = {
   uz: {
     navL1:"Asosiy", navL2:"Vazifalar", navL3:"Do'stlar", navL4:"Pul", navL5:"Profil", dailyCapSuffix:"kunlik limit",
+    newsTitle:"Yangiliklar", newsEmpty:"Hozircha yangiliklar yo'q",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
@@ -924,6 +958,7 @@ const I18N = {
   },
   en: {
     navL1:"Home", navL2:"Tasks", navL3:"Friends", navL4:"Wallet", navL5:"Profile", dailyCapSuffix:"daily cap",
+    newsTitle:"News", newsEmpty:"No news yet",
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
     authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in", forgotPass:"Forgot password?",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
@@ -969,6 +1004,7 @@ const I18N = {
   },
   ru: {
     navL1:"Главная", navL2:"Задания", navL3:"Друзья", navL4:"Вывод", navL5:"Профиль", dailyCapSuffix:"дневной лимит",
+    newsTitle:"Новости", newsEmpty:"Пока новостей нет",
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
     authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти", forgotPass:"Забыли пароль?",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
@@ -1107,6 +1143,7 @@ auth.onAuthStateChanged((user) => {
     currentUid = user.uid;
     state.email = user.email || state.email;
     subscribeTasksCatalog();
+    subscribeNews();
     initUserData(user.uid);
   }
 });
@@ -1204,6 +1241,7 @@ function enterApp(){
 function signOutUser(){
   if(unsubscribeUser) unsubscribeUser();
   if(unsubscribeTasks){ unsubscribeTasks(); unsubscribeTasks = null; }
+  if(unsubscribeNews){ unsubscribeNews(); unsubscribeNews = null; }
   auth.signOut();
   currentUid = null;
   document.getElementById('appScreen').style.display = 'none';
@@ -1437,6 +1475,53 @@ const DEFAULT_TASKS = [
 ];
 
 function escapeHtml(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---------------- Yangiliklar (Firestore `news` collection) ---------------- */
+let unsubscribeNews = null;
+let newsItems = [];
+function getNewsReadAt(){ return parseInt(localStorage.getItem('newsReadAt') || '0', 10); }
+function subscribeNews(){
+  if(unsubscribeNews) unsubscribeNews();
+  unsubscribeNews = db.collection('news').onSnapshot((snap) => {
+    newsItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    newsItems.sort((a,b) => ((b.createdAt && b.createdAt.seconds) || 0) - ((a.createdAt && a.createdAt.seconds) || 0));
+    renderNewsBadge(); renderNewsList();
+  }, err => console.error('Yangiliklarni yuklashda xato:', err));
+}
+function newsUnreadCount(){
+  const readAt = getNewsReadAt();
+  return newsItems.filter(n => ((n.createdAt && n.createdAt.seconds) || 0) * 1000 > readAt).length;
+}
+function renderNewsBadge(){
+  const el = document.getElementById('notifBadge');
+  if(!el) return;
+  const c = newsUnreadCount();
+  el.textContent = c > 9 ? '9+' : c;
+  el.style.display = c > 0 ? 'flex' : 'none';
+}
+function renderNewsList(){
+  const el = document.getElementById('newsList');
+  if(!el) return;
+  const readAt = getNewsReadAt();
+  el.innerHTML = newsItems.length ? newsItems.map(n => {
+    const ms = ((n.createdAt && n.createdAt.seconds) || 0) * 1000;
+    const unread = ms > readAt;
+    const when = ms ? new Date(ms).toLocaleString('uz-UZ', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}) : '';
+    return `<div class="news-item${unread ? ' unread' : ''}">
+      <div class="news-item-title">${unread ? '<span class="news-dot"></span>' : ''}${escapeHtml(n.title || '')}</div>
+      ${n.text ? `<div class="news-item-text">${escapeHtml(n.text)}</div>` : ''}
+      <div class="news-item-time">${when}</div>
+    </div>`;
+  }).join('') : `<div class="news-empty">${t('newsEmpty')}</div>`;
+}
+function openNews(){
+  sndClick();
+  renderNewsList();
+  document.getElementById('newsOverlay').classList.add('show');
+  localStorage.setItem('newsReadAt', String(Date.now()));
+  renderNewsBadge();
+}
+function closeNews(){ document.getElementById('newsOverlay').classList.remove('show'); }
 
 function subscribeTasksCatalog(){
   if(unsubscribeTasks) unsubscribeTasks();
