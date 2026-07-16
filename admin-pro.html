@@ -192,10 +192,10 @@
 <!-- ================= LOGIN GATE ================= -->
 <div id="adminLogin">
   <div class="login-card">
-    <h2>🛡️ Admin kirish</h2>
+    <h2 data-i18n="loginTitle">🛡️ Admin kirish</h2>
     <input type="email" id="adminUser" placeholder="Email" autocomplete="email">
     <input type="password" id="adminPass" placeholder="Parol" autocomplete="current-password">
-    <button onclick="adminLogin()" id="adminLoginBtn">Kirish</button>
+    <button onclick="adminLogin()" id="adminLoginBtn" data-i18n="btnLogin">Kirish</button>
     <div class="login-err" id="loginErr"></div>
   </div>
 </div>
@@ -206,7 +206,7 @@
   <!-- ---- ASOSIY ---- -->
   <div class="view active" id="view-home">
     <div class="topbar">
-      <div class="topbar-left"><span class="menu-ico">☰</span>
+      <div class="topbar-left"><span class="menu-ico" onclick="switchView('settings')" style="cursor:pointer">☰</span>
         <div><div class="brand-name">TaskUp</div><div class="brand-sub">Admin Panel</div></div>
       </div>
       <div class="bell" onclick="switchView('news')" style="cursor:pointer">🔔<span class="dot" id="notifCount">0</span></div>
@@ -214,52 +214,52 @@
     <div class="screen" style="padding-top:6px">
       <div class="greet-card">
         <div class="greet-avatar">🛡️</div>
-        <div class="greet-text"><b>Xush kelibsiz, Admin!</b><span id="todayDate">Bugun</span></div>
+        <div class="greet-text"><b data-i18n="welcome">Xush kelibsiz, Admin!</b><span id="todayDate">Bugun</span></div>
         <div class="super-badge">Super Admin</div>
       </div>
 
       <div class="bal-hero">
         <div class="bal-emoji">👛</div>
-        <div class="bal-hero-top">👁 Umumiy balans</div>
+        <div class="bal-hero-top">👁 <span data-i18n="totalBalance">Umumiy balans</span></div>
         <div class="bal-amount"><span id="totalBalance">0</span> so'm</div>
         <div class="bal-growth">↑ 18.7% o'tgan 30 kun ichida</div>
       </div>
 
       <div class="stat2-grid">
         <div class="stat2" onclick="switchView('users')">
-          <div class="stat2-top"><div class="stat2-ico" style="background:rgba(108,92,231,0.15); color:var(--purple)">👥</div><div class="stat2-lbl">Foydalanuvchilar</div></div>
+          <div class="stat2-top"><div class="stat2-ico" style="background:rgba(108,92,231,0.15); color:var(--purple)">👥</div><div class="stat2-lbl" data-i18n="statUsers">Foydalanuvchilar</div></div>
           <div class="stat2-val" id="statUsersHome">0</div><div class="stat2-growth">↑ 12.5%</div>
         </div>
         <div class="stat2" onclick="switchView('tasks')">
-          <div class="stat2-top"><div class="stat2-ico" style="background:rgba(62,142,255,0.15); color:var(--blue)">☑️</div><div class="stat2-lbl">Vazifalar</div></div>
+          <div class="stat2-top"><div class="stat2-ico" style="background:rgba(62,142,255,0.15); color:var(--blue)">☑️</div><div class="stat2-lbl" data-i18n="statTasks">Vazifalar</div></div>
           <div class="stat2-val" id="statTasksHome">0</div><div class="stat2-growth">↑ 8.2%</div>
         </div>
         <div class="stat2" onclick="switchView('payments')">
-          <div class="stat2-top"><div class="stat2-ico" style="background:rgba(46,204,143,0.15); color:var(--green)">💳</div><div class="stat2-lbl">To'lovlar</div></div>
+          <div class="stat2-top"><div class="stat2-ico" style="background:rgba(46,204,143,0.15); color:var(--green)">💳</div><div class="stat2-lbl" data-i18n="statPayments">To'lovlar</div></div>
           <div class="stat2-val" id="statPaymentsHome">0</div><div class="stat2-growth">↑ 15.3%</div>
         </div>
         <div class="stat2">
-          <div class="stat2-top"><div class="stat2-ico" style="background:rgba(255,92,108,0.15); color:var(--red)">📈</div><div class="stat2-lbl">Platforma daromadi</div></div>
+          <div class="stat2-top"><div class="stat2-ico" style="background:rgba(255,92,108,0.15); color:var(--red)">📈</div><div class="stat2-lbl" data-i18n="statRevenue">Platforma daromadi</div></div>
           <div class="stat2-val" id="statRevenueHome">0</div><div class="stat2-growth">↑ 20.1%</div>
         </div>
       </div>
 
-      <div class="sec-head"><div class="sec-title">So'nggi faoliyatlar</div><div class="sec-link" onclick="switchView('payments')">Barchasi ›</div></div>
+      <div class="sec-head"><div class="sec-title" data-i18n="recentActivity">So'nggi faoliyatlar</div><div class="sec-link" onclick="switchView('payments')" data-i18n="seeAll">Barchasi ›</div></div>
       <div class="card" style="padding:4px 14px" id="recentActivityCard"></div>
     </div>
   </div>
 
   <!-- ---- FOYDALANUVCHILAR ---- -->
   <div class="view" id="view-users">
-    <div class="back-topbar"><span class="back-btn" onclick="switchView('home')">←</span><div class="back-title">Foydalanuvchilar</div>🔍</div>
+    <div class="back-topbar"><span class="back-btn" onclick="switchView('home')">←</span><div class="back-title" data-i18n="usersTitle">Foydalanuvchilar</div><span onclick="openSendCoins('')" style="cursor:pointer" title="Tanga yuborish">🪙</span></div>
     <div class="screen" style="padding-top:0">
       <div class="chips">
-        <div class="chip active" data-f="all" onclick="filterUsers('all',this)">Barchasi</div>
-        <div class="chip" data-f="faol" onclick="filterUsers('faol',this)">Faol</div>
-        <div class="chip" data-f="ban" onclick="filterUsers('ban',this)">Ban qilingan</div>
+        <div class="chip active" data-f="all" onclick="filterUsers('all',this)" data-i18n="chipAll">Barchasi</div>
+        <div class="chip" data-f="faol" onclick="filterUsers('faol',this)" data-i18n="chipActive">Faol</div>
+        <div class="chip" data-f="ban" onclick="filterUsers('ban',this)" data-i18n="chipBanned">Ban qilingan</div>
       </div>
       <div class="overview-card">
-        <div><div class="overview-lbl">Jami foydalanuvchilar</div><div class="overview-val" id="usersTotalVal">0</div><div class="overview-growth">↑ 12.5% o'tgan 30 kun</div></div>
+        <div><div class="overview-lbl" data-i18n="totalUsers">Jami foydalanuvchilar</div><div class="overview-val" id="usersTotalVal">0</div><div class="overview-growth">↑ 12.5% o'tgan 30 kun</div></div>
         <div class="overview-emoji">👥</div>
       </div>
       <div class="search-box">🔍<input type="text" id="userSearch" placeholder="Foydalanuvchi qidirish..." oninput="renderUsers()"></div>
@@ -270,14 +270,14 @@
   <!-- ---- VAZIFALAR ---- -->
   <div class="view" id="view-tasks">
     <div class="back-topbar" style="position:relative">
-      <span class="back-btn" onclick="switchView('home')">←</span><div class="back-title">Vazifalar</div>
+      <span class="back-btn" onclick="switchView('home')">←</span><div class="back-title" data-i18n="tasksTitle">Vazifalar</div>
       <div class="fab" onclick="switchView('addTask')">+</div>
     </div>
     <div class="screen" style="padding-top:0">
       <div class="chips">
-        <div class="chip active" data-f="all" onclick="filterTasksAdmin('all',this)">Barchasi</div>
-        <div class="chip" data-f="on" onclick="filterTasksAdmin('on',this)">Faol</div>
-        <div class="chip" data-f="off" onclick="filterTasksAdmin('off',this)">Nofaol</div>
+        <div class="chip active" data-f="all" onclick="filterTasksAdmin('all',this)" data-i18n="chipAll">Barchasi</div>
+        <div class="chip" data-f="on" onclick="filterTasksAdmin('on',this)" data-i18n="chipOn">Faol</div>
+        <div class="chip" data-f="off" onclick="filterTasksAdmin('off',this)" data-i18n="chipOff">Nofaol</div>
       </div>
       <div id="tasksAdminList"></div>
     </div>
@@ -285,19 +285,19 @@
 
   <!-- ---- YANGI VAZIFA QO'SHISH ---- -->
   <div class="view" id="view-addTask">
-    <div class="back-topbar"><span class="back-btn" onclick="switchView('tasks')">←</span><div class="back-title">Yangi vazifa qo'shish</div></div>
+    <div class="back-topbar"><span class="back-btn" onclick="switchView('tasks')">←</span><div class="back-title" data-i18n="addTaskTitle">Yangi vazifa qo'shish</div></div>
     <div class="screen" style="padding-top:0">
-      <label>Kategoriya</label>
-      <select id="newTaskType"><option value="oddiy">Oddiy</option><option value="premium">Premium</option><option value="bonus">Bonus</option></select>
-      <label>Vazifa nomi</label>
+      <label data-i18n="lblCategory">Kategoriya</label>
+      <select id="newTaskType"><option value="oddiy" data-i18n="catSimple">Oddiy</option><option value="premium" data-i18n="catPremium">Premium</option><option value="bonus" data-i18n="catBonus">Bonus</option></select>
+      <label data-i18n="lblTaskName">Vazifa nomi</label>
       <input type="text" id="newTaskName" placeholder="Vazifa nomini kiriting">
-      <label>Vazifa haqida</label>
+      <label data-i18n="lblTaskDesc">Vazifa haqida</label>
       <textarea id="newTaskDesc" placeholder="Vazifa haqida qisqacha yozing"></textarea>
-      <label>Mukofot (tanga)</label>
+      <label data-i18n="lblReward">Mukofot (tanga)</label>
       <input type="number" id="newTaskReward" placeholder="Mukofot miqdorini kiriting">
-      <label>Kunlik limit (necha marta bajarish mumkin)</label>
+      <label data-i18n="lblDailyLimit">Kunlik limit (necha marta bajarish mumkin)</label>
       <input type="number" id="newTaskDailyLimit" placeholder="Masalan: 5" value="1">
-      <label>Icon tanlang</label>
+      <label data-i18n="lblIcon">Icon tanlang</label>
       <div class="icon-picker">
         <div class="icon-opt ic-video selected" onclick="selectIcon(this,'video')">▶</div>
         <div class="icon-opt ic-download" onclick="selectIcon(this,'download')">⬇</div>
@@ -307,38 +307,74 @@
         <div class="icon-opt ic-tg" onclick="selectIcon(this,'telegram')">✈️</div>
         <div class="icon-opt ic-invite" onclick="selectIcon(this,'rate')">⭐</div>
       </div>
-      <div class="form-toggle-row"><span style="font-size:13.5px; font-weight:600">Vazifani faollashtirish</span>
+      <div class="form-toggle-row"><span style="font-size:13.5px; font-weight:600" data-i18n="lblActivate">Vazifani faollashtirish</span>
         <div class="switch on" id="newTaskActiveSwitch" onclick="this.classList.toggle('on')"></div></div>
-      <button class="submit-btn" onclick="submitNewTask()">Vazifani qo'shish</button>
+      <button class="submit-btn" onclick="submitNewTask()" data-i18n="btnAddTask">Vazifani qo'shish</button>
     </div>
   </div>
 
   <!-- ---- YANGILIKLAR ---- -->
   <div class="view" id="view-news">
-    <div class="back-topbar"><span class="back-btn" onclick="switchView('home')">←</span><div class="back-title">Yangiliklar</div></div>
+    <div class="back-topbar"><span class="back-btn" onclick="switchView('home')">←</span><div class="back-title" data-i18n="newsTitle">Yangiliklar</div></div>
     <div class="screen" style="padding-top:0">
-      <label>Sarlavha</label>
+      <label data-i18n="lblNewsTitle">Sarlavha</label>
       <input type="text" id="newsTitleInput" placeholder="Yangilik sarlavhasi">
-      <label>Matn</label>
+      <label data-i18n="lblNewsText">Matn</label>
       <textarea id="newsTextInput" placeholder="Yangilik matnini yozing — foydalanuvchilarga qo'ng'iroqcha orqali ko'rinadi"></textarea>
-      <button class="submit-btn" onclick="submitNews()">E'lon qilish</button>
-      <div class="sec-head" style="margin-top:24px"><div class="sec-title">E'lon qilingan yangiliklar</div></div>
+      <button class="submit-btn" onclick="submitNews()" data-i18n="btnPublish">E'lon qilish</button>
+      <div class="sec-head" style="margin-top:24px"><div class="sec-title" data-i18n="publishedNews">E'lon qilingan yangiliklar</div></div>
       <div id="newsAdminList"></div>
+    </div>
+  </div>
+
+  <!-- ---- TANGA YUBORISH ---- -->
+  <div class="view" id="view-sendCoins">
+    <div class="back-topbar"><span class="back-btn" onclick="switchView('users')">←</span><div class="back-title" data-i18n="sendCoinsTitle">Tanga yuborish</div></div>
+    <div class="screen" style="padding-top:0">
+      <label data-i18n="sendCoinsTarget">Foydalanuvchi (email yoki ID)</label>
+      <input type="text" id="sendCoinsTarget" placeholder="user@mail.com yoki ID">
+      <label data-i18n="sendCoinsAmount">Tanga miqdori</label>
+      <input type="number" id="sendCoinsAmount" placeholder="1000">
+      <label data-i18n="sendCoinsNote">Izoh (foydalanuvchi tarixida ko'rinadi)</label>
+      <input type="text" id="sendCoinsNote" placeholder="Admin sovg'asi">
+      <button class="submit-btn" id="sendCoinsBtn" onclick="submitSendCoins()" data-i18n="sendCoinsBtn">Tanga yuborish</button>
+    </div>
+  </div>
+
+  <!-- ---- UMUMIY SOZLAMALAR (TIL) ---- -->
+  <div class="view" id="view-general">
+    <div class="back-topbar"><span class="back-btn" onclick="switchView('settings')">←</span><div class="back-title" data-i18n="generalTitle">Umumiy sozlamalar</div></div>
+    <div class="screen" style="padding-top:0">
+      <label data-i18n="langLabel">Til / Language / Язык</label>
+      <div class="card" style="padding:2px 12px">
+        <div class="settings-row" onclick="setAdminLang('uz')"><div class="settings-ico" style="background:var(--green)">🇺🇿</div>
+          <div class="settings-body"><b>O'zbekcha</b><span>Uzbek</span></div><span class="settings-arrow" id="langCheck-uz">✓</span></div>
+        <div class="settings-row" onclick="setAdminLang('en')"><div class="settings-ico" style="background:var(--blue)">🇬🇧</div>
+          <div class="settings-body"><b>English</b><span>Ingliz</span></div><span class="settings-arrow" id="langCheck-en">✓</span></div>
+        <div class="settings-row" style="border-bottom:none" onclick="setAdminLang('ru')"><div class="settings-ico" style="background:var(--red)">🇷🇺</div>
+          <div class="settings-body"><b>Русский</b><span>Rus</span></div><span class="settings-arrow" id="langCheck-ru">✓</span></div>
+      </div>
+      <label style="margin-top:20px" data-i18n="platformInfo">Platforma ma'lumotlari</label>
+      <div class="card" style="padding:2px 12px">
+        <div class="settings-row"><div class="settings-body"><b>TaskUp</b><span data-i18n="platformName">Platforma nomi</span></div></div>
+        <div class="settings-row"><div class="settings-body"><b>1 coin = 1.2 so'm</b><span data-i18n="currencyRate">Valyuta kursi</span></div></div>
+        <div class="settings-row" style="border-bottom:none"><div class="settings-body"><b>10 000 coin</b><span data-i18n="minCashout">Minimal pul yechish</span></div></div>
+      </div>
     </div>
   </div>
 
   <!-- ---- TO'LOVLAR ---- -->
   <div class="view" id="view-payments">
-    <div class="back-topbar"><span class="back-btn" onclick="switchView('home')">←</span><div class="back-title">To'lovlar</div>🔍</div>
+    <div class="back-topbar"><span class="back-btn" onclick="switchView('home')">←</span><div class="back-title" data-i18n="paymentsTitle">To'lovlar</div>🔍</div>
     <div class="screen" style="padding-top:0">
       <div class="chips">
-        <div class="chip active" data-f="all" onclick="filterPayments('all',this)">Barchasi</div>
-        <div class="chip" data-f="pending" onclick="filterPayments('pending',this)">Kutmoqda</div>
-        <div class="chip" data-f="paid" onclick="filterPayments('paid',this)">To'landi</div>
-        <div class="chip" data-f="rejected" onclick="filterPayments('rejected',this)">Rad etildi</div>
+        <div class="chip active" data-f="all" onclick="filterPayments('all',this)" data-i18n="chipAll">Barchasi</div>
+        <div class="chip" data-f="pending" onclick="filterPayments('pending',this)" data-i18n="chipPending">Kutmoqda</div>
+        <div class="chip" data-f="paid" onclick="filterPayments('paid',this)" data-i18n="chipPaid">To'landi</div>
+        <div class="chip" data-f="rejected" onclick="filterPayments('rejected',this)" data-i18n="chipRejected">Rad etildi</div>
       </div>
       <div class="overview-card">
-        <div><div class="overview-lbl">Jami to'lovlar</div><div class="overview-val" id="paymentsTotalVal">0</div><div class="overview-growth">↑ 15.3% o'tgan 30 kun</div></div>
+        <div><div class="overview-lbl" data-i18n="totalPayments">Jami to'lovlar</div><div class="overview-val" id="paymentsTotalVal">0</div><div class="overview-growth">↑ 15.3% o'tgan 30 kun</div></div>
         <div class="overview-emoji">👛</div>
       </div>
       <div id="paymentsList"></div>
@@ -347,35 +383,35 @@
 
   <!-- ---- SOZLAMALAR ---- -->
   <div class="view" id="view-settings">
-    <div class="back-topbar"><div class="back-title">Sozlamalar</div></div>
+    <div class="back-topbar"><div class="back-title" data-i18n="settingsTitle">Sozlamalar</div></div>
     <div class="screen" style="padding-top:0">
       <div class="card" style="padding:2px 12px">
-        <div class="settings-row"><div class="settings-ico" style="background:var(--blue)">⚙️</div>
-          <div class="settings-body"><b>Umumiy sozlamalar</b><span>Platforma nomi, logo, valyuta</span></div><span class="settings-arrow">›</span></div>
-        <div class="settings-row"><div class="settings-ico" style="background:var(--orange)">💳</div>
-          <div class="settings-body"><b>To'lov usullari</b><span>To'lov metodlarini boshqarish</span></div><span class="settings-arrow">›</span></div>
-        <div class="settings-row"><div class="settings-ico" style="background:var(--purple)">📣</div>
-          <div class="settings-body"><b>Reklama sozlamalari</b><span>Reklama birliklari va joylari</span></div><span class="settings-arrow">›</span></div>
-        <div class="settings-row" onclick="switchView('news')"><div class="settings-ico" style="background:var(--amber)">🔔</div>
-          <div class="settings-body"><b>Bildirishnomalar</b><span>Yangiliklar e'lon qilish</span></div><span class="settings-arrow">›</span></div>
-        <div class="settings-row"><div class="settings-ico" style="background:var(--red)">🔒</div>
-          <div class="settings-body"><b>Xavfsizlik</b><span>Admin va xavfsizlik sozlamalari</span></div><span class="settings-arrow">›</span></div>
-        <div class="settings-row"><div class="settings-ico" style="background:var(--green)">💾</div>
-          <div class="settings-body"><b>Zaxira nusxa</b><span>Ma'lumotlar zaxira nusxasini olish</span></div><span class="settings-arrow">›</span></div>
-        <div class="settings-row" style="border-bottom:none"><div class="settings-ico" style="background:var(--muted)">ℹ️</div>
-          <div class="settings-body"><b>Tizim haqida</b><span>Versiya 1.0.0</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row" onclick="switchView('sendCoins')"><div class="settings-ico" style="background:var(--amber)">🪙</div>
+          <div class="settings-body"><b data-i18n="sendCoinsTitle">Tanga yuborish</b><span data-i18n="sendCoinsSub">Foydalanuvchiga tanga sovg'a qilish</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row" onclick="switchView('general')"><div class="settings-ico" style="background:var(--blue)">⚙️</div>
+          <div class="settings-body"><b data-i18n="generalTitle">Umumiy sozlamalar</b><span data-i18n="generalSub">Til, platforma ma'lumotlari</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row" onclick="switchView('payments')"><div class="settings-ico" style="background:var(--orange)">💳</div>
+          <div class="settings-body"><b data-i18n="payMethodsTitle">To'lov usullari</b><span data-i18n="payMethodsSub">To'lov so'rovlarini boshqarish</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row" onclick="switchView('news')"><div class="settings-ico" style="background:var(--purple)">🔔</div>
+          <div class="settings-body"><b data-i18n="notifsTitle">Bildirishnomalar</b><span data-i18n="notifsSub">Yangiliklar e'lon qilish</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row" onclick="resetAdminPassword()"><div class="settings-ico" style="background:var(--red)">🔒</div>
+          <div class="settings-body"><b data-i18n="securityTitle">Xavfsizlik</b><span data-i18n="securitySub">Admin parolini almashtirish</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row" onclick="backupData()"><div class="settings-ico" style="background:var(--green)">💾</div>
+          <div class="settings-body"><b data-i18n="backupTitle">Zaxira nusxa</b><span data-i18n="backupSub">Ma'lumotlarni JSON faylga yuklab olish</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row" style="border-bottom:none" onclick="showAbout()"><div class="settings-ico" style="background:var(--muted)">ℹ️</div>
+          <div class="settings-body"><b data-i18n="aboutTitle">Tizim haqida</b><span>Versiya 1.1.0</span></div><span class="settings-arrow">›</span></div>
       </div>
-      <button class="submit-btn" style="background:none; border:1.5px solid var(--red); color:var(--red); box-shadow:none" onclick="adminLogout()">Chiqish</button>
+      <button class="submit-btn" style="background:none; border:1.5px solid var(--red); color:var(--red); box-shadow:none" onclick="adminLogout()" data-i18n="btnLogout">Chiqish</button>
     </div>
   </div>
 
   <div class="bottom-nav">
     <div class="bottom-nav-inner">
-      <div class="nav-item active" data-v="home" onclick="switchView('home')"><span class="nav-icon">🏠</span><span class="nav-label">Asosiy</span></div>
-      <div class="nav-item" data-v="users" onclick="switchView('users')"><span class="nav-icon">👥</span><span class="nav-label">Foydalanuvchilar</span></div>
-      <div class="nav-item" data-v="tasks" onclick="switchView('tasks')"><span class="nav-icon">☑️</span><span class="nav-label">Vazifalar</span></div>
-      <div class="nav-item" data-v="payments" onclick="switchView('payments')"><span class="nav-icon">💳</span><span class="nav-label">To'lovlar</span></div>
-      <div class="nav-item" data-v="settings" onclick="switchView('settings')"><span class="nav-icon">⚙️</span><span class="nav-label">Sozlamalar</span></div>
+      <div class="nav-item active" data-v="home" onclick="switchView('home')"><span class="nav-icon">🏠</span><span class="nav-label" data-i18n="navHome">Asosiy</span></div>
+      <div class="nav-item" data-v="users" onclick="switchView('users')"><span class="nav-icon">👥</span><span class="nav-label" data-i18n="navUsers">Foydalanuvchilar</span></div>
+      <div class="nav-item" data-v="tasks" onclick="switchView('tasks')"><span class="nav-icon">☑️</span><span class="nav-label" data-i18n="navTasks">Vazifalar</span></div>
+      <div class="nav-item" data-v="payments" onclick="switchView('payments')"><span class="nav-icon">💳</span><span class="nav-label" data-i18n="navPayments">To'lovlar</span></div>
+      <div class="nav-item" data-v="settings" onclick="switchView('settings')"><span class="nav-icon">⚙️</span><span class="nav-label" data-i18n="navSettings">Sozlamalar</span></div>
     </div>
   </div>
 </div>
@@ -412,24 +448,24 @@ function adminLogin(){
   const err = document.getElementById('loginErr');
   err.textContent = '';
   if(!email || !pass){ err.textContent = "Email va parolni kiriting"; return; }
-  btn.disabled = true; btn.textContent = 'Tekshirilmoqda...';
+  btn.disabled = true; btn.textContent = t('btnChecking');
   auth.signInWithEmailAndPassword(email, pass).then((cred) => {
     return db.collection('admins').doc(cred.user.uid).get().then((doc) => {
       if(!doc.exists){
         err.textContent = "Sizda admin huquqi yo'q";
         auth.signOut();
-        btn.disabled = false; btn.textContent = 'Kirish';
+        btn.disabled = false; btn.textContent = t('btnLogin');
         return;
       }
       currentAdminUid = cred.user.uid;
       enterAdminApp();
-      btn.disabled = false; btn.textContent = 'Kirish';
+      btn.disabled = false; btn.textContent = t('btnLogin');
     });
   }).catch((error) => {
     let msg = "Kirishda xatolik yuz berdi";
     if(['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-email'].includes(error.code)) msg = "Email yoki parol noto'g'ri";
     err.textContent = msg;
-    btn.disabled = false; btn.textContent = 'Kirish';
+    btn.disabled = false; btn.textContent = t('btnLogin');
   });
 }
 function enterAdminApp(){
@@ -457,6 +493,186 @@ function showToast(msg){ const el=document.getElementById('toast'); el.textConte
 function initials(str){ return (str||'?').slice(0,2).toUpperCase(); }
 function fmt(n){ return Math.round(n||0).toLocaleString('uz-UZ'); }
 
+/* ---------------- I18N (uz / en / ru) ---------------- */
+const ADMIN_I18N = {
+  uz: {
+    loginTitle:"🛡️ Admin kirish", btnLogin:"Kirish", btnChecking:"Tekshirilmoqda...",
+    navHome:"Asosiy", navUsers:"Foydalanuvchilar", navTasks:"Vazifalar", navPayments:"To'lovlar", navSettings:"Sozlamalar",
+    welcome:"Xush kelibsiz, Admin!", totalBalance:"Umumiy balans",
+    statUsers:"Foydalanuvchilar", statTasks:"Vazifalar", statPayments:"To'lovlar", statRevenue:"Platforma daromadi",
+    recentActivity:"So'nggi faoliyatlar", seeAll:"Barchasi ›", noActivity:"Hozircha faoliyat yo'q", cashoutReqLabel:"Pul yechish so'rovi",
+    usersTitle:"Foydalanuvchilar", totalUsers:"Jami foydalanuvchilar", nothingFound:"Hech narsa topilmadi",
+    chipAll:"Barchasi", chipActive:"Faol", chipBanned:"Ban qilingan", chipOn:"Faol", chipOff:"Nofaol",
+    chipPending:"Kutmoqda", chipPaid:"To'landi", chipRejected:"Rad etildi",
+    statusActive:"Faol", statusBanned:"Ban qilingan", statusPaid:"To'landi", statusPending:"Kutmoqda", statusRejected:"Rad etildi",
+    btnBan:"Bloklash", btnUnban:"Blokdan chiqarish", btnApprove:"Tasdiqlash", btnReject:"Rad etish",
+    tasksTitle:"Vazifalar", noTasks:"Vazifalar yo'q", perDay:"kuniga", addTaskTitle:"Yangi vazifa qo'shish",
+    lblCategory:"Kategoriya", lblTaskName:"Vazifa nomi", lblTaskDesc:"Vazifa haqida", lblReward:"Mukofot (tanga)",
+    lblDailyLimit:"Kunlik limit (necha marta bajarish mumkin)", lblIcon:"Icon tanlang", lblActivate:"Vazifani faollashtirish", btnAddTask:"Vazifani qo'shish",
+    catSimple:"Oddiy", catPremium:"Premium", catBonus:"Bonus",
+    paymentsTitle:"To'lovlar", totalPayments:"Jami to'lovlar", noRequests:"So'rovlar yo'q", noCard:"Karta ma'lumotlari kiritilmagan",
+    newsTitle:"Yangiliklar", lblNewsTitle:"Sarlavha", lblNewsText:"Matn", btnPublish:"E'lon qilish", publishedNews:"E'lon qilingan yangiliklar", noNews:"Yangiliklar yo'q",
+    settingsTitle:"Sozlamalar", btnLogout:"Chiqish",
+    sendCoinsTitle:"Tanga yuborish", sendCoinsSub:"Foydalanuvchiga tanga sovg'a qilish", sendCoinsShort:"Tanga",
+    sendCoinsTarget:"Foydalanuvchi (email yoki ID)", sendCoinsAmount:"Tanga miqdori", sendCoinsNote:"Izoh (foydalanuvchi tarixida ko'rinadi)", sendCoinsBtn:"Tanga yuborish",
+    generalTitle:"Umumiy sozlamalar", generalSub:"Til, platforma ma'lumotlari", langLabel:"Til / Language / Язык",
+    platformInfo:"Platforma ma'lumotlari", platformName:"Platforma nomi", currencyRate:"Valyuta kursi", minCashout:"Minimal pul yechish",
+    payMethodsTitle:"To'lov usullari", payMethodsSub:"To'lov so'rovlarini boshqarish",
+    notifsTitle:"Bildirishnomalar", notifsSub:"Yangiliklar e'lon qilish",
+    securityTitle:"Xavfsizlik", securitySub:"Admin parolini almashtirish",
+    backupTitle:"Zaxira nusxa", backupSub:"Ma'lumotlarni JSON faylga yuklab olish", aboutTitle:"Tizim haqida",
+    enterTarget:"Email yoki ID kiriting", enterAmount:"Tanga miqdorini kiriting", userNotFound:"Foydalanuvchi topilmadi",
+    coinsSent:"tanga yuborildi!", adminGiftLabel:"Admin sovg'asi", errGeneric:"Xatolik yuz berdi",
+    resetConfirm:"Parolni tiklash havolasi yuborilsinmi:", resetSent:"Havola emailingizga yuborildi", backupDone:"Zaxira nusxa yuklab olindi",
+    langChanged:"Til o'zgartirildi", fillTitle:"Sarlavhani kiriting", fillNameReward:"Nomi va mukofotni kiriting",
+    taskAdded:"Vazifa qo'shildi!", taskOn:"Vazifa yoqildi", taskOff:"Vazifa o'chirildi", taskDeleted:"Vazifa o'chirildi", confirmDeleteTask:"Vazifani o'chirmoqchimisiz?",
+    newsPublished:"Yangilik e'lon qilindi!", newsDeleted:"O'chirildi", confirmDeleteNews:"Yangilikni o'chirmoqchimisiz?",
+    userBanned:"Foydalanuvchi bloklandi", userUnbanned:"Blokdan chiqarildi",
+    paymentApproved:"To'lov tasdiqlandi", paymentRejected:"To'lov rad etildi, tanga qaytarildi", confirmApprove:"To'lovni amalga oshirdingizmi? So'rov \"To'landi\" deb belgilanadi."
+  },
+  en: {
+    loginTitle:"🛡️ Admin login", btnLogin:"Log in", btnChecking:"Checking...",
+    navHome:"Home", navUsers:"Users", navTasks:"Tasks", navPayments:"Payments", navSettings:"Settings",
+    welcome:"Welcome, Admin!", totalBalance:"Total balance",
+    statUsers:"Users", statTasks:"Tasks", statPayments:"Payments", statRevenue:"Platform revenue",
+    recentActivity:"Recent activity", seeAll:"See all ›", noActivity:"No activity yet", cashoutReqLabel:"Withdrawal request",
+    usersTitle:"Users", totalUsers:"Total users", nothingFound:"Nothing found",
+    chipAll:"All", chipActive:"Active", chipBanned:"Banned", chipOn:"Active", chipOff:"Inactive",
+    chipPending:"Pending", chipPaid:"Paid", chipRejected:"Rejected",
+    statusActive:"Active", statusBanned:"Banned", statusPaid:"Paid", statusPending:"Pending", statusRejected:"Rejected",
+    btnBan:"Ban", btnUnban:"Unban", btnApprove:"Approve", btnReject:"Reject",
+    tasksTitle:"Tasks", noTasks:"No tasks", perDay:"per day", addTaskTitle:"Add new task",
+    lblCategory:"Category", lblTaskName:"Task name", lblTaskDesc:"About the task", lblReward:"Reward (coins)",
+    lblDailyLimit:"Daily limit (times per day)", lblIcon:"Choose an icon", lblActivate:"Activate task", btnAddTask:"Add task",
+    catSimple:"Simple", catPremium:"Premium", catBonus:"Bonus",
+    paymentsTitle:"Payments", totalPayments:"Total payments", noRequests:"No requests", noCard:"No card details provided",
+    newsTitle:"News", lblNewsTitle:"Title", lblNewsText:"Text", btnPublish:"Publish", publishedNews:"Published news", noNews:"No news",
+    settingsTitle:"Settings", btnLogout:"Log out",
+    sendCoinsTitle:"Send coins", sendCoinsSub:"Gift coins to a user", sendCoinsShort:"Coins",
+    sendCoinsTarget:"User (email or ID)", sendCoinsAmount:"Coin amount", sendCoinsNote:"Note (shown in user's history)", sendCoinsBtn:"Send coins",
+    generalTitle:"General settings", generalSub:"Language, platform info", langLabel:"Til / Language / Язык",
+    platformInfo:"Platform info", platformName:"Platform name", currencyRate:"Exchange rate", minCashout:"Minimum withdrawal",
+    payMethodsTitle:"Payment methods", payMethodsSub:"Manage payout requests",
+    notifsTitle:"Notifications", notifsSub:"Publish news",
+    securityTitle:"Security", securitySub:"Change admin password",
+    backupTitle:"Backup", backupSub:"Download data as JSON", aboutTitle:"About",
+    enterTarget:"Enter email or ID", enterAmount:"Enter coin amount", userNotFound:"User not found",
+    coinsSent:"coins sent!", adminGiftLabel:"Admin gift", errGeneric:"Something went wrong",
+    resetConfirm:"Send password reset link to:", resetSent:"Link sent to your email", backupDone:"Backup downloaded",
+    langChanged:"Language changed", fillTitle:"Enter a title", fillNameReward:"Enter name and reward",
+    taskAdded:"Task added!", taskOn:"Task enabled", taskOff:"Task disabled", taskDeleted:"Task deleted", confirmDeleteTask:"Delete this task?",
+    newsPublished:"News published!", newsDeleted:"Deleted", confirmDeleteNews:"Delete this news item?",
+    userBanned:"User banned", userUnbanned:"User unbanned",
+    paymentApproved:"Payment approved", paymentRejected:"Payment rejected, coins returned", confirmApprove:"Did you complete the payment? The request will be marked as \"Paid\"."
+  },
+  ru: {
+    loginTitle:"🛡️ Вход для админа", btnLogin:"Войти", btnChecking:"Проверка...",
+    navHome:"Главная", navUsers:"Пользователи", navTasks:"Задания", navPayments:"Платежи", navSettings:"Настройки",
+    welcome:"Добро пожаловать, Админ!", totalBalance:"Общий баланс",
+    statUsers:"Пользователи", statTasks:"Задания", statPayments:"Платежи", statRevenue:"Доход платформы",
+    recentActivity:"Последняя активность", seeAll:"Все ›", noActivity:"Пока нет активности", cashoutReqLabel:"Запрос на вывод",
+    usersTitle:"Пользователи", totalUsers:"Всего пользователей", nothingFound:"Ничего не найдено",
+    chipAll:"Все", chipActive:"Активные", chipBanned:"Заблокированные", chipOn:"Активные", chipOff:"Неактивные",
+    chipPending:"Ожидает", chipPaid:"Оплачено", chipRejected:"Отклонено",
+    statusActive:"Активен", statusBanned:"Заблокирован", statusPaid:"Оплачено", statusPending:"Ожидает", statusRejected:"Отклонено",
+    btnBan:"Заблокировать", btnUnban:"Разблокировать", btnApprove:"Подтвердить", btnReject:"Отклонить",
+    tasksTitle:"Задания", noTasks:"Нет заданий", perDay:"в день", addTaskTitle:"Добавить задание",
+    lblCategory:"Категория", lblTaskName:"Название задания", lblTaskDesc:"О задании", lblReward:"Награда (монеты)",
+    lblDailyLimit:"Дневной лимит (раз в день)", lblIcon:"Выберите иконку", lblActivate:"Активировать задание", btnAddTask:"Добавить задание",
+    catSimple:"Обычное", catPremium:"Премиум", catBonus:"Бонус",
+    paymentsTitle:"Платежи", totalPayments:"Всего платежей", noRequests:"Нет запросов", noCard:"Данные карты не указаны",
+    newsTitle:"Новости", lblNewsTitle:"Заголовок", lblNewsText:"Текст", btnPublish:"Опубликовать", publishedNews:"Опубликованные новости", noNews:"Нет новостей",
+    settingsTitle:"Настройки", btnLogout:"Выйти",
+    sendCoinsTitle:"Отправить монеты", sendCoinsSub:"Подарить монеты пользователю", sendCoinsShort:"Монеты",
+    sendCoinsTarget:"Пользователь (email или ID)", sendCoinsAmount:"Количество монет", sendCoinsNote:"Комментарий (виден в истории)", sendCoinsBtn:"Отправить монеты",
+    generalTitle:"Общие настройки", generalSub:"Язык, информация о платформе", langLabel:"Til / Language / Язык",
+    platformInfo:"Информация о платформе", platformName:"Название платформы", currencyRate:"Курс валюты", minCashout:"Минимальный вывод",
+    payMethodsTitle:"Способы оплаты", payMethodsSub:"Управление запросами на вывод",
+    notifsTitle:"Уведомления", notifsSub:"Публикация новостей",
+    securityTitle:"Безопасность", securitySub:"Сменить пароль админа",
+    backupTitle:"Резервная копия", backupSub:"Скачать данные в JSON", aboutTitle:"О системе",
+    enterTarget:"Введите email или ID", enterAmount:"Введите количество монет", userNotFound:"Пользователь не найден",
+    coinsSent:"монет отправлено!", adminGiftLabel:"Подарок от админа", errGeneric:"Произошла ошибка",
+    resetConfirm:"Отправить ссылку для сброса пароля на:", resetSent:"Ссылка отправлена на ваш email", backupDone:"Резервная копия скачана",
+    langChanged:"Язык изменён", fillTitle:"Введите заголовок", fillNameReward:"Введите название и награду",
+    taskAdded:"Задание добавлено!", taskOn:"Задание включено", taskOff:"Задание выключено", taskDeleted:"Задание удалено", confirmDeleteTask:"Удалить задание?",
+    newsPublished:"Новость опубликована!", newsDeleted:"Удалено", confirmDeleteNews:"Удалить новость?",
+    userBanned:"Пользователь заблокирован", userUnbanned:"Пользователь разблокирован",
+    paymentApproved:"Платёж подтверждён", paymentRejected:"Платёж отклонён, монеты возвращены", confirmApprove:"Вы выполнили оплату? Запрос будет отмечен как «Оплачено»."
+  }
+};
+let adminLang = localStorage.getItem('adminLang') || 'uz';
+function t(key){ return (ADMIN_I18N[adminLang] && ADMIN_I18N[adminLang][key]) || ADMIN_I18N.uz[key] || key; }
+function applyAdminLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+  ['uz','en','ru'].forEach(l => {
+    const chk = document.getElementById('langCheck-' + l);
+    if(chk) chk.style.opacity = l === adminLang ? '1' : '0.15';
+  });
+  renderHome(); renderUsers(); renderTasksAdmin(); renderPayments(); renderNewsAdmin();
+}
+function setAdminLang(lang){
+  adminLang = lang;
+  localStorage.setItem('adminLang', lang);
+  applyAdminLang();
+  showToast(t('langChanged'));
+}
+
+/* ---------------- TANGA YUBORISH ---------------- */
+function openSendCoins(uid){
+  switchView('sendCoins');
+  if(uid) document.getElementById('sendCoinsTarget').value = uid;
+}
+function submitSendCoins(){
+  const target = document.getElementById('sendCoinsTarget').value.trim();
+  const amount = parseInt(document.getElementById('sendCoinsAmount').value) || 0;
+  const note = document.getElementById('sendCoinsNote').value.trim();
+  if(!target){ showToast(t('enterTarget')); return; }
+  if(amount <= 0){ showToast(t('enterAmount')); return; }
+  const btn = document.getElementById('sendCoinsBtn');
+  btn.disabled = true;
+  const refPromise = target.includes('@')
+    ? db.collection('users').where('email', '==', target).limit(1).get().then(s => s.empty ? null : s.docs[0].ref)
+    : db.collection('users').doc(target).get().then(d => d.exists ? d.ref : null);
+  refPromise.then(ref => {
+    if(!ref) throw new Error('notfound');
+    return db.runTransaction(tx => tx.get(ref).then(doc => {
+      const d = doc.data() || {};
+      tx.update(ref, { coins: (d.coins||0) + amount, lifetimeCoins: (d.lifetimeCoins||0) + amount });
+    })).then(() => ref);
+  }).then(ref => {
+    ref.collection('history').add({ label: note || t('adminGiftLabel'), amount, at: firebase.firestore.FieldValue.serverTimestamp() });
+    showToast(`+${fmt(amount)} ${t('coinsSent')}`);
+    document.getElementById('sendCoinsTarget').value=''; document.getElementById('sendCoinsAmount').value=''; document.getElementById('sendCoinsNote').value='';
+    btn.disabled = false;
+  }).catch(err => {
+    console.error(err);
+    showToast(err.message === 'notfound' ? t('userNotFound') : t('errGeneric'));
+    btn.disabled = false;
+  });
+}
+
+/* ---------------- SOZLAMALAR AMALLARI ---------------- */
+function backupData(){
+  const data = { exportedAt: new Date().toISOString(), users, tasks: tasksData, payments, news: newsData };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'taskup-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast(t('backupDone'));
+}
+function resetAdminPassword(){
+  const email = auth.currentUser && auth.currentUser.email;
+  if(!email){ showToast(t('errGeneric')); return; }
+  if(!confirm(t('resetConfirm') + ' ' + email)) return;
+  auth.sendPasswordResetEmail(email).then(() => showToast(t('resetSent'))).catch(err => { console.error(err); showToast(t('errGeneric')); });
+}
+function showAbout(){
+  alert('TaskUp Admin v1.1.0\n' + t('statUsers') + ': ' + users.length + '\n' + t('statTasks') + ': ' + tasksData.length + '\n' + t('statPayments') + ': ' + payments.length);
+}
+
 /* ---------------- HOME ---------------- */
 function renderHome(){
   const totalCoins = users.reduce((s,u)=>s+u.coins,0);
@@ -472,9 +688,9 @@ function renderHome(){
   document.getElementById('recentActivityCard').innerHTML = recent.length ? recent.map(p => `
     <div class="act-row">
       <div class="row-avatar">${initials(p.email)}</div>
-      <div class="act-body"><div class="act-name">${p.email||'—'}</div><div class="act-desc">Pul yechish so'rovi</div></div>
-      <div class="act-right"><div class="act-amount pos">${fmt(p.amountSom || Math.round((p.amountCoins||0)*1.2))} so'm</div><div class="act-time status-${p.status}">${p.status==='paid'?"To'landi":p.status==='pending'?'Kutmoqda':'Rad etildi'}</div></div>
-    </div>`).join('') : '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12.5px">Hozircha faoliyat yo\'q</div>';
+      <div class="act-body"><div class="act-name">${escHtml(p.email||'—')}</div><div class="act-desc">${t('cashoutReqLabel')}</div></div>
+      <div class="act-right"><div class="act-amount pos">${fmt(p.amountSom || Math.round((p.amountCoins||0)*1.2))} so'm</div><div class="act-time status-${p.status}">${p.status==='paid'?t('statusPaid'):p.status==='pending'?t('statusPending'):t('statusRejected')}</div></div>
+    </div>`).join('') : `<div style="text-align:center;color:var(--muted);padding:20px;font-size:12.5px">${t('noActivity')}</div>`;
 }
 
 /* ---------------- USERS ---------------- */
@@ -500,18 +716,18 @@ function renderUsers(){
   document.getElementById('usersList').innerHTML = filtered.length ? filtered.map(u => `
     <div class="list-row">
       <div class="row-avatar">${initials(u.email)}</div>
-      <div class="list-body"><div class="list-name">${u.email}</div><div class="list-meta">ID: ${u.uid.slice(0,8)}</div></div>
+      <div class="list-body"><div class="list-name">${escHtml(u.email)}</div><div class="list-meta">ID: ${u.uid.slice(0,8)}</div></div>
       <div class="list-right">
         <div class="list-val">${fmt(u.coins)} coin</div>
-        <div class="list-status ${u.banned?'status-ban':'status-faol'}">● ${u.banned?'Ban qilingan':'Faol'}</div>
-        <div style="margin-top:5px"><span onclick="toggleBanUser('${u.uid}', ${u.banned})" style="color:${u.banned?'var(--green)':'var(--red)'};font-size:10px;cursor:pointer">${u.banned?'✓ Blokdan chiqarish':'✕ Bloklash'}</span></div>
+        <div class="list-status ${u.banned?'status-ban':'status-faol'}">● ${u.banned?t('statusBanned'):t('statusActive')}</div>
+        <div style="margin-top:5px"><span onclick="openSendCoins('${u.uid}')" style="color:var(--amber);font-size:10px;cursor:pointer;margin-right:8px">🪙 ${t('sendCoinsShort')}</span><span onclick="toggleBanUser('${u.uid}', ${u.banned})" style="color:${u.banned?'var(--green)':'var(--red)'};font-size:10px;cursor:pointer">${u.banned?'✓ '+t('btnUnban'):'✕ '+t('btnBan')}</span></div>
       </div>
-    </div>`).join('') : '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">Hech narsa topilmadi</div>';
+    </div>`).join('') : `<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">${t('nothingFound')}</div>`;
 }
 function toggleBanUser(uid, currentlyBanned){
   db.collection('users').doc(uid).update({ banned: !currentlyBanned }).then(() => {
-    showToast(!currentlyBanned ? "Foydalanuvchi bloklandi" : "Blokdan chiqarildi");
-  }).catch(err => { console.error(err); showToast("Xatolik yuz berdi"); });
+    showToast(!currentlyBanned ? t('userBanned') : t('userUnbanned'));
+  }).catch(err => { console.error(err); showToast(t('errGeneric')); });
 }
 
 /* ---------------- TASKS ---------------- */
@@ -533,19 +749,19 @@ function renderTasksAdmin(){
   document.getElementById('tasksAdminList').innerHTML = filtered.length ? filtered.map((t) => `
     <div class="task-row">
       <div class="task-ico ${ADMIN_ICON_CLASS[t.icon]||'ic-video'}">${ADMIN_ICON_EMOJI[t.icon]||'▶'}</div>
-      <div class="task-body"><div class="task-name">${t.name}</div><div class="task-meta">${t.desc||''} • +${t.reward} coin • kuniga ${t.dailyLimit}</div></div>
+      <div class="task-body"><div class="task-name">${escHtml(t.name)}</div><div class="task-meta">${escHtml(t.desc||'')} • +${t.reward} coin • ${window.t('perDay')} ${t.dailyLimit}</div></div>
       <span onclick="deleteTask('${t.id}')" style="color:var(--red);font-size:15px;cursor:pointer;padding:0 4px">✕</span>
       <div class="switch ${t.active?'on':''}" onclick="toggleTaskActive('${t.id}', ${!!t.active})"></div>
-    </div>`).join('') : '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">Vazifalar yo\'q</div>';
+    </div>`).join('') : `<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">${t('noTasks')}</div>`;
 }
 function toggleTaskActive(id, currentActive){
   db.collection('tasks').doc(id).update({ active: !currentActive }).then(() => {
-    showToast(!currentActive ? "Vazifa yoqildi" : "Vazifa o'chirildi");
-  }).catch(err => { console.error(err); showToast("Xatolik"); });
+    showToast(!currentActive ? t('taskOn') : t('taskOff'));
+  }).catch(err => { console.error(err); showToast(t('errGeneric')); });
 }
 function deleteTask(id){
-  if(!confirm("Vazifani o'chirmoqchimisiz?")) return;
-  db.collection('tasks').doc(id).delete().then(()=>showToast("Vazifa o'chirildi")).catch(err=>{ console.error(err); showToast("Xatolik"); });
+  if(!confirm(t('confirmDeleteTask'))) return;
+  db.collection('tasks').doc(id).delete().then(()=>showToast(t('taskDeleted'))).catch(err=>{ console.error(err); showToast(t('errGeneric')); });
 }
 
 let selectedIconKey = 'video';
@@ -560,13 +776,13 @@ function submitNewTask(){
   const dailyLimit = parseInt(document.getElementById('newTaskDailyLimit').value) || 1;
   const category = document.getElementById('newTaskType').value;
   const active = document.getElementById('newTaskActiveSwitch').classList.contains('on');
-  if(!name || !reward){ showToast("Nomi va mukofotni kiriting"); return; }
-  const maxOrder = tasksData.reduce((m,t)=>Math.max(m, t.order||0), 0);
+  if(!name || !reward){ showToast(t('fillNameReward')); return; }
+  const maxOrder = tasksData.reduce((m,x)=>Math.max(m, x.order||0), 0);
   db.collection('tasks').add({ name, desc, reward, dailyLimit, icon: selectedIconKey, category, active, order: maxOrder+1 }).then(() => {
-    showToast("Vazifa qo'shildi!");
+    showToast(t('taskAdded'));
     document.getElementById('newTaskName').value=''; document.getElementById('newTaskDesc').value=''; document.getElementById('newTaskReward').value=''; document.getElementById('newTaskDailyLimit').value='1';
     switchView('tasks');
-  }).catch(err => { console.error(err); showToast("Xatolik yuz berdi"); });
+  }).catch(err => { console.error(err); showToast(t('errGeneric')); });
 }
 
 /* ---------------- NEWS ---------------- */
@@ -591,20 +807,20 @@ function renderNewsAdmin(){
       <div class="task-body"><div class="task-name">${escHtml(n.title||'')}</div><div class="task-meta">${escHtml(preview)}${preview && when ? ' • ' : ''}${when}</div></div>
       <span onclick="deleteNews('${n.id}')" style="color:var(--red);font-size:15px;cursor:pointer;padding:0 4px">✕</span>
     </div>`;
-  }).join('') : '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">Yangiliklar yo\'q</div>';
+  }).join('') : `<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">${t('noNews')}</div>`;
 }
 function submitNews(){
   const title = document.getElementById('newsTitleInput').value.trim();
   const text = document.getElementById('newsTextInput').value.trim();
-  if(!title){ showToast("Sarlavhani kiriting"); return; }
+  if(!title){ showToast(t('fillTitle')); return; }
   db.collection('news').add({ title, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
-    showToast("Yangilik e'lon qilindi!");
+    showToast(t('newsPublished'));
     document.getElementById('newsTitleInput').value=''; document.getElementById('newsTextInput').value='';
-  }).catch(err => { console.error(err); showToast("Xatolik yuz berdi"); });
+  }).catch(err => { console.error(err); showToast(t('errGeneric')); });
 }
 function deleteNews(id){
-  if(!confirm("Yangilikni o'chirmoqchimisiz?")) return;
-  db.collection('news').doc(id).delete().then(()=>showToast("O'chirildi")).catch(err=>{ console.error(err); showToast("Xatolik"); });
+  if(!confirm(t('confirmDeleteNews'))) return;
+  db.collection('news').doc(id).delete().then(()=>showToast(t('newsDeleted'))).catch(err=>{ console.error(err); showToast(t('errGeneric')); });
 }
 
 /* ---------------- PAYMENTS ---------------- */
@@ -621,18 +837,23 @@ function filterPayments(f, el){ paymentFilter=f; document.querySelectorAll('#vie
 function renderPayments(){
   document.getElementById('paymentsTotalVal').textContent = fmt(payments.length);
   const filtered = payments.filter(p => paymentFilter==='all' || p.status===paymentFilter);
-  document.getElementById('paymentsList').innerHTML = filtered.length ? filtered.map((p) => `
+  document.getElementById('paymentsList').innerHTML = filtered.length ? filtered.map((p) => {
+    const cardNum = (p.cardNumber || '').replace(/(\d{4})(?=\d)/g, '$1 ');
+    const cardLine = p.cardNumber ? `<div class="list-meta" style="color:var(--text);margin-top:3px">💳 ${escHtml(cardNum)}${p.cardExpiry ? ' • ' + escHtml(p.cardExpiry) : ''}</div>${p.cardHolder ? `<div class="list-meta">${escHtml(p.cardHolder)}</div>` : ''}` : `<div class="list-meta" style="color:var(--amber)">${t('noCard')}</div>`;
+    return `
     <div class="list-row">
       <div class="row-avatar">${initials(p.email)}</div>
-      <div class="list-body"><div class="list-name">${p.email||'—'}</div><div class="list-meta">${(p.payMethod||'uzcard').toUpperCase()} • ${fmt(p.amountCoins)} coin</div></div>
+      <div class="list-body"><div class="list-name">${escHtml(p.email||'—')}</div><div class="list-meta">${(p.payMethod||'uzcard').toUpperCase()} • ${fmt(p.amountCoins)} coin</div>${cardLine}</div>
       <div class="list-right"><div class="list-val">${fmt(p.amountSom || Math.round((p.amountCoins||0)*1.2))} so'm</div>
-        <div class="list-status status-${p.status}">${p.status==='paid'?"● To'landi":p.status==='pending'?"● Kutmoqda":"● Rad etildi"}</div>
-        ${p.status==='pending' ? `<div style="margin-top:5px"><span onclick="approvePayment('${p.id}')" style="color:var(--green);font-size:10px;cursor:pointer;margin-right:8px">✓ Tasdiqlash</span><span onclick="rejectPayment('${p.id}','${p.uid}',${p.amountCoins})" style="color:var(--red);font-size:10px;cursor:pointer">✕ Rad etish</span></div>` : ``}
+        <div class="list-status status-${p.status}">${p.status==='paid'?'● '+t('statusPaid'):p.status==='pending'?'● '+t('statusPending'):'● '+t('statusRejected')}</div>
+        ${p.status==='pending' ? `<div style="margin-top:5px"><span onclick="approvePayment('${p.id}')" style="color:var(--green);font-size:10px;cursor:pointer;margin-right:8px">✓ ${t('btnApprove')}</span><span onclick="rejectPayment('${p.id}','${p.uid}',${p.amountCoins})" style="color:var(--red);font-size:10px;cursor:pointer">✕ ${t('btnReject')}</span></div>` : ``}
       </div>
-    </div>`).join('') : '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">So\'rovlar yo\'q</div>';
+    </div>`;
+  }).join('') : `<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">${t('noRequests')}</div>`;
 }
 function approvePayment(id){
-  db.collection('cashout_requests').doc(id).update({ status: 'paid' }).then(()=>showToast("To'lov tasdiqlandi")).catch(err=>{ console.error(err); showToast("Xatolik"); });
+  if(!confirm(t('confirmApprove'))) return;
+  db.collection('cashout_requests').doc(id).update({ status: 'paid' }).then(()=>showToast(t('paymentApproved'))).catch(err=>{ console.error(err); showToast(t('errGeneric')); });
 }
 function rejectPayment(id, uid, amountCoins){
   const reqRef = db.collection('cashout_requests').doc(id);
@@ -643,7 +864,7 @@ function rejectPayment(id, uid, amountCoins){
       tx.update(userRef, { coins: (data.coins||0) + amountCoins, cashedOutTotal: Math.max(0,(data.cashedOutTotal||0) - amountCoins) });
       tx.update(reqRef, { status: 'rejected' });
     });
-  }).then(() => showToast("To'lov rad etildi, tanga qaytarildi")).catch(err => { console.error(err); showToast("Xatolik yuz berdi"); });
+  }).then(() => showToast(t('paymentRejected'))).catch(err => { console.error(err); showToast(t('errGeneric')); });
 }
 
 /* Keep admin session across reloads */
@@ -654,6 +875,8 @@ auth.onAuthStateChanged((user) => {
     });
   }
 });
+
+applyAdminLang();
 </script>
 </body>
 </html>
