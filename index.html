@@ -600,6 +600,13 @@
         <button class="copy-btn" onclick="copyReferral()" data-i18n="btnCopy">Nusxalash</button>
       </div>
 
+      <div class="section-label" data-i18n="enterRefCode">Sizni taklif qilishganmi? Kodni kiriting</div>
+      <div class="referral-box">
+        <input type="text" id="refCodeInput" placeholder="TASKUP-XXXX" autocapitalize="characters"
+          style="background:none;border:none;outline:none;color:var(--text);flex:1;font-family:'JetBrains Mono',monospace;font-size:13px;margin:0;padding:0;min-width:0">
+        <button class="copy-btn" onclick="redeemReferralCode()" data-i18n="btnRedeem">Faollashtirish</button>
+      </div>
+
       <div class="section-label" data-i18n="orShare">Yoki ulashish</div>
       <div class="share-row">
         <div class="share-item" onclick="shareVia('telegram')"><div class="share-icon" style="background:#2AABEE; color:#fff"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22 3L2 11l6 2 2 6 3-4 5 4 4-16z"/></svg></div><span>Telegram</span></div>
@@ -828,6 +835,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 
 <script>
 const firebaseConfig = {
@@ -842,6 +850,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const fns = firebase.app().functions();
 
 let currentUid = null;
 let unsubscribeUser = null;
@@ -921,6 +930,7 @@ const I18N = {
     navL1:"Asosiy", navL2:"Vazifalar", navL3:"Do'stlar", navL4:"Pul", navL5:"Profil", dailyCapSuffix:"kunlik limit",
     newsTitle:"Yangiliklar", newsEmpty:"Hozircha yangiliklar yo'q",
     cardDetails:"Karta ma'lumotlari", toastCardNumber:"Karta raqamini to'liq kiriting (16 raqam)", toastCardExpiry:"Amal qilish sanasini kiriting (MM/YY)", toastCardHolder:"Karta egasi ism-familiyasini kiriting",
+    enterRefCode:"Sizni taklif qilishganmi? Kodni kiriting", btnRedeem:"Faollashtirish", toastEnterCode:"Taklif kodini kiriting", toastRefRedeemed:"tanga! Referral faollashdi", toastRefAlready:"Siz allaqachon kod kiritgansiz", toastRefNotFound:"Bunday kod topilmadi", toastRefOwn:"O'z kodingizni kirita olmaysiz", toastRefError:"Xatolik yuz berdi",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
@@ -968,6 +978,7 @@ const I18N = {
     navL1:"Home", navL2:"Tasks", navL3:"Friends", navL4:"Wallet", navL5:"Profile", dailyCapSuffix:"daily cap",
     newsTitle:"News", newsEmpty:"No news yet",
     cardDetails:"Card details", toastCardNumber:"Enter the full card number (16 digits)", toastCardExpiry:"Enter the expiry date (MM/YY)", toastCardHolder:"Enter the cardholder name",
+    enterRefCode:"Were you invited? Enter the code", btnRedeem:"Activate", toastEnterCode:"Enter the referral code", toastRefRedeemed:"coins! Referral activated", toastRefAlready:"You already used a code", toastRefNotFound:"Code not found", toastRefOwn:"You can't use your own code", toastRefError:"Something went wrong",
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
     authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in", forgotPass:"Forgot password?",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
@@ -1015,6 +1026,7 @@ const I18N = {
     navL1:"Главная", navL2:"Задания", navL3:"Друзья", navL4:"Вывод", navL5:"Профиль", dailyCapSuffix:"дневной лимит",
     newsTitle:"Новости", newsEmpty:"Пока новостей нет",
     cardDetails:"Данные карты", toastCardNumber:"Введите полный номер карты (16 цифр)", toastCardExpiry:"Введите срок действия (ММ/ГГ)", toastCardHolder:"Введите имя владельца карты",
+    enterRefCode:"Вас пригласили? Введите код", btnRedeem:"Активировать", toastEnterCode:"Введите реферальный код", toastRefRedeemed:"монет! Реферал активирован", toastRefAlready:"Вы уже использовали код", toastRefNotFound:"Код не найден", toastRefOwn:"Нельзя использовать свой код", toastRefError:"Произошла ошибка",
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
     authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти", forgotPass:"Забыли пароль?",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
@@ -1650,34 +1662,19 @@ function completeTask(taskId, reward, dailyLimit, btnEl){
   const originalText = btn ? btn.innerHTML : null;
   if(btn){ btn.disabled = true; btn.innerHTML = '<span class="btn-spinner"></span>'; }
 
-  const userRef = db.collection('users').doc(currentUid);
+  // ANTI-CHEAT: mukofot serverda (Cloud Function) hisoblanadi va yoziladi
   setTimeout(()=>{
-    db.runTransaction((tx) => {
-      return tx.get(userRef).then((doc) => {
-        const data = doc.data();
-        const currentCount = (data.taskCounts && data.taskCounts[taskId]) || 0;
-        if(currentCount >= dailyLimit) throw new Error('limit');
-        const dailyEarnedSoFar = data.dailyEarned || 0;
-        const dailyCap = getDailyCap(getLevelInfo(data.lifetimeCoins || 0).num);
-        if(dailyEarnedSoFar >= dailyCap) throw new Error('dailycap');
-        const actualReward = Math.min(reward, dailyCap - dailyEarnedSoFar);
-        const newTaskCounts = { ...data.taskCounts, [taskId]: currentCount + 1 };
-        tx.update(userRef, {
-          coins: (data.coins || 0) + actualReward,
-          lifetimeCoins: (data.lifetimeCoins || 0) + actualReward,
-          tasksCompletedTotal: (data.tasksCompletedTotal || 0) + 1,
-          dailyEarned: dailyEarnedSoFar + actualReward,
-          taskCounts: newTaskCounts
-        });
-      });
-    }).then(() => {
+    fns.httpsCallable('completeTask')({ taskId }).then((res) => {
       sndCoin();
-      showToast(`+${reward} ${t('toastTaskDone')}`);
-      logActivity(getTaskLabel(taskId), reward);
+      const got = (res.data && res.data.reward) || reward;
+      showToast(`+${got} ${t('toastTaskDone')}`);
+      loadHistory(currentUid);
       if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
     }).catch((err) => {
-      if(err.message === 'limit'){ showToast(t('toastLimitReached'), true); }
-      else if(err.message === 'dailycap'){ showToast(t('toastDailyCapReached') || 'Kunlik limit tugadi', true); }
+      const msg = err && err.message;
+      if(msg === 'limit'){ showToast(t('toastLimitReached'), true); }
+      else if(msg === 'dailycap'){ showToast(t('toastDailyCapReached') || 'Kunlik limit tugadi', true); }
+      else if(msg === 'banned'){ showToast('Hisobingiz bloklangan', true); }
       else { console.error(err); showToast('Xatolik yuz berdi', true); }
       if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
     });
@@ -1687,24 +1684,18 @@ function completeTask(taskId, reward, dailyLimit, btnEl){
 function claimStreak(){
   sndClick();
   if(!currentUid) return;
-  const today = new Date().toDateString();
-  if(state.lastStreakClaim === today) return;
-  const yesterday = new Date(Date.now()-86400000).toDateString();
-  const continuing = state.lastStreakClaim === yesterday;
-  const newStreak = continuing ? state.streakCount + 1 : 1;
-  const bonus = Math.min(500, 200 + (newStreak-1)*50);
-
-  const userRef = db.collection('users').doc(currentUid);
-  userRef.update({
-    coins: firebase.firestore.FieldValue.increment(bonus),
-    lifetimeCoins: firebase.firestore.FieldValue.increment(bonus),
-    streakCount: newStreak,
-    lastStreakClaim: today
-  }).then(() => {
+  if(state.lastStreakClaim === new Date().toDateString()) return;
+  // ANTI-CHEAT: bonus serverda hisoblanadi
+  const btn = document.getElementById('streakBtn');
+  if(btn) btn.disabled = true;
+  fns.httpsCallable('claimStreak')({}).then((res) => {
     sndCoin();
-    showToast(`+${bonus} ${t('toastStreakBonus')}`);
-    logActivity(`${t('dailyBonusLabel')} (${newStreak})`, bonus);
-  }).catch((err) => { console.error(err); showToast('Xatolik yuz berdi', true); });
+    showToast(`+${(res.data && res.data.bonus) || ''} ${t('toastStreakBonus')}`);
+    loadHistory(currentUid);
+  }).catch((err) => {
+    if(!(err && err.message === 'already-claimed')){ console.error(err); showToast('Xatolik yuz berdi', true); }
+    if(btn) btn.disabled = false;
+  });
 }
 
 function formatCardNumber(el){
@@ -1728,31 +1719,41 @@ function tryCashout(){
   if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardExpiry)){ showToast(t('toastCardExpiry'), true); return; }
   if(cardHolder.length < 3){ showToast(t('toastCardHolder'), true); return; }
 
-  const userRef = db.collection('users').doc(currentUid);
-  db.runTransaction((tx) => {
-    return tx.get(userRef).then((doc) => {
-      const data = doc.data();
-      if((data.coins || 0) < CASHOUT_MIN) throw new Error('insufficient');
-      tx.update(userRef, { coins: data.coins - CASHOUT_MIN, cashedOutTotal: (data.cashedOutTotal || 0) + CASHOUT_MIN });
-      tx.set(db.collection('cashout_requests').doc(), {
-        uid: currentUid,
-        email: state.email,
-        amountCoins: CASHOUT_MIN,
-        amountSom: Math.round(CASHOUT_MIN * COIN_TO_SOM),
-        payMethod: state.payMethod || 'uzcard',
-        cardNumber, cardExpiry, cardHolder,
-        status: 'pending',
-        requestedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    });
+  // ANTI-CHEAT: pul yechish serverda tekshiriladi va yoziladi
+  fns.httpsCallable('requestCashout')({
+    cardNumber, cardExpiry, cardHolder,
+    payMethod: state.payMethod || 'uzcard'
   }).then(() => {
     sndSuccess();
     showToast(t('toastCashoutSent'));
-    logActivity(t('cashoutRequestLabel'), -CASHOUT_MIN);
+    loadHistory(currentUid);
     fireConfetti();
   }).catch((err) => {
-    console.error(err);
-    showToast('Xatolik yuz berdi', true);
+    const msg = err && err.message;
+    if(msg === 'insufficient'){ showToast(`${t('toastCashoutMin')} ${CASHOUT_MIN.toLocaleString()}`, true); }
+    else if(msg === 'banned'){ showToast('Hisobingiz bloklangan', true); }
+    else { console.error(err); showToast('Xatolik yuz berdi', true); }
+  });
+}
+
+function redeemReferralCode(){
+  sndClick();
+  if(!currentUid) return;
+  const code = (document.getElementById('refCodeInput').value || '').trim();
+  if(!code){ showToast(t('toastEnterCode'), true); return; }
+  fns.httpsCallable('redeemReferral')({ code }).then((res) => {
+    sndCoin();
+    showToast(`+${(res.data && res.data.bonus) || ''} ${t('toastRefRedeemed')}`);
+    document.getElementById('refCodeInput').value = '';
+    loadHistory(currentUid);
+    fireConfetti();
+  }).catch((err) => {
+    const m = err && err.message;
+    let msg = t('toastRefError');
+    if(m === 'already-redeemed') msg = t('toastRefAlready');
+    else if(m === 'code-not-found') msg = t('toastRefNotFound');
+    else if(m === 'own-code') msg = t('toastRefOwn');
+    showToast(msg, true);
   });
 }
 
