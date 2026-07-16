@@ -1716,7 +1716,7 @@ function completeTask(taskId, reward, dailyLimit, btnEl){
       else if(msg === 'not-started'){ showToast(t('toastNotStarted'), true); }
       else if(msg === 'ended'){ showToast(t('toastEnded'), true); }
       else if(msg === 'total-limit'){ showToast(t('toastTotalLimit'), true); }
-      else { console.error(err); showToast('Xatolik yuz berdi', true); }
+      else { console.error(err); showToast('Xatolik: ' + ((err && (err.code || err.message)) || "noma'lum"), true); }
       if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
     });
   }, 550);
@@ -1773,7 +1773,7 @@ function tryCashout(){
     const msg = err && err.message;
     if(msg === 'insufficient'){ showToast(`${t('toastCashoutMin')} ${CASHOUT_MIN.toLocaleString()}`, true); }
     else if(msg === 'banned'){ showToast('Hisobingiz bloklangan', true); }
-    else { console.error(err); showToast('Xatolik yuz berdi', true); }
+    else { console.error(err); showToast('Xatolik: ' + ((err && (err.code || err.message)) || "noma'lum"), true); }
   });
 }
 
