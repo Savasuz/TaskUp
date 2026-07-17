@@ -932,6 +932,7 @@ const I18N = {
     cardDetails:"Karta ma'lumotlari", toastCardNumber:"Karta raqamini to'liq kiriting (16 raqam)", toastCardExpiry:"Amal qilish sanasini kiriting (MM/YY)", toastCardHolder:"Karta egasi ism-familiyasini kiriting",
     enterRefCode:"Sizni taklif qilishganmi? Kodni kiriting", btnRedeem:"Faollashtirish", toastEnterCode:"Taklif kodini kiriting", toastRefRedeemed:"tanga! Referral faollashdi", toastRefAlready:"Siz allaqachon kod kiritgansiz", toastRefNotFound:"Bunday kod topilmadi", toastRefOwn:"O'z kodingizni kirita olmaysiz", toastRefError:"Xatolik yuz berdi",
     btnClaim:"Olish", adSoon:"Ilovada tez orada", toastNotStarted:"Vazifa hali boshlanmagan", toastEnded:"Vazifa muddati tugagan", toastTotalLimit:"Vazifa umumiy limiti tugagan",
+    toastNotEnough:"Balansingizda buncha tanga yo'q",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
@@ -981,6 +982,7 @@ const I18N = {
     cardDetails:"Card details", toastCardNumber:"Enter the full card number (16 digits)", toastCardExpiry:"Enter the expiry date (MM/YY)", toastCardHolder:"Enter the cardholder name",
     enterRefCode:"Were you invited? Enter the code", btnRedeem:"Activate", toastEnterCode:"Enter the referral code", toastRefRedeemed:"coins! Referral activated", toastRefAlready:"You already used a code", toastRefNotFound:"Code not found", toastRefOwn:"You can't use your own code", toastRefError:"Something went wrong",
     btnClaim:"Claim", adSoon:"Soon in the app", toastNotStarted:"Task hasn't started yet", toastEnded:"Task has ended", toastTotalLimit:"Task completion limit reached",
+    toastNotEnough:"You don't have that many coins",
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
     authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in", forgotPass:"Forgot password?",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
@@ -1030,6 +1032,7 @@ const I18N = {
     cardDetails:"Данные карты", toastCardNumber:"Введите полный номер карты (16 цифр)", toastCardExpiry:"Введите срок действия (ММ/ГГ)", toastCardHolder:"Введите имя владельца карты",
     enterRefCode:"Вас пригласили? Введите код", btnRedeem:"Активировать", toastEnterCode:"Введите реферальный код", toastRefRedeemed:"монет! Реферал активирован", toastRefAlready:"Вы уже использовали код", toastRefNotFound:"Код не найден", toastRefOwn:"Нельзя использовать свой код", toastRefError:"Произошла ошибка",
     btnClaim:"Получить", adSoon:"Скоро в приложении", toastNotStarted:"Задание ещё не началось", toastEnded:"Задание завершено", toastTotalLimit:"Лимит задания исчерпан",
+    toastNotEnough:"У вас недостаточно монет",
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
     authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти", forgotPass:"Забыли пароль?",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
@@ -1751,7 +1754,11 @@ function formatCardExpiry(el){
 function tryCashout(){
   sndClick();
   if(!currentUid) return;
-  if(state.coins < CASHOUT_MIN){ showToast(`${t('toastCashoutMin')} ${CASHOUT_MIN.toLocaleString()}`, true); return; }
+
+  // Foydalanuvchi kiritgan summa (tanga)
+  const amount = parseInt((document.getElementById('cashoutAmount').value || '').replace(/\D/g, ''), 10) || 0;
+  if(amount < CASHOUT_MIN){ showToast(`${t('toastCashoutMin')} ${CASHOUT_MIN.toLocaleString()}`, true); return; }
+  if(amount > state.coins){ showToast(t('toastNotEnough'), true); return; }
 
   const cardNumber = (document.getElementById('cardNumber').value || '').replace(/\s/g, '');
   const cardExpiry = (document.getElementById('cardExpiry').value || '').trim();
@@ -1762,6 +1769,7 @@ function tryCashout(){
 
   // ANTI-CHEAT: pul yechish serverda tekshiriladi va yoziladi
   fns.httpsCallable('requestCashout')({
+    amount,
     cardNumber, cardExpiry, cardHolder,
     payMethod: state.payMethod || 'uzcard'
   }).then(() => {
@@ -1771,7 +1779,8 @@ function tryCashout(){
     fireConfetti();
   }).catch((err) => {
     const msg = err && err.message;
-    if(msg === 'insufficient'){ showToast(`${t('toastCashoutMin')} ${CASHOUT_MIN.toLocaleString()}`, true); }
+    if(msg === 'insufficient'){ showToast(t('toastNotEnough'), true); }
+    else if(msg === 'below-min'){ showToast(`${t('toastCashoutMin')} ${CASHOUT_MIN.toLocaleString()}`, true); }
     else if(msg === 'banned'){ showToast('Hisobingiz bloklangan', true); }
     else { console.error(err); showToast('Xatolik: ' + ((err && (err.code || err.message)) || "noma'lum"), true); }
   });
