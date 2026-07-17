@@ -453,13 +453,42 @@
   .wheel-close-x{ position:absolute; top:12px; right:14px; width:30px; height:30px; border-radius:50%;
     background:var(--bg-card); border:1px solid var(--line); color:var(--muted); display:flex;
     align-items:center; justify-content:center; cursor:pointer; font-size:13px; z-index:2; }
-  .wheel-wrap{ position:relative; width:264px; height:264px; margin:20px auto 16px; }
-  .wheel-pointer{ position:absolute; top:-15px; left:50%; transform:translateX(-50%); font-size:24px; z-index:3;
+  .wheel-wrap{ position:relative; width:264px; height:284px; margin:20px auto 16px; perspective:700px; }
+  .wheel-pointer{ position:absolute; top:-13px; left:50%; transform:translateX(-50%); font-size:24px; z-index:5;
     color:var(--amber); filter:drop-shadow(0 3px 6px rgba(0,0,0,0.6)); }
-  .wheel-disc{ width:264px; height:264px; border-radius:50%; position:relative;
-    border:6px solid #2A2C3A; box-shadow:0 10px 40px rgba(108,92,231,0.3), inset 0 0 20px rgba(0,0,0,0.35);
-    background:conic-gradient(#6C5CE7 0 45deg,#3E8EFF 45deg 90deg,#2ECC8F 90deg 135deg,#FFB020 135deg 180deg,#FF8A3D 180deg 225deg,#FF5C6C 225deg 270deg,#8B7BFF 270deg 315deg,#E056A0 315deg 360deg);
-    transition:transform 4s cubic-bezier(0.15, 0.9, 0.28, 1); }
+  .wheel-pointer.tick{ animation:pointerTick .12s ease; }
+  @keyframes pointerTick{ 0%{ transform:translateX(-50%) translateY(0); } 45%{ transform:translateX(-50%) translateY(5px); } 100%{ transform:translateX(-50%) translateY(0); } }
+  /* 3D sahna: g'ildirak biroz engashgan, metall gardish va tag soyasi bilan */
+  .wheel-3d{ position:relative; width:264px; height:264px; margin:6px auto 0;
+    transform-style:preserve-3d; transform:rotateX(13deg); }
+  .wheel-rim{ position:absolute; inset:-11px; border-radius:50%; pointer-events:none;
+    background:conic-gradient(#DCDEE8 0deg,#8F93A6 45deg,#F5F6FA 90deg,#7C8095 140deg,#E3E5EE 190deg,#888CA0 240deg,#F0F1F7 290deg,#9296A9 340deg,#DCDEE8 360deg);
+    box-shadow:0 14px 34px rgba(0,0,0,0.55), 0 0 34px rgba(124,92,255,0.35),
+      inset 0 2px 5px rgba(255,255,255,0.55), inset 0 -4px 9px rgba(0,0,0,0.5);
+    animation:rimGlow 2.6s ease-in-out infinite; }
+  @keyframes rimGlow{
+    0%,100%{ box-shadow:0 14px 34px rgba(0,0,0,0.55), 0 0 26px rgba(124,92,255,0.30), inset 0 2px 5px rgba(255,255,255,0.55), inset 0 -4px 9px rgba(0,0,0,0.5); }
+    50%{ box-shadow:0 14px 34px rgba(0,0,0,0.55), 0 0 52px rgba(124,92,255,0.6), inset 0 2px 5px rgba(255,255,255,0.55), inset 0 -4px 9px rgba(0,0,0,0.5); } }
+  .wheel-shadow{ position:absolute; left:50%; bottom:-30px; width:74%; height:26px; transform:translateX(-50%);
+    border-radius:50%; background:radial-gradient(ellipse, rgba(0,0,0,0.55), transparent 70%);
+    filter:blur(4px); pointer-events:none; }
+  .wheel-disc{ width:264px; height:264px; border-radius:50%; position:relative; will-change:transform;
+    box-shadow:inset 0 0 26px rgba(0,0,0,0.45), inset 0 4px 10px rgba(255,255,255,0.12);
+    background:conic-gradient(#6C5CE7 0 45deg,#3E8EFF 45deg 90deg,#2ECC8F 90deg 135deg,#FFB020 135deg 180deg,#FF8A3D 180deg 225deg,#FF5C6C 225deg 270deg,#8B7BFF 270deg 315deg,#E056A0 315deg 360deg); }
+  /* Uchayotgan 3D tangalar va yutuq matni */
+  .fly-coin{ position:fixed; z-index:95; width:26px; height:26px; border-radius:50%; pointer-events:none;
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color:#7A4B00;
+    background:radial-gradient(circle at 35% 30%, #FFF3B0, #FFC93C 55%, #C9861A);
+    box-shadow:0 2px 6px rgba(0,0,0,0.45), inset 0 -2px 3px rgba(0,0,0,0.25), inset 0 2px 3px rgba(255,255,255,0.6);
+    will-change:transform, opacity; }
+  .float-text{ position:fixed; left:50%; top:40%; transform:translateX(-50%); z-index:96; pointer-events:none;
+    font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:34px; color:#FFD873;
+    text-shadow:0 0 18px rgba(255,176,32,0.8), 0 3px 8px rgba(0,0,0,0.6);
+    animation:floatUp 1.5s ease forwards; }
+  @keyframes floatUp{ 0%{ transform:translateX(-50%) translateY(20px) scale(0.6); opacity:0; }
+    20%{ transform:translateX(-50%) translateY(0) scale(1.15); opacity:1; }
+    45%{ transform:translateX(-50%) scale(1); }
+    100%{ transform:translateX(-50%) translateY(-70px) scale(0.9); opacity:0; } }
   .wheel-seg{ position:absolute; top:0; left:50%; width:0; height:50%; transform-origin:bottom center; }
   .wheel-seg span{ position:absolute; top:16px; left:50%; transform:translateX(-50%); color:#fff; font-weight:800;
     font-size:15px; font-family:'Space Grotesk',sans-serif; text-shadow:0 1px 3px rgba(0,0,0,0.55); white-space:nowrap; }
@@ -472,12 +501,23 @@
   #levelUpOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.82); backdrop-filter:blur(5px);
     z-index:90; align-items:center; justify-content:center; }
   #levelUpOverlay.show{ display:flex; }
-  .lvlup-box{ text-align:center; animation:lvlPop .5s cubic-bezier(0.2, 1.4, 0.4, 1); }
+  .lvlup-box{ text-align:center; animation:lvlPop .5s cubic-bezier(0.2, 1.4, 0.4, 1); perspective:600px; }
   @keyframes lvlPop{ from{ transform:scale(0.4); opacity:0; } to{ transform:scale(1); opacity:1; } }
-  .lvlup-shield{ font-size:74px; filter:drop-shadow(0 0 30px rgba(124,92,255,0.8)); animation:floatY 2s ease-in-out infinite; }
+  .lvlup-shield{ font-size:74px; display:inline-block; transform-style:preserve-3d;
+    filter:drop-shadow(0 0 30px rgba(124,92,255,0.8)); }
+  .lvlup-shield.spin3d{ animation:badgeSpin 1.5s cubic-bezier(0.3, 0, 0.25, 1), floatY 2.2s ease-in-out 1.5s infinite; }
+  @keyframes badgeSpin{ from{ transform:rotateY(0deg) scale(0.6); } 60%{ transform:rotateY(300deg) scale(1.08); } to{ transform:rotateY(360deg) scale(1); } }
   .lvlup-title{ font-family:'Space Grotesk',sans-serif; font-size:30px; font-weight:700; margin-top:8px; }
   .lvlup-badge{ margin-top:10px; display:inline-block; background:var(--purple-dim); color:var(--purple);
-    padding:7px 16px; border-radius:20px; font-weight:700; font-family:'Space Grotesk',sans-serif; font-size:14px; }
+    padding:7px 16px; border-radius:20px; font-weight:700; font-family:'Space Grotesk',sans-serif; font-size:14px;
+    position:relative; overflow:hidden; }
+  /* Metall yaltirash (shine sweep) */
+  .lvlup-badge.shine::after{ content:''; position:absolute; top:0; bottom:0; width:45%; left:-70%;
+    transform:skewX(-20deg); background:linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+    animation:shineSweep 1.2s ease .4s 2; }
+  @keyframes shineSweep{ to{ left:135%; } }
+  .lvl-particle{ position:fixed; z-index:95; width:8px; height:8px; border-radius:50%; pointer-events:none;
+    box-shadow:0 0 10px currentColor; will-change:transform, opacity; }
 </style>
 </head>
 <body>
@@ -887,18 +927,22 @@
     <div class="wheel-close-x" onclick="closeWheel()">✕</div>
     <div class="sec-title" data-i18n="wheelTitle">Omadli g'ildirak</div>
     <div class="wheel-wrap">
-      <div class="wheel-pointer">▼</div>
-      <div class="wheel-disc" id="wheelDisc">
-        <div class="wheel-seg" style="transform:rotate(22.5deg)"><span>10</span></div>
-        <div class="wheel-seg" style="transform:rotate(67.5deg)"><span>20</span></div>
-        <div class="wheel-seg" style="transform:rotate(112.5deg)"><span>30</span></div>
-        <div class="wheel-seg" style="transform:rotate(157.5deg)"><span>50</span></div>
-        <div class="wheel-seg" style="transform:rotate(202.5deg)"><span>70</span></div>
-        <div class="wheel-seg" style="transform:rotate(247.5deg)"><span>100</span></div>
-        <div class="wheel-seg" style="transform:rotate(292.5deg)"><span>200</span></div>
-        <div class="wheel-seg" style="transform:rotate(337.5deg)"><span>500</span></div>
+      <div class="wheel-pointer" id="wheelPointer">▼</div>
+      <div class="wheel-3d">
+        <div class="wheel-rim"></div>
+        <div class="wheel-disc" id="wheelDisc">
+          <div class="wheel-seg" style="transform:rotate(22.5deg)"><span>10</span></div>
+          <div class="wheel-seg" style="transform:rotate(67.5deg)"><span>20</span></div>
+          <div class="wheel-seg" style="transform:rotate(112.5deg)"><span>30</span></div>
+          <div class="wheel-seg" style="transform:rotate(157.5deg)"><span>50</span></div>
+          <div class="wheel-seg" style="transform:rotate(202.5deg)"><span>70</span></div>
+          <div class="wheel-seg" style="transform:rotate(247.5deg)"><span>100</span></div>
+          <div class="wheel-seg" style="transform:rotate(292.5deg)"><span>200</span></div>
+          <div class="wheel-seg" style="transform:rotate(337.5deg)"><span>500</span></div>
+        </div>
+        <div class="wheel-hub">🎡</div>
+        <div class="wheel-shadow"></div>
       </div>
-      <div class="wheel-hub">🎡</div>
     </div>
     <button class="btn" id="spinBtn" onclick="doSpin()" data-i18n="btnSpin">Aylantirish</button>
     <div class="wheel-note" id="wheelNote"></div>
@@ -948,7 +992,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const fns = firebase.app().functions();
 // APK (WebView) muhitida ham sessiya saqlanishi uchun aniq LOCAL persistence
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});
+try { auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){}); } catch(e){}
 const APP_URL = 'https://savasuz.github.io/TaskUp/';
 
 let currentUid = null;
@@ -1433,6 +1477,73 @@ function renderWheelState(){
   if(btn && !spinning){ btn.disabled = spun; btn.textContent = spun ? t('wheelAlready') : t('btnSpin'); }
   if(cardBtn){ cardBtn.disabled = spun; cardBtn.textContent = spun ? t('wheelTomorrow') : t('btnSpin'); }
 }
+const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* rAF bilan silliq tezlanish/sekinlashish; ko'rsatkich segment chegarasidan o'tganda bounce */
+function animateWheelTo(targetDeg, duration, onDone){
+  const disc = document.getElementById('wheelDisc');
+  const pointer = document.getElementById('wheelPointer');
+  const startDeg = wheelRotation;
+  const delta = targetDeg - startDeg;
+  const startT = performance.now();
+  let lastSeg = -1, lastTick = 0;
+  function frame(now){
+    const t = Math.min(1, (now - startT) / duration);
+    // easeInOutCubic: avval tezlanadi, oxirida uzoq sekinlashadi
+    const p = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const deg = startDeg + delta * p;
+    disc.style.transform = 'rotateZ(' + deg + 'deg)';
+    const seg = Math.floor((((360 - (deg % 360)) % 360) / 45)) % 8;
+    if(seg !== lastSeg){
+      lastSeg = seg;
+      if(now - lastTick > 75 && !reducedMotion){
+        lastTick = now;
+        pointer.classList.remove('tick'); void pointer.offsetWidth; pointer.classList.add('tick');
+      }
+    }
+    if(t < 1) requestAnimationFrame(frame);
+    else { wheelRotation = targetDeg; onDone && onDone(); }
+  }
+  requestAnimationFrame(frame);
+}
+
+/* 3D tangalar g'ildirakdan balans tomon uchadi */
+function spawnCoinBurst(count){
+  if(reducedMotion) return;
+  const src = document.getElementById('wheelDisc');
+  const sRect = src ? src.getBoundingClientRect() : { left: innerWidth/2 - 20, top: innerHeight/2 - 20, width: 40, height: 40 };
+  const balEl = document.getElementById('coinCount');
+  const bRect = (balEl && balEl.offsetParent !== null) ? balEl.getBoundingClientRect() : { left: innerWidth/2 - 10, top: 50 };
+  const cx = sRect.left + sRect.width/2, cy = sRect.top + sRect.height/2;
+  for(let i = 0; i < count; i++){
+    const c = document.createElement('div');
+    c.className = 'fly-coin';
+    c.textContent = '$';
+    const offX = (Math.random() - 0.5) * 130;
+    const offY = (Math.random() - 0.5) * 70;
+    c.style.left = (cx + offX - 13) + 'px';
+    c.style.top = (cy + offY - 13) + 'px';
+    document.body.appendChild(c);
+    const dx = (bRect.left) - (cx + offX), dy = (bRect.top) - (cy + offY);
+    c.animate([
+      { transform: 'translate(0,0) rotateY(0deg) scale(1)', opacity: 1 },
+      { transform: `translate(${dx*0.5}px, ${dy*0.5 - 70}px) rotateY(360deg) scale(1.15)`, opacity: 1, offset: 0.6 },
+      { transform: `translate(${dx}px, ${dy}px) rotateY(720deg) scale(0.35)`, opacity: 0.15 }
+    ], { duration: 850 + Math.random()*350, delay: i * 55, easing: 'cubic-bezier(0.3,0,0.55,1)', fill: 'forwards' })
+      .onfinish = () => c.remove();
+  }
+}
+function showFloatText(text){
+  const el = document.createElement('div');
+  el.className = 'float-text';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1600);
+}
+function hapticFeedback(pattern){
+  if(navigator.vibrate){ try { navigator.vibrate(pattern); } catch(e){} }
+}
+
 function doSpin(){
   if(spinning || !currentUid) return;
   sndClick();
@@ -1443,20 +1554,23 @@ function doSpin(){
   fns.httpsCallable('spinWheel')({}).then((res) => {
     const prize = (res.data && res.data.prize) || 0;
     const idx = (res.data && res.data.index) || 0;
-    // G'ildirakni yutuq segmenti ko'rsatkich (tepada) ostiga keladigan qilib aylantiramiz
+    // Yutuq segmenti ko'rsatkich (tepada) ostiga keladigan burchak
     const finalAngle = (360 - (idx * 45 + 22.5)) % 360;
     const current = ((wheelRotation % 360) + 360) % 360;
-    wheelRotation += 5 * 360 + ((finalAngle - current + 360) % 360);
-    document.getElementById('wheelDisc').style.transform = `rotate(${wheelRotation}deg)`;
-    setTimeout(() => {
+    const target = wheelRotation + 5 * 360 + ((finalAngle - current + 360) % 360);
+    animateWheelTo(target, reducedMotion ? 400 : 4400, () => {
       spinning = false;
       state.lastSpin = new Date().toDateString();
-      sndCoin(); fireConfetti();
+      sndCoin();
+      hapticFeedback([40, 40, 90]);
+      fireConfetti();
+      spawnCoinBurst(Math.min(10, 6 + Math.floor(prize / 100)));
+      showFloatText('+' + prize + ' coin');
       showToast(`+${prize} ${t('wheelWin')}`);
       document.getElementById('wheelNote').textContent = t('wheelTomorrow');
       renderWheelState();
       loadHistory(currentUid);
-    }, 4300);
+    });
   }).catch((err) => {
     spinning = false;
     const m = err && err.message;
@@ -1605,23 +1719,56 @@ function getLevelInfo(xp){
 }
 /* Level nishonlari (badge) */
 const LEVEL_BADGES = [
-  { min: 50, key: 'badgeLegend', icon: '👑' },
-  { min: 20, key: 'badgeDiamond', icon: '💎' },
-  { min: 10, key: 'badgeGold', icon: '🥇' },
-  { min: 5,  key: 'badgeSilver', icon: '🥈' },
-  { min: 1,  key: 'badgeBronze', icon: '🥉' }
+  { min: 50, key: 'badgeLegend', icon: '👑', color: '#FFD873' },
+  { min: 20, key: 'badgeDiamond', icon: '💎', color: '#7FE7FF' },
+  { min: 10, key: 'badgeGold', icon: '🥇', color: '#FFD873' },
+  { min: 5,  key: 'badgeSilver', icon: '🥈', color: '#C8CCDA' },
+  { min: 1,  key: 'badgeBronze', icon: '🥉', color: '#E09B5C' }
 ];
 function levelBadge(num){
   for(const b of LEVEL_BADGES){ if(num >= b.min) return b; }
   return LEVEL_BADGES[LEVEL_BADGES.length - 1];
 }
+/* Nishon atrofidan oltin/kumush zarrachalar sochiladi */
+function spawnLevelParticles(color){
+  if(reducedMotion) return;
+  const box = document.querySelector('#levelUpOverlay .lvlup-box');
+  if(!box) return;
+  const r = box.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + 55;
+  for(let i = 0; i < 14; i++){
+    const p = document.createElement('div');
+    p.className = 'lvl-particle';
+    p.style.background = color;
+    p.style.color = color;
+    p.style.left = cx + 'px';
+    p.style.top = cy + 'px';
+    document.body.appendChild(p);
+    const ang = Math.random() * Math.PI * 2;
+    const dist = 60 + Math.random() * 95;
+    p.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: `translate(${Math.cos(ang)*dist}px, ${Math.sin(ang)*dist}px) scale(0)`, opacity: 0 }
+    ], { duration: 700 + Math.random() * 500, delay: 250 + Math.random() * 300, easing: 'cubic-bezier(0.2,0.6,0.4,1)', fill: 'forwards' })
+      .onfinish = () => p.remove();
+  }
+}
 function showLevelUp(num){
   const b = levelBadge(num);
   document.getElementById('lvlupNum').textContent = 'Level ' + num + '!';
-  document.getElementById('lvlupBadge').textContent = b.icon + ' ' + t(b.key);
+  const badgeEl = document.getElementById('lvlupBadge');
+  badgeEl.textContent = b.icon + ' ' + t(b.key);
+  const shield = document.querySelector('#levelUpOverlay .lvlup-shield');
+  shield.textContent = b.icon;
   const ov = document.getElementById('levelUpOverlay');
   ov.classList.add('show');
-  setTimeout(() => ov.classList.remove('show'), 2600);
+  // 3D 360° aylanish va metall shine'ni qayta ishga tushiramiz
+  shield.classList.remove('spin3d'); badgeEl.classList.remove('shine');
+  void shield.offsetWidth;
+  shield.classList.add('spin3d'); badgeEl.classList.add('shine');
+  hapticFeedback([50, 50, 100]);
+  spawnLevelParticles(b.color);
+  setTimeout(() => ov.classList.remove('show'), 3000);
 }
 let lastKnownLevel = null;
 function renderLevel(){
