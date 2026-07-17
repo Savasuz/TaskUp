@@ -355,6 +355,22 @@
     </div>
   </div>
 
+  <!-- ---- PROMO KODLAR ---- -->
+  <div class="view" id="view-promo">
+    <div class="back-topbar"><span class="back-btn" onclick="switchView('settings')">←</span><div class="back-title" data-i18n="promoTitle">Promo kodlar</div></div>
+    <div class="screen" style="padding-top:0">
+      <label data-i18n="promoCodeLbl">Kod (masalan: TASKUP2026)</label>
+      <input type="text" id="promoCodeInput" placeholder="TASKUP2026" style="text-transform:uppercase" autocapitalize="characters">
+      <label data-i18n="promoRewardLbl">Mukofot (tanga)</label>
+      <input type="number" id="promoRewardInput" placeholder="500">
+      <label data-i18n="promoMaxLbl">Necha kishi ishlatishi mumkin (bo'sh = cheksiz)</label>
+      <input type="number" id="promoMaxInput" placeholder="100">
+      <button class="submit-btn" onclick="submitPromo()" data-i18n="promoBtn">Kod yaratish</button>
+      <div class="sec-head" style="margin-top:24px"><div class="sec-title" data-i18n="promoListTitle">Yaratilgan kodlar</div></div>
+      <div id="promoAdminList"></div>
+    </div>
+  </div>
+
   <!-- ---- TANGA YUBORISH ---- -->
   <div class="view" id="view-sendCoins">
     <div class="back-topbar"><span class="back-btn" onclick="switchView('users')">←</span><div class="back-title" data-i18n="sendCoinsTitle">Tanga yuborish</div></div>
@@ -416,6 +432,8 @@
       <div class="card" style="padding:2px 12px">
         <div class="settings-row" onclick="switchView('sendCoins')"><div class="settings-ico" style="background:var(--amber)">🪙</div>
           <div class="settings-body"><b data-i18n="sendCoinsTitle">Tanga yuborish</b><span data-i18n="sendCoinsSub">Foydalanuvchiga tanga sovg'a qilish</span></div><span class="settings-arrow">›</span></div>
+        <div class="settings-row" onclick="switchView('promo')"><div class="settings-ico" style="background:#E056A0">🎁</div>
+          <div class="settings-body"><b data-i18n="promoTitle">Promo kodlar</b><span data-i18n="promoSub">Bir martalik bonus kodlari yaratish</span></div><span class="settings-arrow">›</span></div>
         <div class="settings-row" onclick="switchView('general')"><div class="settings-ico" style="background:var(--blue)">⚙️</div>
           <div class="settings-body"><b data-i18n="generalTitle">Umumiy sozlamalar</b><span data-i18n="generalSub">Til, platforma ma'lumotlari</span></div><span class="settings-arrow">›</span></div>
         <div class="settings-row" onclick="switchView('payments')"><div class="settings-ico" style="background:var(--orange)">💳</div>
@@ -504,10 +522,10 @@ function enterAdminApp(){
   document.getElementById('adminApp').style.display = 'flex';
   document.getElementById('adminApp').style.flexDirection = 'column';
   document.getElementById('todayDate').textContent = 'Bugun ' + new Date().toLocaleDateString('uz-UZ', {day:'numeric', month:'long', year:'numeric'});
-  subscribeUsers(); subscribeTasks(); subscribePayments(); subscribeNews();
+  subscribeUsers(); subscribeTasks(); subscribePayments(); subscribeNews(); subscribePromos();
 }
 function adminLogout(){
-  if(usersUnsub) usersUnsub(); if(tasksUnsub) tasksUnsub(); if(paymentsUnsub) paymentsUnsub(); if(newsUnsub) newsUnsub();
+  if(usersUnsub) usersUnsub(); if(tasksUnsub) tasksUnsub(); if(paymentsUnsub) paymentsUnsub(); if(newsUnsub) newsUnsub(); if(promoUnsub) promoUnsub();
   auth.signOut();
   currentAdminUid = null;
   document.getElementById('adminApp').style.display = 'none';
@@ -547,6 +565,10 @@ const ADMIN_I18N = {
     lblTotalLimit:"Umumiy bajarish limiti (ixtiyoriy, bo'sh = cheksiz)", lblStartDate:"Boshlanish sanasi (ixtiyoriy)", lblEndDate:"Tugash sanasi (ixtiyoriy)",
     admobHint:"Rewarded Ad uchun havola kerak emas — reklamani AdMob o'zi ko'rsatadi. Ad Unit ID bu yerga yozilmaydi, u Android ilova sozlamalarida saqlanadi.",
     urlRequired:"Vazifa havolasini kiriting (https:// bilan)", badDates:"Tugash sanasi boshlanishdan oldin bo'lishi mumkin emas",
+    promoTitle:"Promo kodlar", promoSub:"Bir martalik bonus kodlari yaratish", promoCodeLbl:"Kod (masalan: TASKUP2026)", promoRewardLbl:"Mukofot (tanga)",
+    promoMaxLbl:"Necha kishi ishlatishi mumkin (bo'sh = cheksiz)", promoBtn:"Kod yaratish", promoListTitle:"Yaratilgan kodlar",
+    promoUsed:"marta ishlatilgan", promoEmpty:"Kodlar yo'q", promoBadCode:"Kod 3-30 ta harf/raqam bo'lsin (A-Z, 0-9)", promoBadReward:"Mukofotni kiriting",
+    promoExists:"Bu kod allaqachon mavjud", promoCreated:"Promo kod yaratildi!", promoOn:"Kod yoqildi", promoOff:"Kod o'chirildi", promoDeleted:"Kod o'chirildi", promoConfirmDelete:"Kodni o'chirmoqchimisiz?",
     paymentsTitle:"To'lovlar", totalPayments:"Jami to'lovlar", noRequests:"So'rovlar yo'q", noCard:"Karta ma'lumotlari kiritilmagan",
     newsTitle:"Yangiliklar", lblNewsTitle:"Sarlavha", lblNewsText:"Matn", btnPublish:"E'lon qilish", publishedNews:"E'lon qilingan yangiliklar", noNews:"Yangiliklar yo'q",
     settingsTitle:"Sozlamalar", btnLogout:"Chiqish",
@@ -588,6 +610,10 @@ const ADMIN_I18N = {
     lblTotalLimit:"Total completion limit (optional, empty = unlimited)", lblStartDate:"Start date (optional)", lblEndDate:"End date (optional)",
     admobHint:"Rewarded Ad needs no link — AdMob shows the ad itself. The Ad Unit ID is not entered here; it is stored in the Android app configuration.",
     urlRequired:"Enter the task link (starting with https://)", badDates:"End date cannot be before the start date",
+    promoTitle:"Promo codes", promoSub:"Create one-time bonus codes", promoCodeLbl:"Code (e.g. TASKUP2026)", promoRewardLbl:"Reward (coins)",
+    promoMaxLbl:"Max uses (empty = unlimited)", promoBtn:"Create code", promoListTitle:"Created codes",
+    promoUsed:"times used", promoEmpty:"No codes", promoBadCode:"Code must be 3-30 letters/digits (A-Z, 0-9)", promoBadReward:"Enter a reward",
+    promoExists:"This code already exists", promoCreated:"Promo code created!", promoOn:"Code enabled", promoOff:"Code disabled", promoDeleted:"Code deleted", promoConfirmDelete:"Delete this code?",
     paymentsTitle:"Payments", totalPayments:"Total payments", noRequests:"No requests", noCard:"No card details provided",
     newsTitle:"News", lblNewsTitle:"Title", lblNewsText:"Text", btnPublish:"Publish", publishedNews:"Published news", noNews:"No news",
     settingsTitle:"Settings", btnLogout:"Log out",
@@ -629,6 +655,10 @@ const ADMIN_I18N = {
     lblTotalLimit:"Общий лимит выполнений (необязательно, пусто = без лимита)", lblStartDate:"Дата начала (необязательно)", lblEndDate:"Дата окончания (необязательно)",
     admobHint:"Для Rewarded Ad ссылка не нужна — рекламу показывает сам AdMob. Ad Unit ID сюда не вводится, он хранится в конфигурации Android-приложения.",
     urlRequired:"Введите ссылку задания (начиная с https://)", badDates:"Дата окончания не может быть раньше даты начала",
+    promoTitle:"Промокоды", promoSub:"Создание одноразовых бонусных кодов", promoCodeLbl:"Код (напр. TASKUP2026)", promoRewardLbl:"Награда (монеты)",
+    promoMaxLbl:"Макс. использований (пусто = без лимита)", promoBtn:"Создать код", promoListTitle:"Созданные коды",
+    promoUsed:"раз использован", promoEmpty:"Нет кодов", promoBadCode:"Код: 3-30 букв/цифр (A-Z, 0-9)", promoBadReward:"Введите награду",
+    promoExists:"Такой код уже существует", promoCreated:"Промокод создан!", promoOn:"Код включён", promoOff:"Код выключен", promoDeleted:"Код удалён", promoConfirmDelete:"Удалить код?",
     paymentsTitle:"Платежи", totalPayments:"Всего платежей", noRequests:"Нет запросов", noCard:"Данные карты не указаны",
     newsTitle:"Новости", lblNewsTitle:"Заголовок", lblNewsText:"Текст", btnPublish:"Опубликовать", publishedNews:"Опубликованные новости", noNews:"Нет новостей",
     settingsTitle:"Настройки", btnLogout:"Выйти",
@@ -699,6 +729,55 @@ function submitSendCoins(){
     showToast(err.message === 'notfound' ? t('userNotFound') : (t('errGeneric') + ': ' + (err.code || err.message || '')));
     btn.disabled = false;
   });
+}
+
+/* ---------------- PROMO KODLAR ---------------- */
+let promoUnsub = null, promoData = [];
+function subscribePromos(){
+  promoUnsub = db.collection('promo_codes').onSnapshot((snap) => {
+    promoData = [];
+    snap.forEach(doc => promoData.push({ id: doc.id, ...doc.data() }));
+    promoData.sort((a,b)=>((b.createdAt&&b.createdAt.seconds)||0)-((a.createdAt&&a.createdAt.seconds)||0));
+    renderPromosAdmin();
+  }, err => console.error(err));
+}
+function renderPromosAdmin(){
+  const el = document.getElementById('promoAdminList');
+  if(!el) return;
+  el.innerHTML = promoData.length ? promoData.map(p => `
+    <div class="task-row">
+      <div class="task-ico ic-invite">🎁</div>
+      <div class="task-body"><div class="task-name" style="font-family:'JetBrains Mono',monospace">${escHtml(p.id)}</div>
+        <div class="task-meta">+${fmt(p.reward)} coin • ${fmt(p.usedCount||0)}${(p.maxUses||0)>0 ? '/'+fmt(p.maxUses) : ''} ${t('promoUsed')}</div></div>
+      <span onclick="deletePromo('${p.id}')" style="color:var(--red);font-size:15px;cursor:pointer;padding:0 4px">✕</span>
+      <div class="switch ${p.active?'on':''}" onclick="togglePromo('${p.id}', ${!!p.active})"></div>
+    </div>`).join('') : `<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">${t('promoEmpty')}</div>`;
+}
+function submitPromo(){
+  const code = (document.getElementById('promoCodeInput').value || '').trim().toUpperCase();
+  const reward = parseInt(document.getElementById('promoRewardInput').value) || 0;
+  const maxUses = parseInt(document.getElementById('promoMaxInput').value) || 0;
+  if(!code || !/^[A-Z0-9_-]{3,30}$/.test(code)){ showToast(t('promoBadCode')); return; }
+  if(reward <= 0){ showToast(t('promoBadReward')); return; }
+  db.collection('promo_codes').doc(code).get().then(doc => {
+    if(doc.exists){ showToast(t('promoExists')); return; }
+    return db.collection('promo_codes').doc(code).set({
+      reward, maxUses, usedCount: 0, active: true,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      showToast(t('promoCreated'));
+      document.getElementById('promoCodeInput').value=''; document.getElementById('promoRewardInput').value=''; document.getElementById('promoMaxInput').value='';
+    });
+  }).catch(err => { console.error(err); showToast(t('errGeneric')); });
+}
+function togglePromo(id, currentActive){
+  db.collection('promo_codes').doc(id).update({ active: !currentActive })
+    .then(()=>showToast(!currentActive ? t('promoOn') : t('promoOff')))
+    .catch(err=>{ console.error(err); showToast(t('errGeneric')); });
+}
+function deletePromo(id){
+  if(!confirm(t('promoConfirmDelete'))) return;
+  db.collection('promo_codes').doc(id).delete().then(()=>showToast(t('promoDeleted'))).catch(err=>{ console.error(err); showToast(t('errGeneric')); });
 }
 
 /* ---------------- SOZLAMALAR AMALLARI ---------------- */

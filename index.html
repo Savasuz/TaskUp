@@ -434,6 +434,50 @@
   .news-item-text{ font-size:12.5px; color:var(--muted); margin-top:5px; line-height:1.5; white-space:pre-wrap; }
   .news-item-time{ font-size:10.5px; color:var(--muted); margin-top:8px; font-family:'JetBrains Mono',monospace; opacity:0.8; }
   .news-empty{ text-align:center; color:var(--muted); font-size:13px; padding:30px 0; }
+
+  /* ---------- 🎡 Omadli g'ildirak ---------- */
+  .wheel-card{ display:flex; align-items:center; gap:12px; border-radius:18px; padding:14px;
+    background:linear-gradient(135deg, rgba(255,176,32,0.14), var(--bg-card) 60%);
+    border:1px solid rgba(255,176,32,0.45); margin:2px 0 20px; cursor:pointer; }
+  .wheel-mini{ width:46px; height:46px; border-radius:14px; flex-shrink:0; font-size:24px;
+    background:linear-gradient(135deg,#FFD86B,#FF9F1C); display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 16px rgba(255,176,32,0.35), inset 0 1px 0 rgba(255,255,255,0.35); }
+  .wheel-card-body{ flex:1; min-width:0; }
+  .wheel-card-body b{ font-size:14px; font-family:'Space Grotesk',sans-serif; display:block; }
+  .wheel-card-body span{ font-size:11.5px; color:var(--muted); }
+  #wheelOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.82); backdrop-filter:blur(5px);
+    z-index:85; align-items:center; justify-content:center; }
+  #wheelOverlay.show{ display:flex; }
+  .wheel-panel{ background:var(--bg-alt); border:1px solid var(--line); border-radius:24px; padding:22px;
+    width:calc(100% - 40px); max-width:340px; text-align:center; animation:sheetUp .25s ease; position:relative; }
+  .wheel-close-x{ position:absolute; top:12px; right:14px; width:30px; height:30px; border-radius:50%;
+    background:var(--bg-card); border:1px solid var(--line); color:var(--muted); display:flex;
+    align-items:center; justify-content:center; cursor:pointer; font-size:13px; z-index:2; }
+  .wheel-wrap{ position:relative; width:264px; height:264px; margin:20px auto 16px; }
+  .wheel-pointer{ position:absolute; top:-15px; left:50%; transform:translateX(-50%); font-size:24px; z-index:3;
+    color:var(--amber); filter:drop-shadow(0 3px 6px rgba(0,0,0,0.6)); }
+  .wheel-disc{ width:264px; height:264px; border-radius:50%; position:relative;
+    border:6px solid #2A2C3A; box-shadow:0 10px 40px rgba(108,92,231,0.3), inset 0 0 20px rgba(0,0,0,0.35);
+    background:conic-gradient(#6C5CE7 0 45deg,#3E8EFF 45deg 90deg,#2ECC8F 90deg 135deg,#FFB020 135deg 180deg,#FF8A3D 180deg 225deg,#FF5C6C 225deg 270deg,#8B7BFF 270deg 315deg,#E056A0 315deg 360deg);
+    transition:transform 4s cubic-bezier(0.15, 0.9, 0.28, 1); }
+  .wheel-seg{ position:absolute; top:0; left:50%; width:0; height:50%; transform-origin:bottom center; }
+  .wheel-seg span{ position:absolute; top:16px; left:50%; transform:translateX(-50%); color:#fff; font-weight:800;
+    font-size:15px; font-family:'Space Grotesk',sans-serif; text-shadow:0 1px 3px rgba(0,0,0,0.55); white-space:nowrap; }
+  .wheel-hub{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:56px; height:56px; z-index:2;
+    border-radius:50%; background:var(--bg-card); border:4px solid #2A2C3A; display:flex; align-items:center;
+    justify-content:center; font-size:24px; box-shadow:0 4px 14px rgba(0,0,0,0.5); }
+  .wheel-note{ font-size:12px; color:var(--muted); margin-top:12px; min-height:16px; }
+
+  /* ---------- Level-up animatsiya ---------- */
+  #levelUpOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.82); backdrop-filter:blur(5px);
+    z-index:90; align-items:center; justify-content:center; }
+  #levelUpOverlay.show{ display:flex; }
+  .lvlup-box{ text-align:center; animation:lvlPop .5s cubic-bezier(0.2, 1.4, 0.4, 1); }
+  @keyframes lvlPop{ from{ transform:scale(0.4); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  .lvlup-shield{ font-size:74px; filter:drop-shadow(0 0 30px rgba(124,92,255,0.8)); animation:floatY 2s ease-in-out infinite; }
+  .lvlup-title{ font-family:'Space Grotesk',sans-serif; font-size:30px; font-weight:700; margin-top:8px; }
+  .lvlup-badge{ margin-top:10px; display:inline-block; background:var(--purple-dim); color:var(--purple);
+    padding:7px 16px; border-radius:20px; font-weight:700; font-family:'Space Grotesk',sans-serif; font-size:14px; }
 </style>
 </head>
 <body>
@@ -511,7 +555,7 @@
             <div class="greet-sub" id="greetSubTxt" data-i18n="greetSub">Topshiriqlarni bajaring va daromad qiling</div>
           </div>
         </div>
-        <div class="level-chip" onclick="switchTab('level')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <span data-i18n="levelWord">Level</span> <span id="levelNum">1</span></div>
+        <div class="level-chip" onclick="switchTab('level')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <span data-i18n="levelWord">Level</span> <span id="levelNum">1</span> <span id="levelBadgeIco">🥉</span></div>
       </div>
 
       <div class="big-balance-card" onclick="switchTab('wallet')">
@@ -545,6 +589,12 @@
           <div class="daily-timer" id="dailyTimer">23:59:59</div>
         </div>
         <button class="daily-btn" id="streakBtn" onclick="claimStreak()">Olish</button>
+      </div>
+
+      <div class="wheel-card" onclick="openWheel()">
+        <div class="wheel-mini">🎡</div>
+        <div class="wheel-card-body"><b data-i18n="wheelTitle">Omadli g'ildirak</b><span data-i18n="wheelSub">Kuniga 1 marta bepul — 500 tangagacha yutib oling!</span></div>
+        <button class="task-btn" id="wheelCardBtn" onclick="event.stopPropagation(); openWheel()" data-i18n="btnSpin">Aylantirish</button>
       </div>
 
       <div class="sec-head">
@@ -707,6 +757,14 @@
         <div class="profile-phone" id="profilePhone">+998 -- --- -- --</div>
       </div>
       <div class="card">
+        <div class="section-label" style="margin:0 0 10px" data-i18n="promoEnterLbl">🎁 Promo kod</div>
+        <div class="referral-box" style="margin-top:0">
+          <input type="text" id="promoInput" placeholder="TASKUP2026" autocapitalize="characters"
+            style="background:none;border:none;outline:none;color:var(--text);flex:1;font-family:'JetBrains Mono',monospace;font-size:13px;margin:0;padding:0;min-width:0;text-transform:uppercase">
+          <button class="copy-btn" onclick="redeemPromoCode()" data-i18n="btnRedeem">Faollashtirish</button>
+        </div>
+      </div>
+      <div class="card">
         <div class="profile-row"><span data-i18n="totalEarned">Umumiy top ilgan</span><b id="profLifetime">0 coin</b></div>
         <div class="profile-row"><span data-i18n="currentLevel">Joriy daraja</span><b id="profLevel">Bronze</b></div>
         <div class="profile-row"><span data-i18n="dailyStreakLbl">Kunlik seriya</span><b id="profStreak">0 kun</b></div>
@@ -754,6 +812,7 @@
         <div class="level-shield-num" id="levelHeroNum">1</div>
         <div class="level-hero-sub" data-i18n="yourLevelLbl">Sizning levelingiz</div>
         <div class="level-hero-title" id="levelHeroTitle">1-level</div>
+        <div class="lvlup-badge" id="levelBadgeLine">🥉 Bronza</div>
       </div>
       <div class="xp-bar-track" style="margin-top:18px"><div class="xp-bar-fill" id="xpBarFill2"></div></div>
       <div class="xp-bar-label" id="xpLabel2" style="text-align:center; margin-top:8px">0 / 1000 XP</div>
@@ -781,6 +840,11 @@
     <!-- ---- LEADERBOARD TAB ---- -->
     <div class="tab-content" id="tab-leaderboard">
       <div class="sec-head"><div class="sec-title" data-i18n="leaderboardTitle">Reyting</div><div class="sec-link" onclick="switchTab('profile')" data-i18n="backBtn">‹ Orqaga</div></div>
+      <div class="lb-tabs">
+        <div class="lb-tab active" data-p="weekly" onclick="loadLeaderboard('weekly', this)" data-i18n="lbWeekly">Haftalik</div>
+        <div class="lb-tab" data-p="all" onclick="loadLeaderboard('all', this)" data-i18n="lbAll">Umumiy</div>
+        <div class="lb-tab" data-p="referrals" onclick="loadLeaderboard('referrals', this)" data-i18n="lbRef">Referal liga</div>
+      </div>
       <div class="podium">
         <div class="podium-slot second">
           <div class="podium-avatar"><svg viewBox="0 0 24 24" width="22" height="22" fill="#C0C0C0" stroke="var(--bg)" stroke-width="1"><circle cx="12" cy="14" r="7"/><path d="M9 2h6l-1.5 6h-3z"/></svg></div>
@@ -815,6 +879,39 @@
       <div class="nav-item" data-tab="wallet" onclick="switchTab('wallet')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span><span class="nav-label" id="navL4" data-i18n="navL4">Pul</span></div>
       <div class="nav-item" data-tab="profile" onclick="switchTab('profile')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nav-label" id="navL5" data-i18n="navL5">Profil</span></div>
     </div>
+  </div>
+</div>
+
+<!-- ---- 🎡 OMADLI G'ILDIRAK OVERLAY ---- -->
+<div id="wheelOverlay" onclick="if(event.target===this) closeWheel()">
+  <div class="wheel-panel">
+    <div class="wheel-close-x" onclick="closeWheel()">✕</div>
+    <div class="sec-title" data-i18n="wheelTitle">Omadli g'ildirak</div>
+    <div class="wheel-wrap">
+      <div class="wheel-pointer">▼</div>
+      <div class="wheel-disc" id="wheelDisc">
+        <div class="wheel-seg" style="transform:rotate(22.5deg)"><span>10</span></div>
+        <div class="wheel-seg" style="transform:rotate(67.5deg)"><span>20</span></div>
+        <div class="wheel-seg" style="transform:rotate(112.5deg)"><span>30</span></div>
+        <div class="wheel-seg" style="transform:rotate(157.5deg)"><span>50</span></div>
+        <div class="wheel-seg" style="transform:rotate(202.5deg)"><span>70</span></div>
+        <div class="wheel-seg" style="transform:rotate(247.5deg)"><span>100</span></div>
+        <div class="wheel-seg" style="transform:rotate(292.5deg)"><span>200</span></div>
+        <div class="wheel-seg" style="transform:rotate(337.5deg)"><span>500</span></div>
+      </div>
+      <div class="wheel-hub">🎡</div>
+    </div>
+    <button class="btn" id="spinBtn" onclick="doSpin()" data-i18n="btnSpin">Aylantirish</button>
+    <div class="wheel-note" id="wheelNote"></div>
+  </div>
+</div>
+
+<!-- ---- LEVEL-UP OVERLAY ---- -->
+<div id="levelUpOverlay" onclick="this.classList.remove('show')">
+  <div class="lvlup-box">
+    <div class="lvlup-shield">🛡️</div>
+    <div class="lvlup-title" id="lvlupNum">Level 2!</div>
+    <div class="lvlup-badge" id="lvlupBadge">🥉 Bronza</div>
   </div>
 </div>
 
@@ -933,6 +1030,13 @@ const I18N = {
     enterRefCode:"Sizni taklif qilishganmi? Kodni kiriting", btnRedeem:"Faollashtirish", toastEnterCode:"Taklif kodini kiriting", toastRefRedeemed:"tanga! Referral faollashdi", toastRefAlready:"Siz allaqachon kod kiritgansiz", toastRefNotFound:"Bunday kod topilmadi", toastRefOwn:"O'z kodingizni kirita olmaysiz", toastRefError:"Xatolik yuz berdi",
     btnClaim:"Olish", adSoon:"Ilovada tez orada", toastNotStarted:"Vazifa hali boshlanmagan", toastEnded:"Vazifa muddati tugagan", toastTotalLimit:"Vazifa umumiy limiti tugagan",
     toastNotEnough:"Balansingizda buncha tanga yo'q",
+    wheelTitle:"Omadli g'ildirak", wheelSub:"Kuniga 1 marta bepul — 500 tangagacha yutib oling!", btnSpin:"Aylantirish",
+    wheelAlready:"Bugun aylantirib bo'lgansiz", wheelTomorrow:"Ertaga yana keling!", wheelWin:"tanga yutdingiz!",
+    promoEnterLbl:"🎁 Promo kod", toastPromoNotFound:"Bunday kod topilmadi", toastPromoUsed:"Bu kodni allaqachon ishlatgansiz",
+    toastPromoExhausted:"Kod limiti tugagan", toastPromoInactive:"Kod faol emas",
+    lbWeekly:"Haftalik", lbAll:"Umumiy", lbRef:"Referal liga", lbLoading:"Yuklanmoqda...", lbError:"Yuklashda xatolik",
+    lbEmpty:"Hozircha bo'sh — birinchi bo'ling!", youWord:"siz",
+    badgeBronze:"Bronza", badgeSilver:"Kumush", badgeGold:"Oltin", badgeDiamond:"Olmos", badgeLegend:"Afsona",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
@@ -983,6 +1087,13 @@ const I18N = {
     enterRefCode:"Were you invited? Enter the code", btnRedeem:"Activate", toastEnterCode:"Enter the referral code", toastRefRedeemed:"coins! Referral activated", toastRefAlready:"You already used a code", toastRefNotFound:"Code not found", toastRefOwn:"You can't use your own code", toastRefError:"Something went wrong",
     btnClaim:"Claim", adSoon:"Soon in the app", toastNotStarted:"Task hasn't started yet", toastEnded:"Task has ended", toastTotalLimit:"Task completion limit reached",
     toastNotEnough:"You don't have that many coins",
+    wheelTitle:"Lucky Wheel", wheelSub:"One free spin a day — win up to 500 coins!", btnSpin:"Spin",
+    wheelAlready:"Already spun today", wheelTomorrow:"Come back tomorrow!", wheelWin:"coins won!",
+    promoEnterLbl:"🎁 Promo code", toastPromoNotFound:"Code not found", toastPromoUsed:"You already used this code",
+    toastPromoExhausted:"Code limit reached", toastPromoInactive:"Code is inactive",
+    lbWeekly:"Weekly", lbAll:"All-time", lbRef:"Referral league", lbLoading:"Loading...", lbError:"Failed to load",
+    lbEmpty:"Empty for now — be the first!", youWord:"you",
+    badgeBronze:"Bronze", badgeSilver:"Silver", badgeGold:"Gold", badgeDiamond:"Diamond", badgeLegend:"Legend",
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
     authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in", forgotPass:"Forgot password?",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
@@ -1033,6 +1144,13 @@ const I18N = {
     enterRefCode:"Вас пригласили? Введите код", btnRedeem:"Активировать", toastEnterCode:"Введите реферальный код", toastRefRedeemed:"монет! Реферал активирован", toastRefAlready:"Вы уже использовали код", toastRefNotFound:"Код не найден", toastRefOwn:"Нельзя использовать свой код", toastRefError:"Произошла ошибка",
     btnClaim:"Получить", adSoon:"Скоро в приложении", toastNotStarted:"Задание ещё не началось", toastEnded:"Задание завершено", toastTotalLimit:"Лимит задания исчерпан",
     toastNotEnough:"У вас недостаточно монет",
+    wheelTitle:"Колесо удачи", wheelSub:"1 бесплатное вращение в день — до 500 монет!", btnSpin:"Крутить",
+    wheelAlready:"Сегодня уже крутили", wheelTomorrow:"Возвращайтесь завтра!", wheelWin:"монет выиграно!",
+    promoEnterLbl:"🎁 Промокод", toastPromoNotFound:"Код не найден", toastPromoUsed:"Вы уже использовали этот код",
+    toastPromoExhausted:"Лимит кода исчерпан", toastPromoInactive:"Код неактивен",
+    lbWeekly:"Неделя", lbAll:"Все время", lbRef:"Реферальная лига", lbLoading:"Загрузка...", lbError:"Ошибка загрузки",
+    lbEmpty:"Пока пусто — будьте первым!", youWord:"вы",
+    badgeBronze:"Бронза", badgeSilver:"Серебро", badgeGold:"Золото", badgeDiamond:"Алмаз", badgeLegend:"Легенда",
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
     authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти", forgotPass:"Забыли пароль?",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
@@ -1224,6 +1342,7 @@ function subscribeUser(uid){
     state.cashedOutTotal = data.cashedOutTotal || 0;
     state.streakCount = data.streakCount || 0;
     state.lastStreakClaim = data.lastStreakClaim || null;
+    state.lastSpin = data.lastSpin || null;
     state.referralCode = data.referralCode || state.referralCode;
     state.email = data.email || state.email;
     renderAll();
@@ -1286,6 +1405,80 @@ function switchTab(tab){
   document.getElementById('tab-' + tab).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
   document.querySelector('.screen').scrollTop = 0;
+  if(tab === 'leaderboard') loadLeaderboard(currentLbPeriod, document.querySelector('#tab-leaderboard .lb-tab[data-p="' + currentLbPeriod + '"]'));
+}
+
+/* ---------------- 🎡 Omadli g'ildirak ---------------- */
+const SPIN_PRIZES_CLIENT = [10, 20, 30, 50, 70, 100, 200, 500]; // serverdagi bilan bir xil tartib
+let spinning = false;
+let wheelRotation = 0;
+function openWheel(){
+  sndClick();
+  if(!currentUid) return;
+  document.getElementById('wheelOverlay').classList.add('show');
+  renderWheelState();
+}
+function closeWheel(){ if(!spinning) document.getElementById('wheelOverlay').classList.remove('show'); }
+function renderWheelState(){
+  const spun = state.lastSpin === new Date().toDateString();
+  const btn = document.getElementById('spinBtn');
+  const cardBtn = document.getElementById('wheelCardBtn');
+  if(btn && !spinning){ btn.disabled = spun; btn.textContent = spun ? t('wheelAlready') : t('btnSpin'); }
+  if(cardBtn){ cardBtn.disabled = spun; cardBtn.textContent = spun ? t('wheelTomorrow') : t('btnSpin'); }
+}
+function doSpin(){
+  if(spinning || !currentUid) return;
+  sndClick();
+  spinning = true;
+  const btn = document.getElementById('spinBtn');
+  btn.disabled = true;
+  document.getElementById('wheelNote').textContent = '';
+  fns.httpsCallable('spinWheel')({}).then((res) => {
+    const prize = (res.data && res.data.prize) || 0;
+    const idx = (res.data && res.data.index) || 0;
+    // G'ildirakni yutuq segmenti ko'rsatkich (tepada) ostiga keladigan qilib aylantiramiz
+    const finalAngle = (360 - (idx * 45 + 22.5)) % 360;
+    const current = ((wheelRotation % 360) + 360) % 360;
+    wheelRotation += 5 * 360 + ((finalAngle - current + 360) % 360);
+    document.getElementById('wheelDisc').style.transform = `rotate(${wheelRotation}deg)`;
+    setTimeout(() => {
+      spinning = false;
+      state.lastSpin = new Date().toDateString();
+      sndCoin(); fireConfetti();
+      showToast(`+${prize} ${t('wheelWin')}`);
+      document.getElementById('wheelNote').textContent = t('wheelTomorrow');
+      renderWheelState();
+      loadHistory(currentUid);
+    }, 4300);
+  }).catch((err) => {
+    spinning = false;
+    const m = err && err.message;
+    if(m === 'already-spun'){ state.lastSpin = new Date().toDateString(); showToast(t('wheelAlready'), true); }
+    else { console.error(err); showToast('Xatolik: ' + ((err && (err.code || err.message)) || ''), true); }
+    renderWheelState();
+  });
+}
+
+/* ---------------- 🎁 Promo kod ---------------- */
+function redeemPromoCode(){
+  sndClick();
+  if(!currentUid) return;
+  const code = (document.getElementById('promoInput').value || '').trim().toUpperCase();
+  if(!code){ showToast(t('toastEnterCode'), true); return; }
+  fns.httpsCallable('redeemPromo')({ code }).then((res) => {
+    sndCoin(); fireConfetti();
+    showToast(`+${(res.data && res.data.reward) || ''} ${t('toastTaskDone')}`);
+    document.getElementById('promoInput').value = '';
+    loadHistory(currentUid);
+  }).catch((err) => {
+    const m = err && err.message;
+    let msg = t('toastRefError');
+    if(m === 'code-not-found' || m === 'bad-code') msg = t('toastPromoNotFound');
+    else if(m === 'already-used') msg = t('toastPromoUsed');
+    else if(m === 'code-exhausted') msg = t('toastPromoExhausted');
+    else if(m === 'code-inactive') msg = t('toastPromoInactive');
+    showToast(msg, true);
+  });
 }
 
 /* ---------------- Toast / confetti ---------------- */
@@ -1318,7 +1511,7 @@ function animateCount(el, from, to, duration){
   requestAnimationFrame(tick);
 }
 
-function renderAll(){ renderBalance(); renderStreak(); renderActivity(); renderProfile(); renderStats(); renderFriends(); renderPaymentHistory('all'); renderLevel(); renderLeaderboard(); }
+function renderAll(){ renderBalance(); renderStreak(); renderActivity(); renderProfile(); renderStats(); renderFriends(); renderPaymentHistory('all'); renderLevel(); renderLeaderboard(); renderWheelState(); }
 
 function renderBalance(){
   const coins = state.coins;
@@ -1386,7 +1579,9 @@ function renderActivity(){
 
 function renderProfile(){
   document.getElementById('profLifetime').textContent = state.lifetimeCoins.toLocaleString() + ' coin';
-  document.getElementById('profLevel').textContent = getLevelInfo(state.lifetimeCoins).num + '-level';
+  const lnum = getLevelInfo(state.lifetimeCoins).num;
+  const lb = levelBadge(lnum);
+  document.getElementById('profLevel').textContent = lb.icon + ' ' + t(lb.key) + ' • ' + lnum + '-level';
   document.getElementById('profStreak').textContent = state.streakCount + ' kun';
 }
 
@@ -1401,16 +1596,39 @@ function getLevelInfo(xp){
   const current = (xp % XP_PER_LEVEL);
   return { num, current, needed: XP_PER_LEVEL };
 }
+/* Level nishonlari (badge) */
+const LEVEL_BADGES = [
+  { min: 50, key: 'badgeLegend', icon: '👑' },
+  { min: 20, key: 'badgeDiamond', icon: '💎' },
+  { min: 10, key: 'badgeGold', icon: '🥇' },
+  { min: 5,  key: 'badgeSilver', icon: '🥈' },
+  { min: 1,  key: 'badgeBronze', icon: '🥉' }
+];
+function levelBadge(num){
+  for(const b of LEVEL_BADGES){ if(num >= b.min) return b; }
+  return LEVEL_BADGES[LEVEL_BADGES.length - 1];
+}
+function showLevelUp(num){
+  const b = levelBadge(num);
+  document.getElementById('lvlupNum').textContent = 'Level ' + num + '!';
+  document.getElementById('lvlupBadge').textContent = b.icon + ' ' + t(b.key);
+  const ov = document.getElementById('levelUpOverlay');
+  ov.classList.add('show');
+  setTimeout(() => ov.classList.remove('show'), 2600);
+}
 let lastKnownLevel = null;
 function renderLevel(){
   const info = getLevelInfo(state.lifetimeCoins);
   if(lastKnownLevel !== null && info.num > lastKnownLevel){
     sndLevelUp();
-    showToast(`Level ${info.num}!`);
     fireConfetti();
+    showLevelUp(info.num);
   }
   lastKnownLevel = info.num;
   document.getElementById('levelNum').textContent = info.num;
+  const badge = levelBadge(info.num);
+  const bIco = document.getElementById('levelBadgeIco'); if(bIco) bIco.textContent = badge.icon;
+  const bLine = document.getElementById('levelBadgeLine'); if(bLine) bLine.textContent = badge.icon + ' ' + t(badge.key);
   const pct = Math.min(100, (info.current / info.needed) * 100);
   const fill1 = document.getElementById('xpBarFill'); if(fill1) fill1.style.width = pct + '%';
   const fill2 = document.getElementById('xpBarFill2'); if(fill2) fill2.style.width = pct + '%';
@@ -1437,24 +1655,41 @@ function renderLevel(){
 }
 
 /* ---------------- Leaderboard ---------------- */
-const LEADERBOARD_DATA = [
-  { name:"Jasur", coins:125680 }, { name:"Azizbek", coins:98540 }, { name:"Madina", coins:75320 },
-  { name:"Sardor", coins:65430 }, { name:"Oybek", coins:54210 }, { name:"Diyor", coins:42750 }
-];
-function renderLeaderboard(){
-  const combined = [...LEADERBOARD_DATA, { name:"Siz", coins: state.lifetimeCoins, me:true }]
-    .sort((a,b)=>b.coins-a.coins);
-  const [p1, p2, p3, ...rest] = combined;
-  document.getElementById('p1Name').textContent = p1.name; document.getElementById('p1Coin').textContent = p1.coins.toLocaleString();
-  document.getElementById('p2Name').textContent = p2.name; document.getElementById('p2Coin').textContent = p2.coins.toLocaleString();
-  document.getElementById('p3Name').textContent = p3.name; document.getElementById('p3Coin').textContent = p3.coins.toLocaleString();
-  document.getElementById('lbRestList').innerHTML = rest.map((r,i) => `
+/* ---------------- 🏆 Reyting (serverdan, haqiqiy) ---------------- */
+let currentLbPeriod = 'weekly';
+let lbCache = {};
+function loadLeaderboard(period, el){
+  currentLbPeriod = period;
+  if(el){ document.querySelectorAll('#tab-leaderboard .lb-tab').forEach(x => x.classList.remove('active')); el.classList.add('active'); }
+  const cached = lbCache[period];
+  if(cached && Date.now() - cached.at < 120000){ renderLeaderboardData(cached.top, period); return; }
+  document.getElementById('lbRestList').innerHTML = `<div class="activity-empty">${t('lbLoading')}</div>`;
+  fns.httpsCallable('getLeaderboard')({ period }).then((res) => {
+    lbCache[period] = { top: (res.data && res.data.top) || [], at: Date.now() };
+    if(currentLbPeriod === period) renderLeaderboardData(lbCache[period].top, period);
+  }).catch((err) => {
+    console.error(err);
+    document.getElementById('lbRestList').innerHTML = `<div class="activity-empty">${t('lbError')}</div>`;
+  });
+}
+function renderLeaderboardData(top, period){
+  const fmtV = v => (v || 0).toLocaleString();
+  const get = i => top[i] || { name: '—', value: 0 };
+  document.getElementById('p1Name').textContent = get(0).name; document.getElementById('p1Coin').textContent = fmtV(get(0).value);
+  document.getElementById('p2Name').textContent = get(1).name; document.getElementById('p2Coin').textContent = fmtV(get(1).value);
+  document.getElementById('p3Name').textContent = get(2).name; document.getElementById('p3Coin').textContent = fmtV(get(2).value);
+  const rest = top.slice(3);
+  document.getElementById('lbRestList').innerHTML = rest.length ? rest.map((r, i) => `
     <div class="list-row" style="${r.me?'border-color:var(--purple)':''}">
       <div style="width:22px; text-align:center; font-family:'Space Grotesk',sans-serif; font-weight:700; color:var(--muted)">${i+4}</div>
-      <div class="row-avatar" style="margin-left:8px">${r.name.slice(0,2).toUpperCase()}</div>
-      <div class="list-body" style="margin-left:8px"><div class="list-name">${r.name}${r.me?' (siz)':''}</div></div>
-      <div class="list-val"><span class="mini-coin">$</span> ${r.coins.toLocaleString()}</div>
-    </div>`).join('');
+      <div class="row-avatar" style="margin-left:8px">${escapeHtml((r.name||'?').slice(0,2).toUpperCase())}</div>
+      <div class="list-body" style="margin-left:8px"><div class="list-name">${escapeHtml(r.name)}${r.me ? ' (' + t('youWord') + ')' : ''}</div></div>
+      <div class="list-val">${period === 'referrals' ? '👥' : '<span class="mini-coin">$</span>'} ${fmtV(r.value)}</div>
+    </div>`).join('') : (top.length ? '' : `<div class="activity-empty">${t('lbEmpty')}</div>`);
+}
+function renderLeaderboard(){
+  const c = lbCache[currentLbPeriod];
+  if(c) renderLeaderboardData(c.top, currentLbPeriod);
 }
 
 function renderStats(){
