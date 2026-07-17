@@ -30,6 +30,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Promo kodlar: faqat admin boshqaradi; foydalanuvchi server (Cloud Function) orqali ishlatadi.
+    match /promo_codes/{codeId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
     // Foydalanuvchi profili — ANTI-CHEAT:
     // tanga maydonlarini (coins, lifetimeCoins, cashedOutTotal, dailyEarned...)
     // faqat server (Cloud Functions, Admin SDK) va admin o'zgartira oladi.

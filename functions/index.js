@@ -6,6 +6,7 @@
 process.env.TZ = 'Asia/Tashkent';
 
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 
@@ -39,6 +40,27 @@ function dailyCap(level) {
 function requireAuth(req) {
   if (!req.auth || !req.auth.uid) throw new HttpsError('unauthenticated', 'login-required');
   return req.auth.uid;
+}
+
+/* Haftalik reyting uchun ISO hafta belgisi (masalan "2026-W29") */
+function weekStampNow() {
+  const d = new Date();
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  const week = Math.ceil(((t - yearStart) / 86400000 + 1) / 7);
+  return t.getUTCFullYear() + '-W' + String(week).padStart(2, '0');
+}
+/* Haftalik tanga hisobini yangilash uchun patch */
+function weeklyPatch(d, amount) {
+  const ws = weekStampNow();
+  return { weekStamp: ws, weeklyCoins: (d.weekStamp === ws ? (d.weeklyCoins || 0) : 0) + amount };
+}
+/* Reytingda email maxfiyligini saqlash: jas***@ emas, faqat jas*** */
+function maskEmail(email) {
+  const name = String(email || '').split('@')[0] || 'User';
+  return name.length <= 3 ? name + '***' : name.slice(0, 3) + '***';
 }
 
 /* ---------- Vazifani bajarish ---------- */
@@ -99,7 +121,8 @@ exports.completeTask = onCall(async (req) => {
       tasksCompletedTotal: (d.tasksCompletedTotal || 0) + 1,
       dailyEarned: dailyEarned + actual,
       taskCounts: { ...taskCounts, [taskId]: count + 1 },
-      lastReset: today
+      lastReset: today,
+      ...weeklyPatch(d, actual)
     });
     if (td && (td.totalLimit || 0) > 0) {
       tx.update(taskRef, { completedCount: (td.completedCount || 0) + 1 });
@@ -133,7 +156,8 @@ exports.claimStreak = onCall(async (req) => {
       coins: (d.coins || 0) + bonus,
       lifetimeCoins: (d.lifetimeCoins || 0) + bonus,
       streakCount: newStreak,
-      lastStreakClaim: today
+      lastStreakClaim: today,
+      ...weeklyPatch(d, bonus)
     });
     tx.set(userRef.collection('history').doc(), {
       label: `Kunlik bonus (${newStreak})`, amount: bonus, at: FieldValue.serverTimestamp()
@@ -211,7 +235,8 @@ exports.redeemReferral = onCall(async (req) => {
     tx.update(meRef, {
       referredBy: refUserRef.id,
       coins: (me.data().coins || 0) + REFERRAL_BONUS_NEWUSER,
-      lifetimeCoins: (me.data().lifetimeCoins || 0) + REFERRAL_BONUS_NEWUSER
+      lifetimeCoins: (me.data().lifetimeCoins || 0) + REFERRAL_BONUS_NEWUSER,
+      ...weeklyPatch(me.data(), REFERRAL_BONUS_NEWUSER)
     });
     tx.set(meRef.collection('history').doc(), {
       label: 'Referral bonus', amount: REFERRAL_BONUS_NEWUSER, at: FieldValue.serverTimestamp()
@@ -220,11 +245,135 @@ exports.redeemReferral = onCall(async (req) => {
       coins: (rd.coins || 0) + REFERRAL_BONUS_REFERRER,
       lifetimeCoins: (rd.lifetimeCoins || 0) + REFERRAL_BONUS_REFERRER,
       friendsCount: (rd.friendsCount || 0) + 1,
-      friendsBonus: (rd.friendsBonus || 0) + REFERRAL_BONUS_REFERRER
+      friendsBonus: (rd.friendsBonus || 0) + REFERRAL_BONUS_REFERRER,
+      ...weeklyPatch(rd, REFERRAL_BONUS_REFERRER)
     });
     tx.set(refUserRef.collection('history').doc(), {
       label: "Do'st taklifi bonusi", amount: REFERRAL_BONUS_REFERRER, at: FieldValue.serverTimestamp()
     });
   });
   return { bonus: REFERRAL_BONUS_NEWUSER };
+});
+
+/* ---------- 🎡 Omadli g'ildirak (kuniga 1 marta) ---------- */
+const SPIN_PRIZES = [10, 20, 30, 50, 70, 100, 200, 500];
+const SPIN_WEIGHTS = [30, 22, 16, 12, 9, 6, 4, 1]; // katta yutuq kamroq chiqadi
+
+exports.spinWheel = onCall(async (req) => {
+  const uid = requireAuth(req);
+  const userRef = db.collection('users').doc(uid);
+  return db.runTransaction(async (tx) => {
+    const doc = await tx.get(userRef);
+    if (!doc.exists) throw new HttpsError('not-found', 'user-not-found');
+    const d = doc.data();
+    if (d.banned === true) throw new HttpsError('permission-denied', 'banned');
+    const today = new Date().toDateString();
+    if (d.lastSpin === today) throw new HttpsError('failed-precondition', 'already-spun');
+
+    const total = SPIN_WEIGHTS.reduce((a, b) => a + b, 0);
+    let r = Math.random() * total, idx = 0;
+    for (let i = 0; i < SPIN_WEIGHTS.length; i++) { r -= SPIN_WEIGHTS[i]; if (r <= 0) { idx = i; break; } }
+    const prize = SPIN_PRIZES[idx];
+
+    tx.update(userRef, {
+      coins: (d.coins || 0) + prize,
+      lifetimeCoins: (d.lifetimeCoins || 0) + prize,
+      lastSpin: today,
+      ...weeklyPatch(d, prize)
+    });
+    tx.set(userRef.collection('history').doc(), {
+      label: "Omadli g'ildirak", amount: prize, at: FieldValue.serverTimestamp()
+    });
+    return { prize, index: idx };
+  });
+});
+
+/* ---------- 🎁 Promo kod ---------- */
+exports.redeemPromo = onCall(async (req) => {
+  const uid = requireAuth(req);
+  const code = String((req.data && req.data.code) || '').trim().toUpperCase();
+  if (!code || code.length > 30 || !/^[A-Z0-9_-]+$/.test(code)) throw new HttpsError('invalid-argument', 'bad-code');
+
+  const promoRef = db.collection('promo_codes').doc(code);
+  const userRef = db.collection('users').doc(uid);
+  return db.runTransaction(async (tx) => {
+    const promoDoc = await tx.get(promoRef);
+    const userDoc = await tx.get(userRef);
+    if (!promoDoc.exists) throw new HttpsError('not-found', 'code-not-found');
+    if (!userDoc.exists) throw new HttpsError('not-found', 'user-not-found');
+    const p = promoDoc.data(), d = userDoc.data();
+    if (d.banned === true) throw new HttpsError('permission-denied', 'banned');
+    if (p.active !== true) throw new HttpsError('failed-precondition', 'code-inactive');
+    if ((p.maxUses || 0) > 0 && (p.usedCount || 0) >= p.maxUses) throw new HttpsError('resource-exhausted', 'code-exhausted');
+    const used = d.usedPromos || [];
+    if (used.includes(code)) throw new HttpsError('failed-precondition', 'already-used');
+    const reward = Math.floor(Number(p.reward)) || 0;
+    if (reward <= 0) throw new HttpsError('failed-precondition', 'bad-code');
+
+    tx.update(promoRef, { usedCount: (p.usedCount || 0) + 1 });
+    tx.update(userRef, {
+      coins: (d.coins || 0) + reward,
+      lifetimeCoins: (d.lifetimeCoins || 0) + reward,
+      usedPromos: [...used, code],
+      ...weeklyPatch(d, reward)
+    });
+    tx.set(userRef.collection('history').doc(), {
+      label: 'Promo kod: ' + code, amount: reward, at: FieldValue.serverTimestamp()
+    });
+    return { reward };
+  });
+});
+
+/* ---------- 🏆 Reyting (haftalik / umumiy / referal) ---------- */
+exports.getLeaderboard = onCall(async (req) => {
+  const uid = requireAuth(req);
+  const period = String((req.data && req.data.period) || 'all');
+  const field = period === 'weekly' ? 'weeklyCoins' : period === 'referrals' ? 'friendsCount' : 'lifetimeCoins';
+  const snap = await db.collection('users').orderBy(field, 'desc').limit(25).get();
+  const ws = weekStampNow();
+  const top = [];
+  snap.forEach((doc) => {
+    if (top.length >= 10) return;
+    const d = doc.data();
+    if (d.banned === true) return;
+    let value = d[field] || 0;
+    if (period === 'weekly' && d.weekStamp !== ws) value = 0;
+    if (value <= 0) return;
+    top.push({ name: maskEmail(d.email), value, me: doc.id === uid });
+  });
+  return { period, top };
+});
+
+/* ---------- 🏆 Haftalik TOP-3 mukofoti (har dushanba 00:10, Toshkent) ---------- */
+exports.weeklyRewards = onSchedule({ schedule: '10 0 * * 1', timeZone: 'Asia/Tashkent' }, async () => {
+  const snap = await db.collection('users').orderBy('weeklyCoins', 'desc').limit(30).get();
+  const nowWs = weekStampNow();
+  const winners = [];
+  snap.forEach((doc) => {
+    if (winners.length >= 3) return;
+    const d = doc.data();
+    if (d.banned === true) return;
+    if (d.weekStamp === nowWs) return; // yangi hafta hisobiga o'tib bo'lgan
+    if ((d.weeklyCoins || 0) <= 0) return;
+    winners.push({ ref: doc.ref, d });
+  });
+  const prizes = [5000, 3000, 2000];
+  for (let i = 0; i < winners.length; i++) {
+    const { ref, d } = winners[i];
+    await ref.update({
+      coins: (d.coins || 0) + prizes[i],
+      lifetimeCoins: (d.lifetimeCoins || 0) + prizes[i]
+    });
+    await ref.collection('history').add({
+      label: `Haftalik TOP-${i + 1} mukofoti 🏆`, amount: prizes[i], at: FieldValue.serverTimestamp()
+    });
+  }
+  if (winners.length) {
+    await db.collection('news').add({
+      title: "🏆 Haftalik TOP g'oliblari!",
+      text: winners.map((w, i) => `${i + 1}-o'rin: ${maskEmail(w.d.email)} — +${prizes[i]} tanga`).join('\n') +
+        "\nSiz ham keyingi hafta g'olib bo'ling — vazifalarni bajaring!",
+      createdAt: FieldValue.serverTimestamp()
+    });
+  }
 });
