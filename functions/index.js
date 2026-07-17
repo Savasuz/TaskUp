@@ -146,11 +146,13 @@ exports.claimStreak = onCall(async (req) => {
 exports.requestCashout = onCall(async (req) => {
   const uid = requireAuth(req);
   const data = req.data || {};
+  const amount = Math.floor(Number(data.amount)) || 0;
   const cardNumber = String(data.cardNumber || '').replace(/\s/g, '');
   const cardExpiry = String(data.cardExpiry || '').trim();
   const cardHolder = String(data.cardHolder || '').trim().slice(0, 60);
   const payMethod = PAY_METHODS.includes(data.payMethod) ? data.payMethod : 'uzcard';
 
+  if (amount < CASHOUT_MIN) throw new HttpsError('failed-precondition', 'below-min');
   if (!/^\d{16}$/.test(cardNumber)) throw new HttpsError('invalid-argument', 'bad-card-number');
   if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardExpiry)) throw new HttpsError('invalid-argument', 'bad-card-expiry');
   if (cardHolder.length < 3) throw new HttpsError('invalid-argument', 'bad-card-holder');
@@ -161,26 +163,26 @@ exports.requestCashout = onCall(async (req) => {
     if (!doc.exists) throw new HttpsError('not-found', 'user-not-found');
     const d = doc.data();
     if (d.banned === true) throw new HttpsError('permission-denied', 'banned');
-    if ((d.coins || 0) < CASHOUT_MIN) throw new HttpsError('failed-precondition', 'insufficient');
+    if ((d.coins || 0) < amount) throw new HttpsError('failed-precondition', 'insufficient');
 
     tx.update(userRef, {
-      coins: d.coins - CASHOUT_MIN,
-      cashedOutTotal: (d.cashedOutTotal || 0) + CASHOUT_MIN
+      coins: d.coins - amount,
+      cashedOutTotal: (d.cashedOutTotal || 0) + amount
     });
     tx.set(db.collection('cashout_requests').doc(), {
       uid,
       email: d.email || '',
-      amountCoins: CASHOUT_MIN,
-      amountSom: Math.round(CASHOUT_MIN * COIN_TO_SOM),
+      amountCoins: amount,
+      amountSom: Math.round(amount * COIN_TO_SOM),
       payMethod, cardNumber, cardExpiry, cardHolder,
       status: 'pending',
       requestedAt: FieldValue.serverTimestamp()
     });
     tx.set(userRef.collection('history').doc(), {
-      label: "Pul yechish so'rovi", amount: -CASHOUT_MIN, at: FieldValue.serverTimestamp()
+      label: "Pul yechish so'rovi", amount: -amount, at: FieldValue.serverTimestamp()
     });
   });
-  return { ok: true };
+  return { ok: true, amount };
 });
 
 /* ---------- Referral kodini ishlatish ---------- */
