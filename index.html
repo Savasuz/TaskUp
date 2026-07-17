@@ -476,10 +476,13 @@
     box-shadow:inset 0 0 26px rgba(0,0,0,0.45), inset 0 4px 10px rgba(255,255,255,0.12);
     background:conic-gradient(#6C5CE7 0 45deg,#3E8EFF 45deg 90deg,#2ECC8F 90deg 135deg,#FFB020 135deg 180deg,#FF8A3D 180deg 225deg,#FF5C6C 225deg 270deg,#8B7BFF 270deg 315deg,#E056A0 315deg 360deg); }
   /* Uchayotgan 3D tangalar va yutuq matni */
-  .fly-coin{ position:fixed; z-index:95; width:26px; height:26px; border-radius:50%; pointer-events:none;
-    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color:#7A4B00;
+  .fly-coin{ position:fixed; z-index:95; width:28px; height:28px; border-radius:50%; pointer-events:none;
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:#7A4B00;
+    font-family:'Space Grotesk',sans-serif;
     background:radial-gradient(circle at 35% 30%, #FFF3B0, #FFC93C 55%, #C9861A);
-    box-shadow:0 2px 6px rgba(0,0,0,0.45), inset 0 -2px 3px rgba(0,0,0,0.25), inset 0 2px 3px rgba(255,255,255,0.6);
+    border:2px solid #A86E12;
+    box-shadow:0 2px 6px rgba(0,0,0,0.45), 0 0 14px rgba(124,92,255,0.65),
+      inset 0 -2px 3px rgba(0,0,0,0.25), inset 0 2px 3px rgba(255,255,255,0.6);
     will-change:transform, opacity; }
   .float-text{ position:fixed; left:50%; top:40%; transform:translateX(-50%); z-index:96; pointer-events:none;
     font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:34px; color:#FFD873;
@@ -812,6 +815,9 @@
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('language')">
           <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span><span data-i18n="langMenuItem">Til / Language</span></span><span class="muted" id="currentLangLabel">O'zbekcha ›</span>
         </div>
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="toggleSound()">
+          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></span><span data-i18n="soundMenuItem">Ovoz effektlari</span></span><span class="muted" id="soundStateLbl">Yoqilgan</span>
+        </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('leaderboard')">
           <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3a2 2 0 0 1-2 4"/><path d="M7 5H4a2 2 0 0 0 2 4"/></svg></span><span data-i18n="leaderboardMenuItem">Reyting</span></span><span class="muted">›</span>
         </div>
@@ -1005,7 +1011,17 @@ function getAudioCtx(){
   if(audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
+/* Ovoz effektlari sozlamasi — Profil > Ovoz effektlari orqali o'chiriladi */
+let soundOn = localStorage.getItem('taskupSound') !== '0';
+function toggleSound(){
+  soundOn = !soundOn;
+  localStorage.setItem('taskupSound', soundOn ? '1' : '0');
+  const lbl = document.getElementById('soundStateLbl');
+  if(lbl) lbl.textContent = soundOn ? t('soundOnLbl') : t('soundOffLbl');
+  if(soundOn) sndClick();
+}
 function playTone(freq, duration, type, startTime, gainPeak){
+  if(!soundOn) return;
   const ctx = getAudioCtx();
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -1083,6 +1099,7 @@ const I18N = {
     lbWeekly:"Haftalik", lbAll:"Umumiy", lbRef:"Referal liga", lbLoading:"Yuklanmoqda...", lbError:"Yuklashda xatolik",
     lbEmpty:"Hozircha bo'sh — birinchi bo'ling!", youWord:"siz",
     badgeBronze:"Bronza", badgeSilver:"Kumush", badgeGold:"Oltin", badgeDiamond:"Olmos", badgeLegend:"Afsona",
+    soundMenuItem:"Ovoz effektlari", soundOnLbl:"Yoqilgan ›", soundOffLbl:"O'chirilgan ›",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
@@ -1140,6 +1157,7 @@ const I18N = {
     lbWeekly:"Weekly", lbAll:"All-time", lbRef:"Referral league", lbLoading:"Loading...", lbError:"Failed to load",
     lbEmpty:"Empty for now — be the first!", youWord:"you",
     badgeBronze:"Bronze", badgeSilver:"Silver", badgeGold:"Gold", badgeDiamond:"Diamond", badgeLegend:"Legend",
+    soundMenuItem:"Sound effects", soundOnLbl:"On ›", soundOffLbl:"Off ›",
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
     authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in", forgotPass:"Forgot password?",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
@@ -1197,6 +1215,7 @@ const I18N = {
     lbWeekly:"Неделя", lbAll:"Все время", lbRef:"Реферальная лига", lbLoading:"Загрузка...", lbError:"Ошибка загрузки",
     lbEmpty:"Пока пусто — будьте первым!", youWord:"вы",
     badgeBronze:"Бронза", badgeSilver:"Серебро", badgeGold:"Золото", badgeDiamond:"Алмаз", badgeLegend:"Легенда",
+    soundMenuItem:"Звуковые эффекты", soundOnLbl:"Вкл ›", soundOffLbl:"Выкл ›",
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
     authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти", forgotPass:"Забыли пароль?",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
@@ -1507,29 +1526,30 @@ function animateWheelTo(targetDeg, duration, onDone){
   requestAnimationFrame(frame);
 }
 
-/* 3D tangalar g'ildirakdan balans tomon uchadi */
-function spawnCoinBurst(count){
+/* "T" belgili 3D tangalar manbadan balans tomon uchadi */
+function spawnCoinBurstFrom(sourceEl, count){
   if(reducedMotion) return;
-  const src = document.getElementById('wheelDisc');
-  const sRect = src ? src.getBoundingClientRect() : { left: innerWidth/2 - 20, top: innerHeight/2 - 20, width: 40, height: 40 };
+  const visible = sourceEl && sourceEl.offsetParent !== null;
+  const sRect = visible ? sourceEl.getBoundingClientRect()
+    : { left: innerWidth/2 - 20, top: innerHeight/2 - 40, width: 40, height: 40 };
   const balEl = document.getElementById('coinCount');
   const bRect = (balEl && balEl.offsetParent !== null) ? balEl.getBoundingClientRect() : { left: innerWidth/2 - 10, top: 50 };
   const cx = sRect.left + sRect.width/2, cy = sRect.top + sRect.height/2;
   for(let i = 0; i < count; i++){
     const c = document.createElement('div');
     c.className = 'fly-coin';
-    c.textContent = '$';
-    const offX = (Math.random() - 0.5) * 130;
-    const offY = (Math.random() - 0.5) * 70;
-    c.style.left = (cx + offX - 13) + 'px';
-    c.style.top = (cy + offY - 13) + 'px';
+    c.textContent = 'T';
+    const offX = (Math.random() - 0.5) * 120;
+    const offY = (Math.random() - 0.5) * 60;
+    c.style.left = (cx + offX - 14) + 'px';
+    c.style.top = (cy + offY - 14) + 'px';
     document.body.appendChild(c);
     const dx = (bRect.left) - (cx + offX), dy = (bRect.top) - (cy + offY);
     c.animate([
       { transform: 'translate(0,0) rotateY(0deg) scale(1)', opacity: 1 },
       { transform: `translate(${dx*0.5}px, ${dy*0.5 - 70}px) rotateY(360deg) scale(1.15)`, opacity: 1, offset: 0.6 },
       { transform: `translate(${dx}px, ${dy}px) rotateY(720deg) scale(0.35)`, opacity: 0.15 }
-    ], { duration: 850 + Math.random()*350, delay: i * 55, easing: 'cubic-bezier(0.3,0,0.55,1)', fill: 'forwards' })
+    ], { duration: 700 + Math.random()*300, delay: i * 40, easing: 'cubic-bezier(0.3,0,0.55,1)', fill: 'forwards' })
       .onfinish = () => c.remove();
   }
 }
@@ -1542,6 +1562,30 @@ function showFloatText(text){
 }
 function hapticFeedback(pattern){
   if(navigator.vibrate){ try { navigator.vibrate(pattern); } catch(e){} }
+}
+
+/* ---------------- 💰 Premium reward animatsiyasi (navbat bilan) ----------------
+   Faqat server mukofotni tasdiqlagandan KEYIN chaqiriladi.
+   Bir nechta mukofot ketma-ket kelsa, navbat bilan ko'rsatiladi. */
+let rewardQueue = [];
+let rewardPlaying = false;
+function celebrateReward(amount, sourceEl){
+  rewardQueue.push({ amount, sourceEl });
+  if(!rewardPlaying) playNextReward();
+}
+function playNextReward(){
+  const item = rewardQueue.shift();
+  if(!item){ rewardPlaying = false; return; }
+  rewardPlaying = true;
+  sndCoin();
+  hapticFeedback([35, 30, 70]);
+  showFloatText('+' + item.amount + ' coin');
+  if(!reducedMotion){
+    fireConfetti();
+    spawnCoinBurstFrom(item.sourceEl, Math.min(12, 8 + Math.floor(item.amount / 150)));
+  }
+  // Butun sikl ~1.6s — keyingi mukofot shundan keyin
+  setTimeout(playNextReward, reducedMotion ? 500 : 1700);
 }
 
 function doSpin(){
@@ -1561,11 +1605,7 @@ function doSpin(){
     animateWheelTo(target, reducedMotion ? 400 : 4400, () => {
       spinning = false;
       state.lastSpin = new Date().toDateString();
-      sndCoin();
-      hapticFeedback([40, 40, 90]);
-      fireConfetti();
-      spawnCoinBurst(Math.min(10, 6 + Math.floor(prize / 100)));
-      showFloatText('+' + prize + ' coin');
+      celebrateReward(prize, document.getElementById('wheelDisc'));
       showToast(`+${prize} ${t('wheelWin')}`);
       document.getElementById('wheelNote').textContent = t('wheelTomorrow');
       renderWheelState();
@@ -1587,7 +1627,7 @@ function redeemPromoCode(){
   const code = (document.getElementById('promoInput').value || '').trim().toUpperCase();
   if(!code){ showToast(t('toastEnterCode'), true); return; }
   fns.httpsCallable('redeemPromo')({ code }).then((res) => {
-    sndCoin(); fireConfetti();
+    celebrateReward((res.data && res.data.reward) || 0, null);
     showToast(`+${(res.data && res.data.reward) || ''} ${t('toastTaskDone')}`);
     document.getElementById('promoInput').value = '';
     loadHistory(currentUid);
@@ -1704,6 +1744,8 @@ function renderProfile(){
   const lb = levelBadge(lnum);
   document.getElementById('profLevel').textContent = lb.icon + ' ' + t(lb.key) + ' • ' + lnum + '-level';
   document.getElementById('profStreak').textContent = state.streakCount + ' kun';
+  const sndLbl = document.getElementById('soundStateLbl');
+  if(sndLbl) sndLbl.textContent = soundOn ? t('soundOnLbl') : t('soundOffLbl');
 }
 
 /* ---------------- Level / XP system ---------------- */
@@ -2105,8 +2147,8 @@ function completeTask(taskId, reward, dailyLimit, btnEl){
   // ANTI-CHEAT: mukofot serverda (Cloud Function) hisoblanadi va yoziladi
   setTimeout(()=>{
     fns.httpsCallable('completeTask')({ taskId }).then((res) => {
-      sndCoin();
       const got = (res.data && res.data.reward) || reward;
+      celebrateReward(got, btn);
       showToast(`+${got} ${t('toastTaskDone')}`);
       loadHistory(currentUid);
       if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
@@ -2132,7 +2174,7 @@ function claimStreak(){
   const btn = document.getElementById('streakBtn');
   if(btn) btn.disabled = true;
   fns.httpsCallable('claimStreak')({}).then((res) => {
-    sndCoin();
+    celebrateReward((res.data && res.data.bonus) || 0, document.getElementById('streakBtn'));
     showToast(`+${(res.data && res.data.bonus) || ''} ${t('toastStreakBonus')}`);
     loadHistory(currentUid);
   }).catch((err) => {
@@ -2191,11 +2233,10 @@ function redeemReferralCode(){
   const code = (document.getElementById('refCodeInput').value || '').trim();
   if(!code){ showToast(t('toastEnterCode'), true); return; }
   fns.httpsCallable('redeemReferral')({ code }).then((res) => {
-    sndCoin();
+    celebrateReward((res.data && res.data.bonus) || 0, null);
     showToast(`+${(res.data && res.data.bonus) || ''} ${t('toastRefRedeemed')}`);
     document.getElementById('refCodeInput').value = '';
     loadHistory(currentUid);
-    fireConfetti();
   }).catch((err) => {
     const m = err && err.message;
     let msg = t('toastRefError');
