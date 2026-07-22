@@ -209,6 +209,7 @@
       </div>
       <button onclick="resend2fa()" id="resend2faBtn" data-i18n="otpResend">Havolani qayta yuborish</button>
       <button onclick="cancel2fa()" style="margin-top:10px; background:none; border:1.5px solid var(--line); box-shadow:none; color:var(--muted)" data-i18n="otpBack">‹ Orqaga</button>
+      <div id="otpStatus" style="font-size:12px; margin-top:12px; text-align:center; min-height:16px; line-height:1.5"></div>
     </div>
     <div class="login-err" id="loginErr"></div>
   </div>
@@ -529,14 +530,26 @@ function cancel2fa(){
 }
 function send2faLink(email){
   try { localStorage.setItem('admin2faEmail', email); } catch(e){}
+  const st = document.getElementById('otpStatus');
+  if(st){ st.style.color = 'var(--muted)'; st.textContent = '⏳ Yuborilmoqda...'; }
   return auth.sendSignInLinkToEmail(email, {
     url: location.origin + location.pathname,
     handleCodeInApp: true
   }).then(() => {
     showToast(t('otpSent'));
+    if(st){
+      st.style.color = 'var(--green)';
+      st.textContent = '✅ ' + t('otpSent') + ' (' + new Date().toLocaleTimeString().slice(0,5) + '). ' + t('otpCheckSpam');
+    }
   }).catch((err) => {
     console.error(err);
-    document.getElementById('loginErr').textContent = t('otpSendErr') + ' (' + (err.code || '') + ')';
+    let hint = '';
+    if(err.code === 'auth/operation-not-allowed') hint = t('otpEnableHint');
+    else if(err.code === 'auth/unauthorized-continue-uri') hint = t('otpDomainHint');
+    if(st){
+      st.style.color = 'var(--red)';
+      st.textContent = '✕ ' + t('otpSendErr') + ' (' + (err.code || '') + '). ' + hint;
+    }
   });
 }
 function resend2fa(){
@@ -662,6 +675,9 @@ const ADMIN_I18N = {
     otpSent:"Havola emailga yuborildi", otpResend:"Havolani qayta yuborish", otpBack:"‹ Orqaga",
     otpOk:"Tasdiqlandi! Xush kelibsiz", otpBadLink:"Havola eskirgan yoki noto'g'ri — qayta yuboring", otpSendErr:"Havola yuborishda xatolik",
     offlineMsg:"Internet aloqasi yo'q — ulanish tiklanishini kutyapmiz", onlineMsg:"Internet aloqasi tiklandi ✅",
+    otpCheckSpam:"Kelmasa Spam papkasini tekshiring — yuboruvchi: noreply@taskup-df8ee.firebaseapp.com",
+    otpEnableHint:"Firebase Console → Authentication → Sign-in method → Email/Password ichida \"Email link (passwordless sign-in)\" yoqilmagan!",
+    otpDomainHint:"Firebase Console → Authentication → Settings → Authorized domains ga savasuz.github.io qo'shilmagan!",
     chipPending:"Kutmoqda", chipPaid:"To'landi", chipRejected:"Rad etildi",
     statusActive:"Faol", statusBanned:"Ban qilingan", statusPaid:"To'landi", statusPending:"Kutmoqda", statusRejected:"Rad etildi",
     btnBan:"Bloklash", btnUnban:"Blokdan chiqarish", btnApprove:"Tasdiqlash", btnReject:"Rad etish",
@@ -712,6 +728,9 @@ const ADMIN_I18N = {
     otpSent:"Link sent to email", otpResend:"Resend link", otpBack:"‹ Back",
     otpOk:"Verified! Welcome", otpBadLink:"Link expired or invalid — resend it", otpSendErr:"Failed to send the link",
     offlineMsg:"No internet connection — waiting to reconnect", onlineMsg:"Back online ✅",
+    otpCheckSpam:"Check your Spam folder — sender: noreply@taskup-df8ee.firebaseapp.com",
+    otpEnableHint:"\"Email link (passwordless sign-in)\" is not enabled in Firebase Console → Authentication → Sign-in method → Email/Password!",
+    otpDomainHint:"savasuz.github.io is missing from Firebase Console → Authentication → Settings → Authorized domains!",
     chipPending:"Pending", chipPaid:"Paid", chipRejected:"Rejected",
     statusActive:"Active", statusBanned:"Banned", statusPaid:"Paid", statusPending:"Pending", statusRejected:"Rejected",
     btnBan:"Ban", btnUnban:"Unban", btnApprove:"Approve", btnReject:"Reject",
@@ -762,6 +781,9 @@ const ADMIN_I18N = {
     otpSent:"Ссылка отправлена", otpResend:"Отправить ещё раз", otpBack:"‹ Назад",
     otpOk:"Подтверждено! Добро пожаловать", otpBadLink:"Ссылка устарела — отправьте заново", otpSendErr:"Ошибка отправки ссылки",
     offlineMsg:"Нет интернет-соединения — ждём восстановления", onlineMsg:"Соединение восстановлено ✅",
+    otpCheckSpam:"Проверьте папку Спам — отправитель: noreply@taskup-df8ee.firebaseapp.com",
+    otpEnableHint:"В Firebase Console → Authentication → Sign-in method → Email/Password не включён \"Email link (passwordless sign-in)\"!",
+    otpDomainHint:"savasuz.github.io отсутствует в Firebase Console → Authentication → Settings → Authorized domains!",
     chipPending:"Ожидает", chipPaid:"Оплачено", chipRejected:"Отклонено",
     statusActive:"Активен", statusBanned:"Заблокирован", statusPaid:"Оплачено", statusPending:"Ожидает", statusRejected:"Отклонено",
     btnBan:"Заблокировать", btnUnban:"Разблокировать", btnApprove:"Подтвердить", btnReject:"Отклонить",
