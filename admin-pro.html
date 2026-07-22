@@ -185,13 +185,23 @@
     font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px;
     opacity:0; transition:all .3s ease; pointer-events:none; z-index:60; white-space:nowrap; }
   </style>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
 <div id="offlineBar" style="display:none; position:fixed; top:0; left:0; right:0; z-index:110; background:#B3261E; color:#fff; text-align:center; padding:8px 12px; font-size:12.5px; font-weight:700; font-family:'Space Grotesk',sans-serif">📡 <span data-i18n="offlineMsg">Internet aloqasi yo'q — ulanish tiklanishini kutyapmiz</span></div>
+
+<div id="adminLoading" style="position:fixed; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; background:linear-gradient(160deg,#2A1E56 0%,#1B1433 55%,#141021 100%)">
+  <div style="width:78px; height:78px; border-radius:22px; background:linear-gradient(135deg,#7B6EF0,#6C5CE7); display:flex; align-items:center; justify-content:center; font-size:38px; color:#fff; font-weight:700; box-shadow:0 12px 34px rgba(108,92,231,0.55)">🛡️</div>
+  <div style="font-family:'Space Grotesk',sans-serif,Arial; font-size:24px; font-weight:700; color:#fff">TaskUp Admin</div>
+  <div style="width:30px; height:30px; border-radius:50%; border:3px solid rgba(255,255,255,0.18); border-top-color:#8B7BFF; animation:adminSpin 0.8s linear infinite"></div>
+</div>
+<style>@keyframes adminSpin{ to{ transform:rotate(360deg); } }</style>
+<script>
+setTimeout(function(){
+  var l = document.getElementById('adminLoading');
+  if(l && l.style.display !== 'none') l.style.display = 'none';
+}, 8000);
+</script>
 
 <!-- ================= LOGIN GATE ================= -->
 <div id="adminLogin">
@@ -478,6 +488,9 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyAkzf5b2npCuazGlqce6-MYn46YISqGw1o",
@@ -1176,6 +1189,8 @@ function rejectPayment(id, uid, amountCoins){
 /* Keep admin session across reloads (2FA: faqat ishonchli qurilmada) */
 const returning2fa = handle2faReturn();
 auth.onAuthStateChanged((user) => {
+  const adminLoad = document.getElementById('adminLoading');
+  if(adminLoad) adminLoad.style.display = 'none';
   if(returning2fa) return; // havola orqali kirish o'zi boshqaradi
   if(user){
     db.collection('admins').doc(user.uid).get().then((doc) => {
