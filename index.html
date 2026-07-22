@@ -9,7 +9,10 @@
 <meta http-equiv="Expires" content="0">
 <title>TaskUp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<!-- Shrift birinchi chizishni bloklamasligi uchun asinxron yuklanadi -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"></noscript>
 <style>
   :root{
     --bg:#0A0B10; --bg-alt:#14151D; --bg-card:#181A24; --line:#242631;
@@ -80,11 +83,17 @@
   .onboard-step-text b{ display:block; font-size:14px; margin-bottom:2px; }
   .onboard-step-text span{ font-size:12.5px; color:var(--muted); }
 
-  #loadingScreen{ position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:14px; z-index:100; }
-  .spinner{ width:34px; height:34px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--purple); animation:spin 0.8s linear infinite; }
+  #loadingScreen{ position:fixed; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:16px; z-index:100;
+    background:linear-gradient(160deg,#2A1E56 0%,#1B1433 55%,#141021 100%); }
+  .loading-logo{ width:78px; height:78px; border-radius:22px; background:linear-gradient(135deg,#7B6EF0,#6C5CE7);
+    display:flex; align-items:center; justify-content:center; font-size:38px; color:#fff; font-weight:700;
+    box-shadow:0 12px 34px rgba(108,92,231,0.55); animation:loadPulse 1.5s ease-in-out infinite; }
+  @keyframes loadPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.09); } }
+  .loading-title{ font-family:'Space Grotesk',sans-serif,Arial; font-size:27px; font-weight:700; color:#fff; }
+  .spinner{ width:30px; height:30px; border-radius:50%; border:3px solid rgba(255,255,255,0.18); border-top-color:#8B7BFF; animation:spin 0.8s linear infinite; }
   @keyframes spin{ to{ transform:rotate(360deg); } }
-  .loading-text{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--muted); letter-spacing:1px; }
+  .loading-text{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:rgba(255,255,255,0.55); letter-spacing:2px; }
 
   /* ---------- Header (greeting + balance chip) ---------- */
   .home-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:10px; }
@@ -565,7 +574,19 @@
 <body>
 
 <div id="offlineBar" style="display:none; position:fixed; top:0; left:0; right:0; z-index:110; background:#B3261E; color:#fff; text-align:center; padding:8px 12px; font-size:12.5px; font-weight:700; font-family:'Space Grotesk',sans-serif">📡 <span data-i18n="offlineMsg">Internet aloqasi yo'q — ulanish tiklanishini kutyapmiz</span></div>
-<div id="loadingScreen"><div class="spinner"></div><div class="loading-text">YUKLANMOQDA...</div></div>
+<div id="loadingScreen">
+  <div class="loading-logo">✓</div>
+  <div class="loading-title">TaskUp</div>
+  <div class="spinner"></div>
+  <div class="loading-text">YUKLANMOQDA...</div>
+</div>
+<script>
+// Zaxira: 8 soniyada nima bo'lsa ham loading yopiladi (CDN yuklanmay qolsa ham foydalanuvchi qora ekranda qolmasin)
+setTimeout(function(){
+  var l = document.getElementById('loadingScreen');
+  if(l && l.style.display !== 'none') l.style.display = 'none';
+}, 8000);
+</script>
 
 <!-- ================= AUTH ================= -->
 <div id="splashScreen">
@@ -2526,7 +2547,8 @@ function redeemReferralCode(btnEl){
 
 renderTaskLists();
 updateOnlineState();
-document.getElementById('loadingScreen').style.display = 'none';
+// loadingScreen endi onAuthStateChanged'da (sessiya aniqlangach) yopiladi —
+// shunda qora ekran o'rniga brendlangan yuklanish ko'rinadi
 </script>
 </body>
 </html>
