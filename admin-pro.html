@@ -504,6 +504,8 @@ window.addEventListener('error', function(e){
 });
 
 /* ---------------- AUTH + 2FA (email havola — ikkinchi bosqich) ---------------- */
+// 2FA hozircha O'CHIRILGAN — yoqish uchun true qiling
+const REQUIRE_2FA = false;
 const TRUST_KEY = 'admin2faTrust';
 const TRUST_DAYS = 30;
 let pending2faEmail = '';
@@ -572,8 +574,7 @@ function adminLogin(){
         return;
       }
       btn.disabled = false; btn.textContent = t('btnLogin');
-      if(isTrustedDevice()){
-        // Bu qurilma so'nggi 30 kunda 2FA'dan o'tgan
+      if(!REQUIRE_2FA || isTrustedDevice()){
         currentAdminUid = cred.user.uid;
         enterAdminApp();
       } else {
@@ -1179,7 +1180,7 @@ auth.onAuthStateChanged((user) => {
   if(user){
     db.collection('admins').doc(user.uid).get().then((doc) => {
       if(doc.exists){
-        if(isTrustedDevice()){ currentAdminUid = user.uid; enterAdminApp(); }
+        if(!REQUIRE_2FA || isTrustedDevice()){ currentAdminUid = user.uid; enterAdminApp(); }
         else { show2faScreen(user.email || ''); }
       }
       else if(currentAdminUid){ adminLogout(); }
