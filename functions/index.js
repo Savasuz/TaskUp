@@ -270,15 +270,25 @@ exports.spinWheel = onCall(async (req) => {
     const today = new Date().toDateString();
     if (d.lastSpin === today) throw new HttpsError('failed-precondition', 'already-spun');
 
-    const total = SPIN_WEIGHTS.reduce((a, b) => a + b, 0);
-    let r = Math.random() * total, idx = 0;
-    for (let i = 0; i < SPIN_WEIGHTS.length; i++) { r -= SPIN_WEIGHTS[i]; if (r <= 0) { idx = i; break; } }
+    let idx;
+    if (d.firstSpinUsed !== true) {
+      // ENG BIRINCHI aylantirish: har doim eng katta (500) yoki
+      // ikkinchi eng katta (200) yutuq — server belgilaydi
+      idx = Math.random() < 0.5 ? SPIN_PRIZES.length - 1 : SPIN_PRIZES.length - 2;
+    } else {
+      // Keyingi aylantirishlar: oddiy og'irlikli tasodif
+      const total = SPIN_WEIGHTS.reduce((a, b) => a + b, 0);
+      let r = Math.random() * total;
+      idx = 0;
+      for (let i = 0; i < SPIN_WEIGHTS.length; i++) { r -= SPIN_WEIGHTS[i]; if (r <= 0) { idx = i; break; } }
+    }
     const prize = SPIN_PRIZES[idx];
 
     tx.update(userRef, {
       coins: (d.coins || 0) + prize,
       lifetimeCoins: (d.lifetimeCoins || 0) + prize,
       lastSpin: today,
+      firstSpinUsed: true,
       ...weeklyPatch(d, prize)
     });
     tx.set(userRef.collection('history').doc(), {
