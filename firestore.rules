@@ -36,6 +36,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Qurilmalar reyestri (multi-akkaunt nazorati): yozish faqat server orqali.
+    match /devices/{deviceId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // Foydalanuvchi profili — ANTI-CHEAT:
     // tanga maydonlarini (coins, lifetimeCoins, cashedOutTotal, dailyEarned...)
     // faqat server (Cloud Functions, Admin SDK) va admin o'zgartira oladi.

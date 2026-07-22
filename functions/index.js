@@ -377,3 +377,39 @@ exports.weeklyRewards = onSchedule({ schedule: '10 0 * * 1', timeZone: 'Asia/Tas
     });
   }
 });
+
+/* ---------- 🛡️ Qurilma nazorati (multi-akkaunt aniqlash) ----------
+   Bitta qurilmada 3 va undan ortiq akkaunt ochilsa, ular avtomatik BAN
+   qilinmaydi — faqat "tekshiruvda" (flagged) belgisi qo'yiladi, admin
+   panelda ko'rinadi va admin o'zi qaror qabul qiladi. */
+const DEVICE_ACCOUNT_LIMIT = 3;
+
+exports.registerDevice = onCall(async (req) => {
+  const uid = requireAuth(req);
+  const deviceId = String((req.data && req.data.deviceId) || '').trim();
+  if (!/^[a-zA-Z0-9_-]{8,64}$/.test(deviceId)) throw new HttpsError('invalid-argument', 'bad-device');
+
+  const ipRaw = (req.rawRequest && (req.rawRequest.headers['x-forwarded-for'] || req.rawRequest.ip)) || '';
+  const ip = String(ipRaw).split(',')[0].trim().slice(0, 45);
+
+  const devRef = db.collection('devices').doc(deviceId);
+  const uidsNow = await db.runTransaction(async (tx) => {
+    const doc = await tx.get(devRef);
+    const d = doc.exists ? doc.data() : {};
+    const uids = Array.isArray(d.uids) ? d.uids.slice(0, 20) : [];
+    if (!uids.includes(uid)) uids.push(uid);
+    tx.set(devRef, { uids, lastSeen: FieldValue.serverTimestamp(), lastIp: ip }, { merge: true });
+    return uids;
+  });
+
+  let flaggedMe = false;
+  if (uidsNow.length >= DEVICE_ACCOUNT_LIMIT) {
+    flaggedMe = true;
+    for (const u of uidsNow) {
+      await db.collection('users').doc(u).update({
+        flagged: true, flagReason: 'multi-account', flaggedAt: FieldValue.serverTimestamp()
+      }).catch(() => {});
+    }
+  }
+  return { flagged: flaggedMe };
+});

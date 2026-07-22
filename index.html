@@ -1358,11 +1358,28 @@ auth.onAuthStateChanged((user) => {
     state.email = user.email || state.email;
     subscribeTasksCatalog();
     subscribeNews();
+    registerThisDevice();
     initUserData(user.uid);
   } else {
     document.getElementById('splashScreen').style.display = 'flex';
   }
 });
+
+/* Qurilma identifikatori (multi-akkaunt nazorati uchun) — serverga yuboriladi,
+   3+ akkaunt bitta qurilmada bo'lsa server "tekshiruvda" belgisini qo'yadi */
+function getDeviceId(){
+  let id = localStorage.getItem('taskupDeviceId');
+  if(!id){
+    id = 'dev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10);
+    try { localStorage.setItem('taskupDeviceId', id); } catch(e){}
+  }
+  return id;
+}
+function registerThisDevice(){
+  try {
+    fns.httpsCallable('registerDevice')({ deviceId: getDeviceId() }).catch(function(){});
+  } catch(e){}
+}
 
 function initUserData(uid){
   const userRef = db.collection('users').doc(uid);

@@ -195,9 +195,19 @@
 <div id="adminLogin">
   <div class="login-card">
     <h2 data-i18n="loginTitle">🛡️ Admin kirish</h2>
-    <input type="email" id="adminUser" placeholder="Email" autocomplete="email">
-    <input type="password" id="adminPass" placeholder="Parol" autocomplete="current-password">
-    <button onclick="adminLogin()" id="adminLoginBtn" data-i18n="btnLogin">Kirish</button>
+    <div id="loginStep1">
+      <input type="email" id="adminUser" placeholder="Email" autocomplete="email">
+      <input type="password" id="adminPass" placeholder="Parol" autocomplete="current-password">
+      <button onclick="adminLogin()" id="adminLoginBtn" data-i18n="btnLogin">Kirish</button>
+    </div>
+    <div id="loginStep2fa" style="display:none">
+      <div style="font-size:13px; color:var(--muted); line-height:1.7; margin-bottom:14px">
+        📧 <span data-i18n="otpMsg">Tasdiqlash havolasi emailingizga yuborildi. Emaildagi havolani SHU brauzerda oching — shundan keyin panel ochiladi.</span>
+        <div id="otp2faEmail" style="color:var(--text); font-weight:600; margin-top:6px"></div>
+      </div>
+      <button onclick="resend2fa()" id="resend2faBtn" data-i18n="otpResend">Havolani qayta yuborish</button>
+      <button onclick="cancel2fa()" style="margin-top:10px; background:none; border:1.5px solid var(--line); box-shadow:none; color:var(--muted)" data-i18n="otpBack">‹ Orqaga</button>
+    </div>
     <div class="login-err" id="loginErr"></div>
   </div>
 </div>
@@ -258,6 +268,7 @@
       <div class="chips">
         <div class="chip active" data-f="all" onclick="filterUsers('all',this)" data-i18n="chipAll">Barchasi</div>
         <div class="chip" data-f="faol" onclick="filterUsers('faol',this)" data-i18n="chipActive">Faol</div>
+        <div class="chip" data-f="flagged" onclick="filterUsers('flagged',this)" data-i18n="chipFlagged">⚠ Tekshiruvda</div>
         <div class="chip" data-f="ban" onclick="filterUsers('ban',this)" data-i18n="chipBanned">Ban qilingan</div>
       </div>
       <div class="overview-card">
@@ -489,7 +500,46 @@ window.addEventListener('error', function(e){
   if(e.message && e.message !== 'Script error.') console.error('Xato:', e.message, 'Qator:', e.lineno);
 });
 
-/* ---------------- AUTH ---------------- */
+/* ---------------- AUTH + 2FA (email havola — ikkinchi bosqich) ---------------- */
+const TRUST_KEY = 'admin2faTrust';
+const TRUST_DAYS = 30;
+let pending2faEmail = '';
+function isTrustedDevice(){
+  try {
+    const v = JSON.parse(localStorage.getItem(TRUST_KEY) || 'null');
+    return !!(v && v.exp > Date.now());
+  } catch(e){ return false; }
+}
+function markTrusted(){
+  try { localStorage.setItem(TRUST_KEY, JSON.stringify({ exp: Date.now() + TRUST_DAYS * 86400000 })); } catch(e){}
+}
+function show2faScreen(email){
+  pending2faEmail = email;
+  document.getElementById('loginStep1').style.display = 'none';
+  document.getElementById('loginStep2fa').style.display = 'block';
+  document.getElementById('otp2faEmail').textContent = email;
+}
+function cancel2fa(){
+  document.getElementById('loginStep2fa').style.display = 'none';
+  document.getElementById('loginStep1').style.display = 'block';
+  auth.signOut();
+  currentAdminUid = null;
+}
+function send2faLink(email){
+  try { localStorage.setItem('admin2faEmail', email); } catch(e){}
+  return auth.sendSignInLinkToEmail(email, {
+    url: location.origin + location.pathname,
+    handleCodeInApp: true
+  }).then(() => {
+    showToast(t('otpSent'));
+  }).catch((err) => {
+    console.error(err);
+    document.getElementById('loginErr').textContent = t('otpSendErr') + ' (' + (err.code || '') + ')';
+  });
+}
+function resend2fa(){
+  if(pending2faEmail) send2faLink(pending2faEmail);
+}
 function adminLogin(){
   const email = document.getElementById('adminUser').value.trim();
   const pass = document.getElementById('adminPass').value;
@@ -506,9 +556,16 @@ function adminLogin(){
         btn.disabled = false; btn.textContent = t('btnLogin');
         return;
       }
-      currentAdminUid = cred.user.uid;
-      enterAdminApp();
       btn.disabled = false; btn.textContent = t('btnLogin');
+      if(isTrustedDevice()){
+        // Bu qurilma so'nggi 30 kunda 2FA'dan o'tgan
+        currentAdminUid = cred.user.uid;
+        enterAdminApp();
+      } else {
+        // 2-bosqich: emailga tasdiqlash havolasi
+        send2faLink(email);
+        show2faScreen(email);
+      }
     });
   }).catch((error) => {
     let msg = "Kirishda xatolik yuz berdi";
@@ -516,6 +573,34 @@ function adminLogin(){
     err.textContent = msg;
     btn.disabled = false; btn.textContent = t('btnLogin');
   });
+}
+/* Emaildagi 2FA havolasi orqali qaytish */
+function handle2faReturn(){
+  try {
+    if(auth.isSignInWithEmailLink && auth.isSignInWithEmailLink(window.location.href)){
+      let email = localStorage.getItem('admin2faEmail') || '';
+      if(!email) email = prompt('Admin email:') || '';
+      auth.signInWithEmailLink(email, window.location.href).then((cred) => {
+        history.replaceState(null, '', location.pathname);
+        return db.collection('admins').doc(cred.user.uid).get().then((doc) => {
+          if(doc.exists){
+            markTrusted();
+            currentAdminUid = cred.user.uid;
+            enterAdminApp();
+            showToast(t('otpOk'));
+          } else {
+            auth.signOut();
+            document.getElementById('loginErr').textContent = "Sizda admin huquqi yo'q";
+          }
+        });
+      }).catch((err) => {
+        console.error(err);
+        document.getElementById('loginErr').textContent = t('otpBadLink');
+      });
+      return true;
+    }
+  } catch(e){ console.error(e); }
+  return false;
 }
 function enterAdminApp(){
   document.getElementById('adminLogin').style.display = 'none';
@@ -552,6 +637,10 @@ const ADMIN_I18N = {
     recentActivity:"So'nggi faoliyatlar", seeAll:"Barchasi ›", noActivity:"Hozircha faoliyat yo'q", cashoutReqLabel:"Pul yechish so'rovi",
     usersTitle:"Foydalanuvchilar", totalUsers:"Jami foydalanuvchilar", nothingFound:"Hech narsa topilmadi",
     chipAll:"Barchasi", chipActive:"Faol", chipBanned:"Ban qilingan", chipOn:"Faol", chipOff:"Nofaol",
+    chipFlagged:"⚠ Tekshiruvda", statusFlagged:"Tekshiruvda", btnUnflag:"Tekshiruvdan chiqarish", unflagged:"Tekshiruvdan chiqarildi",
+    otpMsg:"Tasdiqlash havolasi emailingizga yuborildi. Emaildagi havolani SHU brauzerda oching — shundan keyin panel ochiladi.",
+    otpSent:"Havola emailga yuborildi", otpResend:"Havolani qayta yuborish", otpBack:"‹ Orqaga",
+    otpOk:"Tasdiqlandi! Xush kelibsiz", otpBadLink:"Havola eskirgan yoki noto'g'ri — qayta yuboring", otpSendErr:"Havola yuborishda xatolik",
     chipPending:"Kutmoqda", chipPaid:"To'landi", chipRejected:"Rad etildi",
     statusActive:"Faol", statusBanned:"Ban qilingan", statusPaid:"To'landi", statusPending:"Kutmoqda", statusRejected:"Rad etildi",
     btnBan:"Bloklash", btnUnban:"Blokdan chiqarish", btnApprove:"Tasdiqlash", btnReject:"Rad etish",
@@ -597,6 +686,10 @@ const ADMIN_I18N = {
     recentActivity:"Recent activity", seeAll:"See all ›", noActivity:"No activity yet", cashoutReqLabel:"Withdrawal request",
     usersTitle:"Users", totalUsers:"Total users", nothingFound:"Nothing found",
     chipAll:"All", chipActive:"Active", chipBanned:"Banned", chipOn:"Active", chipOff:"Inactive",
+    chipFlagged:"⚠ Under review", statusFlagged:"Under review", btnUnflag:"Clear review", unflagged:"Review cleared",
+    otpMsg:"A verification link was sent to your email. Open the link in THIS browser to unlock the panel.",
+    otpSent:"Link sent to email", otpResend:"Resend link", otpBack:"‹ Back",
+    otpOk:"Verified! Welcome", otpBadLink:"Link expired or invalid — resend it", otpSendErr:"Failed to send the link",
     chipPending:"Pending", chipPaid:"Paid", chipRejected:"Rejected",
     statusActive:"Active", statusBanned:"Banned", statusPaid:"Paid", statusPending:"Pending", statusRejected:"Rejected",
     btnBan:"Ban", btnUnban:"Unban", btnApprove:"Approve", btnReject:"Reject",
@@ -642,6 +735,10 @@ const ADMIN_I18N = {
     recentActivity:"Последняя активность", seeAll:"Все ›", noActivity:"Пока нет активности", cashoutReqLabel:"Запрос на вывод",
     usersTitle:"Пользователи", totalUsers:"Всего пользователей", nothingFound:"Ничего не найдено",
     chipAll:"Все", chipActive:"Активные", chipBanned:"Заблокированные", chipOn:"Активные", chipOff:"Неактивные",
+    chipFlagged:"⚠ На проверке", statusFlagged:"На проверке", btnUnflag:"Снять проверку", unflagged:"Проверка снята",
+    otpMsg:"Ссылка подтверждения отправлена на ваш email. Откройте её в ЭТОМ браузере, чтобы войти в панель.",
+    otpSent:"Ссылка отправлена", otpResend:"Отправить ещё раз", otpBack:"‹ Назад",
+    otpOk:"Подтверждено! Добро пожаловать", otpBadLink:"Ссылка устарела — отправьте заново", otpSendErr:"Ошибка отправки ссылки",
     chipPending:"Ожидает", chipPaid:"Оплачено", chipRejected:"Отклонено",
     statusActive:"Активен", statusBanned:"Заблокирован", statusPaid:"Оплачено", statusPending:"Ожидает", statusRejected:"Отклонено",
     btnBan:"Заблокировать", btnUnban:"Разблокировать", btnApprove:"Подтвердить", btnReject:"Отклонить",
@@ -828,7 +925,7 @@ function subscribeUsers(){
     users = [];
     snap.forEach(doc => {
       const d = doc.data();
-      users.push({ uid: doc.id, email: d.email || '(no email)', coins: d.coins||0, lifetimeCoins: d.lifetimeCoins||0, cashedOutTotal: d.cashedOutTotal||0, banned: d.banned===true });
+      users.push({ uid: doc.id, email: d.email || '(no email)', coins: d.coins||0, lifetimeCoins: d.lifetimeCoins||0, cashedOutTotal: d.cashedOutTotal||0, banned: d.banned===true, flagged: d.flagged===true });
     });
     renderHome(); renderUsers();
   }, err => console.error(err));
@@ -838,7 +935,9 @@ function renderUsers(){
   document.getElementById('usersTotalVal').textContent = fmt(users.length);
   const q = (document.getElementById('userSearch').value || '').toLowerCase();
   const filtered = users.filter(u => {
-    const statusMatch = userFilter==='all' || (userFilter==='ban' && u.banned) || (userFilter==='faol' && !u.banned);
+    const statusMatch = userFilter==='all' || (userFilter==='ban' && u.banned)
+      || (userFilter==='flagged' && u.flagged)
+      || (userFilter==='faol' && !u.banned && !u.flagged);
     return statusMatch && u.email.toLowerCase().includes(q);
   });
   document.getElementById('usersList').innerHTML = filtered.length ? filtered.map(u => `
@@ -847,10 +946,15 @@ function renderUsers(){
       <div class="list-body"><div class="list-name">${escHtml(u.email)}</div><div class="list-meta">ID: ${u.uid.slice(0,8)}</div></div>
       <div class="list-right">
         <div class="list-val">${fmt(u.coins)} coin</div>
-        <div class="list-status ${u.banned?'status-ban':'status-faol'}">● ${u.banned?t('statusBanned'):t('statusActive')}</div>
-        <div style="margin-top:5px"><span onclick="openSendCoins('${u.uid}')" style="color:var(--amber);font-size:10px;cursor:pointer;margin-right:8px">🪙 ${t('sendCoinsShort')}</span><span onclick="toggleBanUser('${u.uid}', ${u.banned})" style="color:${u.banned?'var(--green)':'var(--red)'};font-size:10px;cursor:pointer">${u.banned?'✓ '+t('btnUnban'):'✕ '+t('btnBan')}</span></div>
+        <div class="list-status ${u.banned?'status-ban':(u.flagged?'status-nofaol':'status-faol')}">● ${u.banned?t('statusBanned'):(u.flagged?'⚠ '+t('statusFlagged'):t('statusActive'))}</div>
+        <div style="margin-top:5px"><span onclick="openSendCoins('${u.uid}')" style="color:var(--amber);font-size:10px;cursor:pointer;margin-right:8px">🪙 ${t('sendCoinsShort')}</span>${u.flagged ? `<span onclick="clearFlag('${u.uid}')" style="color:var(--green);font-size:10px;cursor:pointer;margin-right:8px">✓ ${t('btnUnflag')}</span>` : ''}<span onclick="toggleBanUser('${u.uid}', ${u.banned})" style="color:${u.banned?'var(--green)':'var(--red)'};font-size:10px;cursor:pointer">${u.banned?'✓ '+t('btnUnban'):'✕ '+t('btnBan')}</span></div>
       </div>
     </div>`).join('') : `<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">${t('nothingFound')}</div>`;
+}
+function clearFlag(uid){
+  db.collection('users').doc(uid).update({ flagged: false }).then(() => {
+    showToast(t('unflagged'));
+  }).catch(err => { console.error(err); showToast(t('errGeneric')); });
 }
 function toggleBanUser(uid, currentlyBanned){
   db.collection('users').doc(uid).update({ banned: !currentlyBanned }).then(() => {
@@ -1023,11 +1127,16 @@ function rejectPayment(id, uid, amountCoins){
   }).then(() => showToast(t('paymentRejected'))).catch(err => { console.error(err); showToast(t('errGeneric')); });
 }
 
-/* Keep admin session across reloads */
+/* Keep admin session across reloads (2FA: faqat ishonchli qurilmada) */
+const returning2fa = handle2faReturn();
 auth.onAuthStateChanged((user) => {
+  if(returning2fa) return; // havola orqali kirish o'zi boshqaradi
   if(user){
     db.collection('admins').doc(user.uid).get().then((doc) => {
-      if(doc.exists){ currentAdminUid = user.uid; enterAdminApp(); }
+      if(doc.exists){
+        if(isTrustedDevice()){ currentAdminUid = user.uid; enterAdminApp(); }
+        else { show2faScreen(user.email || ''); }
+      }
       else if(currentAdminUid){ adminLogout(); }
     });
   } else if(currentAdminUid){
