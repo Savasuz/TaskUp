@@ -547,6 +547,7 @@
 </head>
 <body>
 
+<div id="offlineBar" style="display:none; position:fixed; top:0; left:0; right:0; z-index:110; background:#B3261E; color:#fff; text-align:center; padding:8px 12px; font-size:12.5px; font-weight:700; font-family:'Space Grotesk',sans-serif">📡 <span data-i18n="offlineMsg">Internet aloqasi yo'q — ulanish tiklanishini kutyapmiz</span></div>
 <div id="loadingScreen"><div class="spinner"></div><div class="loading-text">YUKLANMOQDA...</div></div>
 
 <!-- ================= AUTH ================= -->
@@ -719,7 +720,7 @@
       <div class="referral-box">
         <input type="text" id="refCodeInput" placeholder="TASKUP-XXXX" autocapitalize="characters"
           style="background:none;border:none;outline:none;color:var(--text);flex:1;font-family:'JetBrains Mono',monospace;font-size:13px;margin:0;padding:0;min-width:0">
-        <button class="copy-btn" onclick="redeemReferralCode()" data-i18n="btnRedeem">Faollashtirish</button>
+        <button class="copy-btn" onclick="redeemReferralCode(this)" data-i18n="btnRedeem">Faollashtirish</button>
       </div>
 
       <div class="section-label" data-i18n="orShare">Bizni kuzating</div>
@@ -787,7 +788,7 @@
       <div class="section-label" data-i18n="enterAmount">Summani kiriting</div>
       <input type="text" id="cashoutAmount" placeholder="10000" value="10000" inputmode="numeric" style="margin-bottom:6px">
       <div class="progress-track"><div class="progress-fill" id="cashoutProgress"></div></div>
-      <button class="cashout-btn" id="cashoutBtn" onclick="tryCashout()" style="margin-top:6px">Yuklanmoqda...</button>
+      <button class="cashout-btn" id="cashoutBtn" onclick="tryCashout(this)" style="margin-top:6px">Yuklanmoqda...</button>
 
       <div class="sec-head" style="margin-top:24px">
         <div class="sec-title" data-i18n="recentActivity">So'nggi harakatlar</div>
@@ -825,7 +826,7 @@
         <div class="referral-box" style="margin-top:0">
           <input type="text" id="promoInput" placeholder="TASKUP2026" autocapitalize="characters"
             style="background:none;border:none;outline:none;color:var(--text);flex:1;font-family:'JetBrains Mono',monospace;font-size:13px;margin:0;padding:0;min-width:0;text-transform:uppercase">
-          <button class="copy-btn" onclick="redeemPromoCode()" data-i18n="btnRedeem">Faollashtirish</button>
+          <button class="copy-btn" onclick="redeemPromoCode(this)" data-i18n="btnRedeem">Faollashtirish</button>
         </div>
       </div>
       <div class="card">
@@ -1151,6 +1152,8 @@ const I18N = {
     badgeBronze:"Bronza", badgeSilver:"Kumush", badgeGold:"Oltin", badgeDiamond:"Olmos", badgeLegend:"Afsona",
     soundMenuItem:"Ovoz effektlari", soundOnLbl:"Yoqilgan ›", soundOffLbl:"O'chirilgan ›",
     helpTitle:"Yordam", helpText:"Savol yoki muammo bormi? Biz bilan bog'laning — odatda bir necha soat ichida javob beramiz.", helpTelegram:"Telegram orqali yozish", helpEmail:"Email yozish",
+    errOffline:"Internet aloqasi yo'q. Ulanishni tekshirib, qayta urinib ko'ring", errNetwork:"Server bilan aloqa uzildi. Bir necha soniyadan keyin qayta urinib ko'ring", errAuth:"Sessiya muddati tugagan — ilovadan chiqib, qaytadan kiring", errPermission:"Ruxsat yo'q — sahifani yangilang yoki qaytadan kiring", errUnknown:"Kutilmagan xatolik. Qayta urinib ko'ring",
+    offlineMsg:"Internet aloqasi yo'q — ulanish tiklanishini kutyapmiz", onlineMsg:"Internet aloqasi tiklandi ✅",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
@@ -1210,6 +1213,8 @@ const I18N = {
     badgeBronze:"Bronze", badgeSilver:"Silver", badgeGold:"Gold", badgeDiamond:"Diamond", badgeLegend:"Legend",
     soundMenuItem:"Sound effects", soundOnLbl:"On ›", soundOffLbl:"Off ›",
     helpTitle:"Help", helpText:"Questions or problems? Contact us — we usually reply within a few hours.", helpTelegram:"Message us on Telegram", helpEmail:"Write an email",
+    errOffline:"No internet connection. Check your connection and try again", errNetwork:"Lost connection to the server. Try again in a few seconds", errAuth:"Session expired — sign out and log in again", errPermission:"No permission — refresh the page or log in again", errUnknown:"Unexpected error. Please try again",
+    offlineMsg:"No internet connection — waiting to reconnect", onlineMsg:"Back online ✅",
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
     authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in", forgotPass:"Forgot password?",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
@@ -1269,6 +1274,8 @@ const I18N = {
     badgeBronze:"Бронза", badgeSilver:"Серебро", badgeGold:"Золото", badgeDiamond:"Алмаз", badgeLegend:"Легенда",
     soundMenuItem:"Звуковые эффекты", soundOnLbl:"Вкл ›", soundOffLbl:"Выкл ›",
     helpTitle:"Помощь", helpText:"Вопросы или проблемы? Свяжитесь с нами — обычно отвечаем в течение нескольких часов.", helpTelegram:"Написать в Telegram", helpEmail:"Написать на email",
+    errOffline:"Нет интернет-соединения. Проверьте связь и попробуйте снова", errNetwork:"Потеряна связь с сервером. Попробуйте через несколько секунд", errAuth:"Сессия истекла — выйдите и войдите заново", errPermission:"Нет доступа — обновите страницу или войдите заново", errUnknown:"Непредвиденная ошибка. Попробуйте ещё раз",
+    offlineMsg:"Нет интернет-соединения — ждём восстановления", onlineMsg:"Соединение восстановлено ✅",
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
     authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти", forgotPass:"Забыли пароль?",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
@@ -1568,6 +1575,38 @@ function renderWheelState(){
 }
 const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* ---------------- Aniq xato xabarlari ---------------- */
+function friendlyError(err){
+  const code = (err && (err.code || err.message)) || '';
+  if(!navigator.onLine) return t('errOffline');
+  if(/unavailable|internal|deadline|network|fetch/i.test(code)) return t('errNetwork');
+  if(/unauthenticated/i.test(code)) return t('errAuth');
+  if(/permission-denied/i.test(code)) return t('errPermission');
+  return t('errUnknown') + (code ? ' (' + code + ')' : '');
+}
+
+/* ---------------- Tugma loading holati (ikki marta bosishdan himoya) ---------------- */
+function withBtnLoading(btn, promise){
+  if(!btn) return promise;
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-spinner"></span>';
+  return promise.finally(() => { btn.disabled = false; btn.innerHTML = orig; });
+}
+
+/* ---------------- Internet holati ---------------- */
+function updateOnlineState(){
+  const bar = document.getElementById('offlineBar');
+  if(!bar) return;
+  if(navigator.onLine){
+    if(bar.style.display === 'block'){ bar.style.display = 'none'; showToast(t('onlineMsg')); }
+  } else {
+    bar.style.display = 'block';
+  }
+}
+window.addEventListener('online', updateOnlineState);
+window.addEventListener('offline', updateOnlineState);
+
 /* rAF bilan silliq tezlanish/sekinlashish; ko'rsatkich segment chegarasidan o'tganda bounce */
 function animateWheelTo(targetDeg, duration, onDone){
   const disc = document.getElementById('wheelDisc');
@@ -1685,31 +1724,31 @@ function doSpin(){
     spinning = false;
     const m = err && err.message;
     if(m === 'already-spun'){ state.lastSpin = new Date().toDateString(); showToast(t('wheelAlready'), true); }
-    else { console.error(err); showToast('Xatolik: ' + ((err && (err.code || err.message)) || ''), true); }
+    else { console.error(err); showToast(friendlyError(err), true); }
     renderWheelState();
   });
 }
 
 /* ---------------- 🎁 Promo kod ---------------- */
-function redeemPromoCode(){
+function redeemPromoCode(btnEl){
   sndClick();
   if(!currentUid) return;
   const code = (document.getElementById('promoInput').value || '').trim().toUpperCase();
   if(!code){ showToast(t('toastEnterCode'), true); return; }
-  fns.httpsCallable('redeemPromo')({ code }).then((res) => {
+  withBtnLoading(btnEl, fns.httpsCallable('redeemPromo')({ code }).then((res) => {
     celebrateReward((res.data && res.data.reward) || 0, null);
     showToast(`+${(res.data && res.data.reward) || ''} ${t('toastTaskDone')}`);
     document.getElementById('promoInput').value = '';
     loadHistory(currentUid);
   }).catch((err) => {
     const m = err && err.message;
-    let msg = t('toastRefError');
+    let msg = friendlyError(err);
     if(m === 'code-not-found' || m === 'bad-code') msg = t('toastPromoNotFound');
     else if(m === 'already-used') msg = t('toastPromoUsed');
     else if(m === 'code-exhausted') msg = t('toastPromoExhausted');
     else if(m === 'code-inactive') msg = t('toastPromoInactive');
     showToast(msg, true);
-  });
+  }));
 }
 
 /* ---------------- Toast / confetti ---------------- */
@@ -2247,7 +2286,7 @@ function completeTask(taskId, reward, dailyLimit, btnEl){
       else if(msg === 'not-started'){ showToast(t('toastNotStarted'), true); }
       else if(msg === 'ended'){ showToast(t('toastEnded'), true); }
       else if(msg === 'total-limit'){ showToast(t('toastTotalLimit'), true); }
-      else { console.error(err); showToast('Xatolik: ' + ((err && (err.code || err.message)) || "noma'lum"), true); }
+      else { console.error(err); showToast(friendlyError(err), true); }
       if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
     });
   }, 550);
@@ -2265,7 +2304,7 @@ function claimStreak(){
     showToast(`+${(res.data && res.data.bonus) || ''} ${t('toastStreakBonus')}`);
     loadHistory(currentUid);
   }).catch((err) => {
-    if(!(err && err.message === 'already-claimed')){ console.error(err); showToast('Xatolik yuz berdi', true); }
+    if(!(err && err.message === 'already-claimed')){ console.error(err); showToast(friendlyError(err), true); }
     if(btn) btn.disabled = false;
   });
 }
@@ -2279,7 +2318,7 @@ function formatCardExpiry(el){
   el.value = d.length > 2 ? d.slice(0, 2) + '/' + d.slice(2) : d;
 }
 
-function tryCashout(){
+function tryCashout(btnEl){
   sndClick();
   if(!currentUid) return;
 
@@ -2296,7 +2335,7 @@ function tryCashout(){
   if(cardHolder.length < 3){ showToast(t('toastCardHolder'), true); return; }
 
   // ANTI-CHEAT: pul yechish serverda tekshiriladi va yoziladi
-  fns.httpsCallable('requestCashout')({
+  withBtnLoading(btnEl, fns.httpsCallable('requestCashout')({
     amount,
     cardNumber, cardExpiry, cardHolder,
     payMethod: state.payMethod || 'uzcard'
@@ -2310,31 +2349,32 @@ function tryCashout(){
     if(msg === 'insufficient'){ showToast(t('toastNotEnough'), true); }
     else if(msg === 'below-min'){ showToast(`${t('toastCashoutMin')} ${CASHOUT_MIN.toLocaleString()}`, true); }
     else if(msg === 'banned'){ showToast('Hisobingiz bloklangan', true); }
-    else { console.error(err); showToast('Xatolik: ' + ((err && (err.code || err.message)) || "noma'lum"), true); }
-  });
+    else { console.error(err); showToast(friendlyError(err), true); }
+  }));
 }
 
-function redeemReferralCode(){
+function redeemReferralCode(btnEl){
   sndClick();
   if(!currentUid) return;
   const code = (document.getElementById('refCodeInput').value || '').trim();
   if(!code){ showToast(t('toastEnterCode'), true); return; }
-  fns.httpsCallable('redeemReferral')({ code }).then((res) => {
+  withBtnLoading(btnEl, fns.httpsCallable('redeemReferral')({ code }).then((res) => {
     celebrateReward((res.data && res.data.bonus) || 0, null);
     showToast(`+${(res.data && res.data.bonus) || ''} ${t('toastRefRedeemed')}`);
     document.getElementById('refCodeInput').value = '';
     loadHistory(currentUid);
   }).catch((err) => {
     const m = err && err.message;
-    let msg = t('toastRefError');
+    let msg = friendlyError(err);
     if(m === 'already-redeemed') msg = t('toastRefAlready');
     else if(m === 'code-not-found') msg = t('toastRefNotFound');
     else if(m === 'own-code') msg = t('toastRefOwn');
     showToast(msg, true);
-  });
+  }));
 }
 
 renderTaskLists();
+updateOnlineState();
 document.getElementById('loadingScreen').style.display = 'none';
 </script>
 </body>

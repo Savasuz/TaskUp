@@ -191,6 +191,8 @@
 </head>
 <body>
 
+<div id="offlineBar" style="display:none; position:fixed; top:0; left:0; right:0; z-index:110; background:#B3261E; color:#fff; text-align:center; padding:8px 12px; font-size:12.5px; font-weight:700; font-family:'Space Grotesk',sans-serif">📡 <span data-i18n="offlineMsg">Internet aloqasi yo'q — ulanish tiklanishini kutyapmiz</span></div>
+
 <!-- ================= LOGIN GATE ================= -->
 <div id="adminLogin">
   <div class="login-card">
@@ -348,7 +350,7 @@
       </div>
       <div class="form-toggle-row"><span style="font-size:13.5px; font-weight:600" data-i18n="lblActivate">Vazifani faollashtirish</span>
         <div class="switch on" id="newTaskActiveSwitch" onclick="this.classList.toggle('on')"></div></div>
-      <button class="submit-btn" onclick="submitNewTask()" data-i18n="btnAddTask">Vazifani qo'shish</button>
+      <button class="submit-btn" onclick="submitNewTask(this)" data-i18n="btnAddTask">Vazifani qo'shish</button>
     </div>
   </div>
 
@@ -360,7 +362,7 @@
       <input type="text" id="newsTitleInput" placeholder="Yangilik sarlavhasi">
       <label data-i18n="lblNewsText">Matn</label>
       <textarea id="newsTextInput" placeholder="Yangilik matnini yozing — foydalanuvchilarga qo'ng'iroqcha orqali ko'rinadi"></textarea>
-      <button class="submit-btn" onclick="submitNews()" data-i18n="btnPublish">E'lon qilish</button>
+      <button class="submit-btn" onclick="submitNews(this)" data-i18n="btnPublish">E'lon qilish</button>
       <div class="sec-head" style="margin-top:24px"><div class="sec-title" data-i18n="publishedNews">E'lon qilingan yangiliklar</div></div>
       <div id="newsAdminList"></div>
     </div>
@@ -376,7 +378,7 @@
       <input type="number" id="promoRewardInput" placeholder="500">
       <label data-i18n="promoMaxLbl">Necha kishi ishlatishi mumkin (bo'sh = cheksiz)</label>
       <input type="number" id="promoMaxInput" placeholder="100">
-      <button class="submit-btn" onclick="submitPromo()" data-i18n="promoBtn">Kod yaratish</button>
+      <button class="submit-btn" onclick="submitPromo(this)" data-i18n="promoBtn">Kod yaratish</button>
       <div class="sec-head" style="margin-top:24px"><div class="sec-title" data-i18n="promoListTitle">Yaratilgan kodlar</div></div>
       <div id="promoAdminList"></div>
     </div>
@@ -624,6 +626,24 @@ function switchView(name){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.v===name));
 }
 function showToast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.className='toast show'; setTimeout(()=>el.className='toast',1800); }
+/* Tugma loading holati (ikki marta bosishdan himoya) */
+function withBtnLoading(btn, promise){
+  if(!btn) return promise;
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳...';
+  return promise.finally(() => { btn.disabled = false; btn.innerHTML = orig; });
+}
+/* Internet holati */
+function updateOnlineState(){
+  const bar = document.getElementById('offlineBar');
+  if(!bar) return;
+  if(navigator.onLine){
+    if(bar.style.display === 'block'){ bar.style.display = 'none'; showToast(t('onlineMsg')); }
+  } else { bar.style.display = 'block'; }
+}
+window.addEventListener('online', updateOnlineState);
+window.addEventListener('offline', updateOnlineState);
 function initials(str){ return (str||'?').slice(0,2).toUpperCase(); }
 function fmt(n){ return Math.round(n||0).toLocaleString('uz-UZ'); }
 
@@ -641,6 +661,7 @@ const ADMIN_I18N = {
     otpMsg:"Tasdiqlash havolasi emailingizga yuborildi. Emaildagi havolani SHU brauzerda oching — shundan keyin panel ochiladi.",
     otpSent:"Havola emailga yuborildi", otpResend:"Havolani qayta yuborish", otpBack:"‹ Orqaga",
     otpOk:"Tasdiqlandi! Xush kelibsiz", otpBadLink:"Havola eskirgan yoki noto'g'ri — qayta yuboring", otpSendErr:"Havola yuborishda xatolik",
+    offlineMsg:"Internet aloqasi yo'q — ulanish tiklanishini kutyapmiz", onlineMsg:"Internet aloqasi tiklandi ✅",
     chipPending:"Kutmoqda", chipPaid:"To'landi", chipRejected:"Rad etildi",
     statusActive:"Faol", statusBanned:"Ban qilingan", statusPaid:"To'landi", statusPending:"Kutmoqda", statusRejected:"Rad etildi",
     btnBan:"Bloklash", btnUnban:"Blokdan chiqarish", btnApprove:"Tasdiqlash", btnReject:"Rad etish",
@@ -690,6 +711,7 @@ const ADMIN_I18N = {
     otpMsg:"A verification link was sent to your email. Open the link in THIS browser to unlock the panel.",
     otpSent:"Link sent to email", otpResend:"Resend link", otpBack:"‹ Back",
     otpOk:"Verified! Welcome", otpBadLink:"Link expired or invalid — resend it", otpSendErr:"Failed to send the link",
+    offlineMsg:"No internet connection — waiting to reconnect", onlineMsg:"Back online ✅",
     chipPending:"Pending", chipPaid:"Paid", chipRejected:"Rejected",
     statusActive:"Active", statusBanned:"Banned", statusPaid:"Paid", statusPending:"Pending", statusRejected:"Rejected",
     btnBan:"Ban", btnUnban:"Unban", btnApprove:"Approve", btnReject:"Reject",
@@ -739,6 +761,7 @@ const ADMIN_I18N = {
     otpMsg:"Ссылка подтверждения отправлена на ваш email. Откройте её в ЭТОМ браузере, чтобы войти в панель.",
     otpSent:"Ссылка отправлена", otpResend:"Отправить ещё раз", otpBack:"‹ Назад",
     otpOk:"Подтверждено! Добро пожаловать", otpBadLink:"Ссылка устарела — отправьте заново", otpSendErr:"Ошибка отправки ссылки",
+    offlineMsg:"Нет интернет-соединения — ждём восстановления", onlineMsg:"Соединение восстановлено ✅",
     chipPending:"Ожидает", chipPaid:"Оплачено", chipRejected:"Отклонено",
     statusActive:"Активен", statusBanned:"Заблокирован", statusPaid:"Оплачено", statusPending:"Ожидает", statusRejected:"Отклонено",
     btnBan:"Заблокировать", btnUnban:"Разблокировать", btnApprove:"Подтвердить", btnReject:"Отклонить",
@@ -850,13 +873,13 @@ function renderPromosAdmin(){
       <div class="switch ${p.active?'on':''}" onclick="togglePromo('${p.id}', ${!!p.active})"></div>
     </div>`).join('') : `<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">${t('promoEmpty')}</div>`;
 }
-function submitPromo(){
+function submitPromo(btnEl){
   const code = (document.getElementById('promoCodeInput').value || '').trim().toUpperCase();
   const reward = parseInt(document.getElementById('promoRewardInput').value) || 0;
   const maxUses = parseInt(document.getElementById('promoMaxInput').value) || 0;
   if(!code || !/^[A-Z0-9_-]{3,30}$/.test(code)){ showToast(t('promoBadCode')); return; }
   if(reward <= 0){ showToast(t('promoBadReward')); return; }
-  db.collection('promo_codes').doc(code).get().then(doc => {
+  withBtnLoading(btnEl, db.collection('promo_codes').doc(code).get().then(doc => {
     if(doc.exists){ showToast(t('promoExists')); return; }
     return db.collection('promo_codes').doc(code).set({
       reward, maxUses, usedCount: 0, active: true,
@@ -865,16 +888,16 @@ function submitPromo(){
       showToast(t('promoCreated'));
       document.getElementById('promoCodeInput').value=''; document.getElementById('promoRewardInput').value=''; document.getElementById('promoMaxInput').value='';
     });
-  }).catch(err => { console.error(err); showToast(t('errGeneric')); });
+  }).catch(err => { console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); }));
 }
 function togglePromo(id, currentActive){
   db.collection('promo_codes').doc(id).update({ active: !currentActive })
     .then(()=>showToast(!currentActive ? t('promoOn') : t('promoOff')))
-    .catch(err=>{ console.error(err); showToast(t('errGeneric')); });
+    .catch(err=>{ console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); });
 }
 function deletePromo(id){
   if(!confirm(t('promoConfirmDelete'))) return;
-  db.collection('promo_codes').doc(id).delete().then(()=>showToast(t('promoDeleted'))).catch(err=>{ console.error(err); showToast(t('errGeneric')); });
+  db.collection('promo_codes').doc(id).delete().then(()=>showToast(t('promoDeleted'))).catch(err=>{ console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); });
 }
 
 /* ---------------- SOZLAMALAR AMALLARI ---------------- */
@@ -892,7 +915,7 @@ function resetAdminPassword(){
   const email = auth.currentUser && auth.currentUser.email;
   if(!email){ showToast(t('errGeneric')); return; }
   if(!confirm(t('resetConfirm') + ' ' + email)) return;
-  auth.sendPasswordResetEmail(email).then(() => showToast(t('resetSent'))).catch(err => { console.error(err); showToast(t('errGeneric')); });
+  auth.sendPasswordResetEmail(email).then(() => showToast(t('resetSent'))).catch(err => { console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); });
 }
 function showAbout(){
   alert('TaskUp Admin v1.1.0\n' + t('statUsers') + ': ' + users.length + '\n' + t('statTasks') + ': ' + tasksData.length + '\n' + t('statPayments') + ': ' + payments.length);
@@ -954,12 +977,12 @@ function renderUsers(){
 function clearFlag(uid){
   db.collection('users').doc(uid).update({ flagged: false }).then(() => {
     showToast(t('unflagged'));
-  }).catch(err => { console.error(err); showToast(t('errGeneric')); });
+  }).catch(err => { console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); });
 }
 function toggleBanUser(uid, currentlyBanned){
   db.collection('users').doc(uid).update({ banned: !currentlyBanned }).then(() => {
     showToast(!currentlyBanned ? t('userBanned') : t('userUnbanned'));
-  }).catch(err => { console.error(err); showToast(t('errGeneric')); });
+  }).catch(err => { console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); });
 }
 
 /* ---------------- TASKS ---------------- */
@@ -989,11 +1012,11 @@ function renderTasksAdmin(){
 function toggleTaskActive(id, currentActive){
   db.collection('tasks').doc(id).update({ active: !currentActive }).then(() => {
     showToast(!currentActive ? t('taskOn') : t('taskOff'));
-  }).catch(err => { console.error(err); showToast(t('errGeneric')); });
+  }).catch(err => { console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); });
 }
 function deleteTask(id){
   if(!confirm(t('confirmDeleteTask'))) return;
-  db.collection('tasks').doc(id).delete().then(()=>showToast(t('taskDeleted'))).catch(err=>{ console.error(err); showToast(t('errGeneric')); });
+  db.collection('tasks').doc(id).delete().then(()=>showToast(t('taskDeleted'))).catch(err=>{ console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); });
 }
 
 let selectedIconKey = 'video';
@@ -1009,7 +1032,7 @@ function onTaskKindChange(){
   if(isAd) document.getElementById('newTaskVerify').value = 'admob';
   else if(document.getElementById('newTaskVerify').value === 'admob') document.getElementById('newTaskVerify').value = 'auto';
 }
-function submitNewTask(){
+function submitNewTask(btnEl){
   const name = document.getElementById('newTaskName').value.trim();
   const desc = document.getElementById('newTaskDesc').value.trim();
   const reward = parseInt(document.getElementById('newTaskReward').value) || 0;
@@ -1032,7 +1055,7 @@ function submitNewTask(){
   if(startAt && endAt && endAt < startAt){ showToast(t('badDates')); return; }
 
   const maxOrder = tasksData.reduce((m,x)=>Math.max(m, x.order||0), 0);
-  db.collection('tasks').add({
+  withBtnLoading(btnEl, db.collection('tasks').add({
     name, desc, reward, dailyLimit, icon: selectedIconKey, category, active,
     kind, url: kind === 'rewarded_ad' ? '' : url, verify,
     totalLimit, completedCount: 0, startAt, endAt,
@@ -1042,7 +1065,7 @@ function submitNewTask(){
     ['newTaskName','newTaskDesc','newTaskReward','newTaskUrl','newTaskTotalLimit','newTaskStart','newTaskEnd'].forEach(id => document.getElementById(id).value='');
     document.getElementById('newTaskDailyLimit').value='1';
     switchView('tasks');
-  }).catch(err => { console.error(err); showToast(t('errGeneric')); });
+  }).catch(err => { console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); }));
 }
 
 /* ---------------- NEWS ---------------- */
@@ -1069,18 +1092,18 @@ function renderNewsAdmin(){
     </div>`;
   }).join('') : `<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">${t('noNews')}</div>`;
 }
-function submitNews(){
+function submitNews(btnEl){
   const title = document.getElementById('newsTitleInput').value.trim();
   const text = document.getElementById('newsTextInput').value.trim();
   if(!title){ showToast(t('fillTitle')); return; }
-  db.collection('news').add({ title, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
+  withBtnLoading(btnEl, db.collection('news').add({ title, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(() => {
     showToast(t('newsPublished'));
     document.getElementById('newsTitleInput').value=''; document.getElementById('newsTextInput').value='';
-  }).catch(err => { console.error(err); showToast(t('errGeneric')); });
+  }).catch(err => { console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); }));
 }
 function deleteNews(id){
   if(!confirm(t('confirmDeleteNews'))) return;
-  db.collection('news').doc(id).delete().then(()=>showToast(t('newsDeleted'))).catch(err=>{ console.error(err); showToast(t('errGeneric')); });
+  db.collection('news').doc(id).delete().then(()=>showToast(t('newsDeleted'))).catch(err=>{ console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); });
 }
 
 /* ---------------- PAYMENTS ---------------- */
@@ -1113,7 +1136,7 @@ function renderPayments(){
 }
 function approvePayment(id){
   if(!confirm(t('confirmApprove'))) return;
-  db.collection('cashout_requests').doc(id).update({ status: 'paid' }).then(()=>showToast(t('paymentApproved'))).catch(err=>{ console.error(err); showToast(t('errGeneric')); });
+  db.collection('cashout_requests').doc(id).update({ status: 'paid' }).then(()=>showToast(t('paymentApproved'))).catch(err=>{ console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); });
 }
 function rejectPayment(id, uid, amountCoins){
   const reqRef = db.collection('cashout_requests').doc(id);
@@ -1124,7 +1147,7 @@ function rejectPayment(id, uid, amountCoins){
       tx.update(userRef, { coins: (data.coins||0) + amountCoins, cashedOutTotal: Math.max(0,(data.cashedOutTotal||0) - amountCoins) });
       tx.update(reqRef, { status: 'rejected' });
     });
-  }).then(() => showToast(t('paymentRejected'))).catch(err => { console.error(err); showToast(t('errGeneric')); });
+  }).then(() => showToast(t('paymentRejected'))).catch(err => { console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); });
 }
 
 /* Keep admin session across reloads (2FA: faqat ishonchli qurilmada) */
@@ -1146,6 +1169,7 @@ auth.onAuthStateChanged((user) => {
 });
 
 applyAdminLang();
+updateOnlineState();
 </script>
 </body>
 </html>
