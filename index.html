@@ -521,6 +521,28 @@
   @keyframes shineSweep{ to{ left:135%; } }
   .lvl-particle{ position:fixed; z-index:95; width:8px; height:8px; border-radius:50%; pointer-events:none;
     box-shadow:0 0 10px currentColor; will-change:transform, opacity; }
+
+  /* ---------- Hujjat ko'ruvchi (Maxfiylik/Shartlar — ilova ichida) ---------- */
+  #docOverlay{ display:none; position:fixed; inset:0; background:var(--bg); z-index:88; flex-direction:column; }
+  #docOverlay.show{ display:flex; }
+  .doc-head{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px;
+    border-bottom:1px solid var(--line); background:var(--bg-alt); }
+  .doc-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; }
+  .doc-close{ width:32px; height:32px; border-radius:50%; background:var(--bg-card); border:1px solid var(--line);
+    color:var(--muted); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px; }
+  #docFrame{ flex:1; width:100%; border:none; background:#fff; }
+
+  /* ---------- Yordam oynasi ---------- */
+  #helpOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.72); backdrop-filter:blur(4px);
+    z-index:88; align-items:flex-end; justify-content:center; }
+  #helpOverlay.show{ display:flex; }
+  .help-btn-row{ display:flex; align-items:center; gap:13px; background:var(--bg-card); border:1px solid var(--line);
+    border-radius:14px; padding:14px; margin-bottom:10px; cursor:pointer; }
+  .help-btn-row:active{ transform:scale(0.98); }
+  .help-ico{ width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-size:19px; color:#fff; flex-shrink:0; }
+  .help-body b{ font-size:14px; display:block; }
+  .help-body span{ font-size:11.5px; color:var(--muted); }
 </style>
 </head>
 <body>
@@ -833,13 +855,13 @@
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('friends')">
           <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span data-i18n="myFriendsMenuItem">Do'stlarim</span></span><span class="muted">›</span>
         </div>
-        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="window.open('https://t.me/Taskupuz','_blank')">
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="openHelp()">
           <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span><span data-i18n="helpMenuItem">Yordam / Qo'llab-quvvatlash</span></span><span class="muted">›</span>
         </div>
-        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="window.open('privacy-policy.html','_blank')">
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="openDocViewer('privacy-policy.html','privacyMenuItem')">
           <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><span data-i18n="privacyMenuItem">Maxfiylik siyosati</span></span><span class="muted">›</span>
         </div>
-        <div class="profile-row" style="padding:13px 14px; cursor:pointer; border-bottom:none" onclick="window.open('terms-of-service.html','_blank')">
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer; border-bottom:none" onclick="openDocViewer('terms-of-service.html','termsMenuItem')">
           <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></span><span data-i18n="termsMenuItem">Foydalanish shartlari</span></span><span class="muted">›</span>
         </div>
       </div>
@@ -923,6 +945,34 @@
       <div class="nav-item" data-tab="friends" onclick="switchTab('friends')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="nav-label" id="navL3" data-i18n="navL3">Do'stlar</span></div>
       <div class="nav-item" data-tab="wallet" onclick="switchTab('wallet')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span><span class="nav-label" id="navL4" data-i18n="navL4">Pul</span></div>
       <div class="nav-item" data-tab="profile" onclick="switchTab('profile')"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nav-label" id="navL5" data-i18n="navL5">Profil</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ---- HUJJAT KO'RUVCHI (ilova ichida) ---- -->
+<div id="docOverlay">
+  <div class="doc-head">
+    <div class="doc-title" id="docTitle">Hujjat</div>
+    <div class="doc-close" onclick="closeDocViewer()">✕</div>
+  </div>
+  <iframe id="docFrame" src="about:blank"></iframe>
+</div>
+
+<!-- ---- YORDAM OVERLAY ---- -->
+<div id="helpOverlay" onclick="if(event.target===this) closeHelp()">
+  <div class="news-panel">
+    <div class="news-head">
+      <div class="sec-title" data-i18n="helpTitle">Yordam</div>
+      <div class="news-close" onclick="closeHelp()">✕</div>
+    </div>
+    <div style="font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:14px" data-i18n="helpText">Savol yoki muammo bormi? Biz bilan bog'laning — odatda bir necha soat ichida javob beramiz.</div>
+    <div class="help-btn-row" onclick="window.open('https://t.me/Taskupuz','_blank')">
+      <div class="help-ico" style="background:#2AABEE"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22 3L2 11l6 2 2 6 3-4 5 4 4-16z"/></svg></div>
+      <div class="help-body"><b data-i18n="helpTelegram">Telegram orqali yozish</b><span>@Taskupuz</span></div>
+    </div>
+    <div class="help-btn-row" onclick="window.open('mailto:rubekdeveloper@gmail.com?subject=TaskUp%20yordam','_blank')">
+      <div class="help-ico" style="background:var(--purple)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+      <div class="help-body"><b data-i18n="helpEmail">Email yozish</b><span>rubekdeveloper@gmail.com</span></div>
     </div>
   </div>
 </div>
@@ -1100,6 +1150,7 @@ const I18N = {
     lbEmpty:"Hozircha bo'sh — birinchi bo'ling!", youWord:"siz",
     badgeBronze:"Bronza", badgeSilver:"Kumush", badgeGold:"Oltin", badgeDiamond:"Olmos", badgeLegend:"Afsona",
     soundMenuItem:"Ovoz effektlari", soundOnLbl:"Yoqilgan ›", soundOffLbl:"O'chirilgan ›",
+    helpTitle:"Yordam", helpText:"Savol yoki muammo bormi? Biz bilan bog'laning — odatda bir necha soat ichida javob beramiz.", helpTelegram:"Telegram orqali yozish", helpEmail:"Email yozish",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
@@ -1158,6 +1209,7 @@ const I18N = {
     lbEmpty:"Empty for now — be the first!", youWord:"you",
     badgeBronze:"Bronze", badgeSilver:"Silver", badgeGold:"Gold", badgeDiamond:"Diamond", badgeLegend:"Legend",
     soundMenuItem:"Sound effects", soundOnLbl:"On ›", soundOffLbl:"Off ›",
+    helpTitle:"Help", helpText:"Questions or problems? Contact us — we usually reply within a few hours.", helpTelegram:"Message us on Telegram", helpEmail:"Write an email",
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
     authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in", forgotPass:"Forgot password?",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
@@ -1216,6 +1268,7 @@ const I18N = {
     lbEmpty:"Пока пусто — будьте первым!", youWord:"вы",
     badgeBronze:"Бронза", badgeSilver:"Серебро", badgeGold:"Золото", badgeDiamond:"Алмаз", badgeLegend:"Легенда",
     soundMenuItem:"Звуковые эффекты", soundOnLbl:"Вкл ›", soundOffLbl:"Выкл ›",
+    helpTitle:"Помощь", helpText:"Вопросы или проблемы? Свяжитесь с нами — обычно отвечаем в течение нескольких часов.", helpTelegram:"Написать в Telegram", helpEmail:"Написать на email",
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
     authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти", forgotPass:"Забыли пароль?",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
@@ -2011,6 +2064,23 @@ function renderNewsList(){
     </div>`;
   }).join('') : `<div class="news-empty">${t('newsEmpty')}</div>`;
 }
+/* ---------------- Hujjat ko'ruvchi va Yordam ---------------- */
+function openDocViewer(url, titleKey){
+  sndClick();
+  document.getElementById('docTitle').textContent = t(titleKey);
+  document.getElementById('docFrame').src = url;
+  document.getElementById('docOverlay').classList.add('show');
+}
+function closeDocViewer(){
+  document.getElementById('docOverlay').classList.remove('show');
+  document.getElementById('docFrame').src = 'about:blank';
+}
+function openHelp(){
+  sndClick();
+  document.getElementById('helpOverlay').classList.add('show');
+}
+function closeHelp(){ document.getElementById('helpOverlay').classList.remove('show'); }
+
 function openNews(){
   sndClick();
   renderNewsList();
