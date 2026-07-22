@@ -532,6 +532,23 @@
     color:var(--muted); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px; }
   #docFrame{ flex:1; width:100%; border:none; background:#fff; }
 
+  /* ---------- 🎉 Ulashish (share) oynasi ---------- */
+  #shareOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.78); backdrop-filter:blur(5px);
+    z-index:92; align-items:flex-end; justify-content:center; }
+  #shareOverlay.show{ display:flex; }
+  .share-card{ background:linear-gradient(160deg,#2A1E56 0%,#1B1433 55%,#141021 100%);
+    border:1px solid rgba(124,92,255,0.5); border-radius:20px; padding:22px 18px; text-align:center;
+    box-shadow:0 10px 30px rgba(108,92,231,0.3), inset 0 1px 0 rgba(255,255,255,0.08); }
+  .share-card-logo{ display:flex; align-items:center; justify-content:center; gap:8px;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; }
+  .share-logo-badge{ width:30px; height:30px; border-radius:9px; background:linear-gradient(135deg,#7B6EF0,#6C5CE7);
+    display:inline-flex; align-items:center; justify-content:center; color:#fff; font-size:16px;
+    box-shadow:0 4px 10px rgba(108,92,231,0.5); }
+  .share-card-name{ margin-top:14px; font-size:13px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+  .share-card-text{ margin-top:8px; font-size:19px; font-weight:800; font-family:'Space Grotesk',sans-serif;
+    color:#FFD873; line-height:1.4; text-shadow:0 0 16px rgba(255,176,32,0.4); }
+  .share-card-link{ margin-top:14px; font-size:11.5px; color:rgba(255,255,255,0.55); font-family:'JetBrains Mono',monospace; }
+
   /* ---------- Yordam oynasi ---------- */
   #helpOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.72); backdrop-filter:blur(4px);
     z-index:88; align-items:flex-end; justify-content:center; }
@@ -950,6 +967,25 @@
   </div>
 </div>
 
+<!-- ---- 🎉 ULASHISH OYNASI ---- -->
+<div id="shareOverlay" onclick="if(event.target===this) closeShareCard()">
+  <div class="news-panel">
+    <div class="news-head">
+      <div class="sec-title" data-i18n="shareTitle">Do'stlaringga ko'rsat! 🎉</div>
+      <div class="news-close" onclick="closeShareCard()">✕</div>
+    </div>
+    <div class="share-card" id="shareCardPreview">
+      <div class="share-card-logo"><span class="share-logo-badge">✓</span> TaskUp</div>
+      <div class="share-card-name" id="shareCardName">@user</div>
+      <div class="share-card-text" id="shareCardText">🎡 500 tanga yutdim!</div>
+      <div class="share-card-link">savasuz.github.io/TaskUp</div>
+    </div>
+    <button class="btn" onclick="shareToTelegram()" style="margin-top:16px"><span data-i18n="shareTg">Telegram'da ulashish</span></button>
+    <button class="btn" onclick="shareToInstagram(this)" style="margin-top:10px; background:linear-gradient(135deg,#F58529,#DD2A7B,#8134AF); box-shadow:0 6px 18px rgba(221,42,123,0.35)"><span data-i18n="shareIg">Instagram Story'ga qo'shish</span></button>
+    <button onclick="closeShareCard()" style="margin-top:10px; width:100%; padding:13px; background:none; border:1.5px solid var(--line); border-radius:12px; color:var(--muted); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer" data-i18n="shareClose">Yopish</button>
+  </div>
+</div>
+
 <!-- ---- HUJJAT KO'RUVCHI (ilova ichida) ---- -->
 <div id="docOverlay">
   <div class="doc-head">
@@ -1154,6 +1190,9 @@ const I18N = {
     helpTitle:"Yordam", helpText:"Savol yoki muammo bormi? Biz bilan bog'laning — odatda bir necha soat ichida javob beramiz.", helpTelegram:"Telegram orqali yozish", helpEmail:"Email yozish",
     errOffline:"Internet aloqasi yo'q. Ulanishni tekshirib, qayta urinib ko'ring", errNetwork:"Server bilan aloqa uzildi. Bir necha soniyadan keyin qayta urinib ko'ring", errAuth:"Sessiya muddati tugagan — ilovadan chiqib, qaytadan kiring", errPermission:"Ruxsat yo'q — sahifani yangilang yoki qaytadan kiring", errUnknown:"Kutilmagan xatolik. Qayta urinib ko'ring",
     offlineMsg:"Internet aloqasi yo'q — ulanish tiklanishini kutyapmiz", onlineMsg:"Internet aloqasi tiklandi ✅",
+    shareTitle:"Do'stlaringga ko'rsat! 🎉", shareWheel:"🎡 Omadli g'ildirakda {n} tanga yutdim!", shareLevel:"🏆 TaskUp'da {n}-levelga chiqdim!", shareCashout:"💸 TaskUp'da ishlagan pulimni yechdim!",
+    shareTg:"Telegram'da ulashish", shareIg:"Instagram Story'ga qo'shish", shareClose:"Yopish",
+    shareInviteLine:"Siz ham vazifa bajarib pul ishlang:", shareCodeLine:"Taklif kodim:", shareImgSaved:"Rasm yuklab olindi — Instagram Story'ga qo'shing 📸",
     splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
@@ -1215,6 +1254,9 @@ const I18N = {
     helpTitle:"Help", helpText:"Questions or problems? Contact us — we usually reply within a few hours.", helpTelegram:"Message us on Telegram", helpEmail:"Write an email",
     errOffline:"No internet connection. Check your connection and try again", errNetwork:"Lost connection to the server. Try again in a few seconds", errAuth:"Session expired — sign out and log in again", errPermission:"No permission — refresh the page or log in again", errUnknown:"Unexpected error. Please try again",
     offlineMsg:"No internet connection — waiting to reconnect", onlineMsg:"Back online ✅",
+    shareTitle:"Show your friends! 🎉", shareWheel:"🎡 I won {n} coins on the Lucky Wheel!", shareLevel:"🏆 I reached level {n} on TaskUp!", shareCashout:"💸 I cashed out my TaskUp earnings!",
+    shareTg:"Share on Telegram", shareIg:"Add to Instagram Story", shareClose:"Close",
+    shareInviteLine:"Earn money doing tasks too:", shareCodeLine:"My invite code:", shareImgSaved:"Image saved — add it to your Instagram Story 📸",
     splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
     authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in", forgotPass:"Forgot password?",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
@@ -1276,6 +1318,9 @@ const I18N = {
     helpTitle:"Помощь", helpText:"Вопросы или проблемы? Свяжитесь с нами — обычно отвечаем в течение нескольких часов.", helpTelegram:"Написать в Telegram", helpEmail:"Написать на email",
     errOffline:"Нет интернет-соединения. Проверьте связь и попробуйте снова", errNetwork:"Потеряна связь с сервером. Попробуйте через несколько секунд", errAuth:"Сессия истекла — выйдите и войдите заново", errPermission:"Нет доступа — обновите страницу или войдите заново", errUnknown:"Непредвиденная ошибка. Попробуйте ещё раз",
     offlineMsg:"Нет интернет-соединения — ждём восстановления", onlineMsg:"Соединение восстановлено ✅",
+    shareTitle:"Покажи друзьям! 🎉", shareWheel:"🎡 Я выиграл {n} монет в Колесе удачи!", shareLevel:"🏆 Я достиг {n}-го уровня в TaskUp!", shareCashout:"💸 Я вывел свой заработок в TaskUp!",
+    shareTg:"Поделиться в Telegram", shareIg:"Добавить в Instagram Story", shareClose:"Закрыть",
+    shareInviteLine:"Зарабатывай на заданиях и ты:", shareCodeLine:"Мой код приглашения:", shareImgSaved:"Картинка сохранена — добавьте её в Instagram Story 📸",
     splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
     authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти", forgotPass:"Забыли пароль?",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
@@ -1719,6 +1764,8 @@ function doSpin(){
       document.getElementById('wheelNote').textContent = t('wheelTomorrow');
       renderWheelState();
       loadHistory(currentUid);
+      // Eng katta yutuq — ulashish taklifi
+      if(prize === 500){ setTimeout(() => { closeWheel(); openShareCard('wheel', prize); }, 2000); }
     });
   }).catch((err) => {
     spinning = false;
@@ -1920,6 +1967,8 @@ function showLevelUp(num){
   hapticFeedback([50, 50, 100]);
   spawnLevelParticles(b.color);
   setTimeout(() => ov.classList.remove('show'), 3000);
+  // Level oshdi — ulashish taklifi
+  setTimeout(() => openShareCard('level', num), 3200);
 }
 let lastKnownLevel = null;
 function renderLevel(){
@@ -2103,6 +2152,105 @@ function renderNewsList(){
     </div>`;
   }).join('') : `<div class="news-empty">${t('newsEmpty')}</div>`;
 }
+/* ---------------- 🎉 Ulashish oynasi (katta yutuqlardan keyin) ---------------- */
+let shareContext = null;
+function shareAchieveText(){
+  if(!shareContext) return '';
+  if(shareContext.type === 'wheel') return t('shareWheel').replace('{n}', shareContext.value);
+  if(shareContext.type === 'level') return t('shareLevel').replace('{n}', shareContext.value);
+  return t('shareCashout');
+}
+function openShareCard(type, value){
+  shareContext = { type, value };
+  const name = '@' + ((state.email || 'taskup').split('@')[0]);
+  document.getElementById('shareCardName').textContent = name;
+  document.getElementById('shareCardText').textContent = shareAchieveText();
+  document.getElementById('shareOverlay').classList.add('show');
+}
+function closeShareCard(){ document.getElementById('shareOverlay').classList.remove('show'); }
+function buildShareMessage(){
+  return shareAchieveText() + '\n' + t('shareInviteLine') + ' ' + APP_URL +
+    (state.referralCode ? '\n' + t('shareCodeLine') + ' ' + state.referralCode : '');
+}
+function shareToTelegram(){
+  sndClick();
+  window.open('https://t.me/share/url?url=' + encodeURIComponent(APP_URL) +
+    '&text=' + encodeURIComponent(buildShareMessage()), '_blank');
+}
+/* Instagram Story uchun karta rasmini canvas'da chizamiz */
+function roundRectPath(x, rx, ry, w, h, r){
+  x.beginPath();
+  x.moveTo(rx + r, ry);
+  x.arcTo(rx + w, ry, rx + w, ry + h, r);
+  x.arcTo(rx + w, ry + h, rx, ry + h, r);
+  x.arcTo(rx, ry + h, rx, ry, r);
+  x.arcTo(rx, ry, rx + w, ry, r);
+  x.closePath();
+}
+function drawShareCanvas(){
+  return new Promise((resolve) => {
+    const W = 720, H = 900;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    // Fon gradienti
+    const g = x.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, '#2A1E56'); g.addColorStop(0.55, '#1B1433'); g.addColorStop(1, '#141021');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+    // Bezak tangalar
+    x.fillStyle = 'rgba(255,201,60,0.9)';
+    [[80,120,26],[640,90,20],[610,780,30],[110,800,18]].forEach(([cx,cy,r]) => {
+      x.beginPath(); x.arc(cx, cy, r, 0, Math.PI*2); x.fill();
+    });
+    // Logo
+    x.fillStyle = '#6C5CE7';
+    roundRectPath(x, W/2 - 60, 110, 120, 120, 32); x.fill();
+    x.fillStyle = '#fff'; x.textAlign = 'center';
+    x.font = 'bold 78px Arial, sans-serif';
+    x.fillText('✓', W/2, 198);
+    x.font = 'bold 62px Arial, sans-serif';
+    x.fillText('TaskUp', W/2, 320);
+    // Ism
+    x.fillStyle = 'rgba(255,255,255,0.65)';
+    x.font = '30px monospace';
+    x.fillText('@' + ((state.email || 'taskup').split('@')[0]).slice(0, 24), W/2, 400);
+    // Yutuq matni (2 qatorga bo'lamiz)
+    x.fillStyle = '#FFD873';
+    x.font = 'bold 44px Arial, sans-serif';
+    const words = shareAchieveText().split(' ');
+    let line = '', lines = [];
+    words.forEach(w => {
+      if((line + ' ' + w).trim().length > 22){ lines.push(line.trim()); line = w; }
+      else line += ' ' + w;
+    });
+    if(line.trim()) lines.push(line.trim());
+    lines.slice(0, 3).forEach((l, i) => x.fillText(l, W/2, 500 + i * 62));
+    // Havola
+    x.fillStyle = 'rgba(255,255,255,0.55)';
+    x.font = '26px monospace';
+    x.fillText('savasuz.github.io/TaskUp', W/2, 800);
+    c.toBlob(resolve, 'image/png');
+  });
+}
+function shareToInstagram(btnEl){
+  sndClick();
+  withBtnLoading(btnEl, drawShareCanvas().then((blob) => {
+    if(!blob) return;
+    const file = new File([blob], 'taskup-yutuq.png', { type: 'image/png' });
+    if(navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share){
+      // Tizim ulashish oynasi — foydalanuvchi Instagram Story'ni tanlaydi
+      return navigator.share({ files: [file], text: buildShareMessage() }).catch(() => {});
+    }
+    // Fallback: rasmni yuklab beramiz
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'taskup-yutuq.png';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+    showToast(t('shareImgSaved'));
+  }));
+}
+
 /* ---------------- Hujjat ko'ruvchi va Yordam ---------------- */
 function openDocViewer(url, titleKey){
   sndClick();
@@ -2335,6 +2483,7 @@ function tryCashout(btnEl){
   if(cardHolder.length < 3){ showToast(t('toastCardHolder'), true); return; }
 
   // ANTI-CHEAT: pul yechish serverda tekshiriladi va yoziladi
+  const isFirstCashout = (state.cashedOutTotal || 0) === 0;
   withBtnLoading(btnEl, fns.httpsCallable('requestCashout')({
     amount,
     cardNumber, cardExpiry, cardHolder,
@@ -2344,6 +2493,8 @@ function tryCashout(btnEl){
     showToast(t('toastCashoutSent'));
     loadHistory(currentUid);
     fireConfetti();
+    // Birinchi pul yechish — ulashish taklifi
+    if(isFirstCashout){ setTimeout(() => openShareCard('cashout', amount), 1400); }
   }).catch((err) => {
     const msg = err && err.message;
     if(msg === 'insufficient'){ showToast(t('toastNotEnough'), true); }
