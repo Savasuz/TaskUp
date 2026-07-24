@@ -318,6 +318,7 @@
   .copy-btn:active{ transform:scale(0.93); background:var(--purple-dim); }
   .profile-row{ display:flex; justify-content:space-between; align-items:center; padding:13px 2px; border-bottom:1px solid var(--line); font-size:14px; transition:opacity .12s ease; }
   .row-flex{ display:flex; align-items:center; gap:12px; }
+  .row-flex > span:last-child{ font-weight:600; font-size:14.5px; line-height:1; }
   .row-icon{ width:36px; height:36px; border-radius:11px; color:#fff; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--line); }
   .row-icon svg{ width:20px; height:20px; }
   .row-icon img{ width:36px; height:36px; object-fit:contain; image-rendering:auto; border-radius:11px; display:block; }
@@ -396,9 +397,9 @@
   @keyframes pulse{ 0%{ transform:scale(1); } 40%{ transform:scale(1.06); } 100%{ transform:scale(1); } }
 
   /* ---------- HOME redesign (TaskCoin style) — faqat bosh sahifa ---------- */
-  #tab-home .icon-btn{ background:transparent; border:none; width:34px; height:34px; }
-  #tab-home .icon-btn svg{ width:21px; height:21px; }
-  #tab-home .icon-btn img{ width:21px; height:21px; }
+  #tab-home .icon-btn{ background:transparent; border:none; width:42px; height:42px; }
+  #tab-home .icon-btn svg{ width:26px; height:26px; }
+  #tab-home .icon-btn img{ width:30px; height:30px; }
   #tab-home .greet-avatar{ width:48px; height:48px; border-radius:16px;
     background:linear-gradient(135deg,#8B7BFF,#5B4BD6);
     box-shadow:0 6px 16px rgba(108,92,231,0.4), inset 0 1px 0 rgba(255,255,255,0.25); }
@@ -1810,8 +1811,6 @@ function doSpin(){
       document.getElementById('wheelNote').textContent = t('wheelTomorrow');
       renderWheelState();
       loadHistory(currentUid);
-      // Eng katta yutuq — ulashish taklifi
-      if(prize === 500){ setTimeout(() => { closeWheel(); openShareCard('wheel', prize); }, 2000); }
     });
   }).catch((err) => {
     spinning = false;
@@ -2036,8 +2035,6 @@ function showLevelUp(num){
   hapticFeedback([50, 50, 100]);
   spawnLevelParticles(b.color);
   setTimeout(() => ov.classList.remove('show'), 3000);
-  // Level oshdi — ulashish taklifi
-  setTimeout(() => openShareCard('level', num), 3200);
 }
 let lastKnownLevel = null;
 function renderLevel(){
