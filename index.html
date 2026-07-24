@@ -163,6 +163,19 @@
   .task-icon svg{ width:21px; height:21px; }
   .icon-video{ background:var(--red); } .icon-download{ background:var(--green); }
   .icon-survey{ background:var(--blue); } .icon-invite{ background:var(--orange); }
+  .icon-ad{ background:#17C3B2; } .icon-tg{ background:#29A9EA; } .icon-rate{ background:#FF6FB0; }
+  .task-progress{ display:flex; align-items:center; gap:7px; margin-top:6px; }
+  .task-progress span{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--muted); flex-shrink:0; }
+  .task-progress-bar{ flex:1; max-width:70px; height:4px; background:var(--bg); border-radius:3px; overflow:hidden; border:1px solid var(--line); }
+  .task-progress-fill{ height:100%; background:linear-gradient(90deg, var(--purple), var(--blue)); border-radius:3px; transition:width .4s ease; }
+  .task-progress-fill.full{ background:var(--green); }
+  .task.task-done{ opacity:0.55; }
+  .task.task-done .task-icon{ filter:grayscale(0.65); }
+  .task.task-top{ position:relative; background:linear-gradient(135deg, rgba(255,176,32,0.16), rgba(108,92,231,0.10)); border:1.5px solid var(--amber); box-shadow:0 4px 18px rgba(255,176,32,0.18); }
+  .task.task-top.task-done{ background:var(--bg-card); border-color:var(--line); box-shadow:none; }
+  .task-top-badge{ position:absolute; top:-9px; right:14px; background:linear-gradient(135deg, #FFC94A, #FFB020); color:#2A1800;
+    font-size:9px; font-weight:800; padding:3px 9px; border-radius:20px; letter-spacing:0.4px; font-family:'Space Grotesk', sans-serif;
+    box-shadow:0 3px 8px rgba(255,176,32,0.4); }
   .task-body{ flex:1; min-width:0; }
   .task-name{ font-size:14px; font-weight:700; }
   .task-desc{ font-size:11.5px; color:var(--muted); margin-top:1px; }
@@ -1166,7 +1179,6 @@ function sndLevelUp(){
 const COIN_TO_USD = 10000;
 const COIN_TO_SOM = 1.2; // 10000 tanga = 12000 so'm
 const CASHOUT_MIN = 10000;
-const TASK_LIMITS = { video: 8, download: 3, survey: 1 };
 const DAILY_CAP_BASE = 3000;
 const DAILY_CAP_PER_LEVEL = 250;
 const DAILY_CAP_MAX_LEVEL = 10; // 10-darajadan keyin limit oshmaydi
@@ -1255,6 +1267,7 @@ const I18N = {
     statusPaid:"Muvaffaqiyatli", statusPending:"Kutilmoqda", statusCancelled:"Bekor qilingan",
     dailyBonusLabel:"Kunlik bonus", cashoutRequestLabel:"Pulga aylantirish so'rovi",
     btnClaim:"Olish", dailyClaimSub:"Har kuni bonus oling!", taskDoneToday:"Bugun tugadi",
+    taskBtnDone:"Bajarildi", taskBtnTomorrow:"Ertaga", taskBestReward:"ENG KO'P MUKOFOT",
     helloWord:"Salom", defaultUserName:"Foydalanuvchi", levelWord:"Level"
   },
   en: {
@@ -1319,6 +1332,7 @@ const I18N = {
     statusPaid:"Successful", statusPending:"Pending", statusCancelled:"Cancelled",
     dailyBonusLabel:"Daily bonus", cashoutRequestLabel:"Cashout request",
     btnClaim:"Claim", dailyClaimSub:"Claim your daily bonus!", taskDoneToday:"Done for today",
+    taskBtnDone:"Done", taskBtnTomorrow:"Tomorrow", taskBestReward:"BEST REWARD",
     helloWord:"Hello", defaultUserName:"User", levelWord:"Level"
   },
   ru: {
@@ -1383,6 +1397,7 @@ const I18N = {
     statusPaid:"Успешно", statusPending:"В ожидании", statusCancelled:"Отменено",
     dailyBonusLabel:"Ежедневный бонус", cashoutRequestLabel:"Заявка на вывод",
     btnClaim:"Забрать", dailyClaimSub:"Забирайте бонус каждый день!", taskDoneToday:"На сегодня выполнено",
+    taskBtnDone:"Готово", taskBtnTomorrow:"Завтра", taskBestReward:"САМАЯ БОЛЬШАЯ НАГРАДА",
     helloWord:"Привет", defaultUserName:"Пользователь", levelWord:"Уровень"
   }
 };
@@ -1872,11 +1887,34 @@ function renderBalance(){
   if(coins >= CASHOUT_MIN){ btn.textContent = t('cashoutReady'); btn.classList.add('ready'); }
   else { btn.textContent = `${t('cashoutNeed')} ${(CASHOUT_MIN - coins).toLocaleString()} ${t('cashoutNeedSuffix')}`; btn.classList.remove('ready'); }
 
-  document.querySelectorAll('.task-btn').forEach(btn => {
-    const m = btn.getAttribute('onclick') ? btn.getAttribute('onclick').match(/completeTask\('(\w+)'/) : null;
-    if(!m) return;
-    const id = m[1]; const count = state.taskCounts[id] || 0;
-    if(count >= TASK_LIMITS[id]){ btn.disabled = true; btn.textContent = t('taskDoneToday'); } else { btn.disabled = false; btn.textContent = t('btnDo'); }
+  updateTaskCardStates();
+}
+
+/* Vazifa kartalarini qayta chizmasdan (flicker bermasdan) progress/limit holatini yangilaydi */
+function updateTaskCardStates(){
+  document.querySelectorAll('.task[data-task-id]').forEach(el => {
+    if(el.dataset.kind === 'ad') return;
+    const id = el.dataset.taskId;
+    const dailyLimit = Number(el.dataset.dailyLimit) || 1;
+    const count = state.taskCounts[id] || 0;
+    const limitReached = count >= dailyLimit;
+
+    const countEl = el.querySelector('.task-progress-count');
+    if(countEl) countEl.textContent = `${count}/${dailyLimit}`;
+    const fillEl = el.querySelector('.task-progress-fill');
+    if(fillEl){
+      fillEl.style.width = Math.min(100, Math.round((count / dailyLimit) * 100)) + '%';
+      fillEl.classList.toggle('full', limitReached);
+    }
+
+    el.classList.toggle('task-done', limitReached);
+
+    const btn = el.querySelector('.task-btn');
+    if(!btn || !limitReached || btn.disabled) return; // spinner/countdown holatidagi tugmani buzmaymiz
+    btn.dataset.limitLocked = '1';
+    btn.disabled = true;
+    btn.removeAttribute('data-i18n');
+    btn.textContent = dailyLimit > 1 ? t('taskBtnTomorrow') : t('taskBtnDone');
   });
 }
 
@@ -2120,7 +2158,7 @@ const TASK_ICON_SVG = {
   telegram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
   rate: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>'
 };
-const TASK_ICON_CLASS = { video:'icon-video', download:'icon-download', survey:'icon-survey', invite:'icon-invite', ad:'icon-survey', telegram:'icon-survey', rate:'icon-invite' };
+const TASK_ICON_CLASS = { video:'icon-video', download:'icon-download', survey:'icon-survey', invite:'icon-invite', ad:'icon-ad', telegram:'icon-tg', rate:'icon-rate' };
 
 /* Firestore `tasks` collection bo'sh bo'lsa ko'rsatiladigan standart vazifalar */
 const DEFAULT_TASKS = [
@@ -2308,16 +2346,24 @@ function subscribeTasksCatalog(){
   }, err => { console.error('Vazifalarni yuklashda xato:', err); renderTaskLists(); });
 }
 
-function taskRowHtml(task){
+function taskRowHtml(task, maxReward){
   const isDefault = !!task.nameKey;
   const name = isDefault ? `<span data-i18n="${task.nameKey}">${escapeHtml(t(task.nameKey))}</span>` : escapeHtml(task.name);
   const desc = isDefault ? `<span data-i18n="${task.descKey}">${escapeHtml(t(task.descKey))}</span>` : escapeHtml(task.desc || '');
   const reward = Number(task.reward) || 0;
   const dailyLimit = Number(task.dailyLimit) || 1;
+  const isAdKind = !isDefault && task.kind === 'rewarded_ad';
+  const count = state.taskCounts[task.id] || 0;
+  const limitReached = !isAdKind && count >= dailyLimit;
+  const isTop = !isAdKind && maxReward > 0 && reward === maxReward;
+
   let btnHtml;
-  if(!isDefault && task.kind === 'rewarded_ad'){
+  if(isAdKind){
     // AdMob Rewarded Ad — Android ilovaga SDK ulangach yoqiladi
     btnHtml = `<button class="task-btn" disabled data-i18n="adSoon">${t('adSoon')}</button>`;
+  } else if(limitReached){
+    const doneLabel = dailyLimit > 1 ? t('taskBtnTomorrow') : t('taskBtnDone');
+    btnHtml = `<button class="task-btn" disabled data-limit-locked="1">${escapeHtml(doneLabel)}</button>`;
   } else {
     let action;
     if(task.action === 'friends') action = "switchTab('friends')";
@@ -2325,13 +2371,26 @@ function taskRowHtml(task){
     else action = `completeTask('${escapeHtml(task.id)}', ${reward}, ${dailyLimit}, this)`;
     btnHtml = `<button class="task-btn" onclick="${action}" data-i18n="btnDo">${t('btnDo')}</button>`;
   }
+
+  const progressHtml = (!isAdKind && dailyLimit > 1) ? `
+          <div class="task-progress">
+            <span class="task-progress-count">${count}/${dailyLimit}</span>
+            <div class="task-progress-bar"><div class="task-progress-fill${limitReached ? ' full' : ''}" style="width:${Math.min(100, Math.round((count/dailyLimit)*100))}%"></div></div>
+          </div>` : '';
+
+  const cardClasses = ['task'];
+  if(isTop) cardClasses.push('task-top');
+  if(limitReached) cardClasses.push('task-done');
+
   return `
-      <div class="task" data-cat="${escapeHtml(task.category || 'oddiy')}">
+      <div class="${cardClasses.join(' ')}" data-cat="${escapeHtml(task.category || 'oddiy')}" data-task-id="${escapeHtml(task.id)}" data-daily-limit="${dailyLimit}"${isAdKind ? ' data-kind="ad"' : ''}>
+        ${isTop ? `<div class="task-top-badge">${escapeHtml(t('taskBestReward'))}</div>` : ''}
         <div class="task-icon ${TASK_ICON_CLASS[task.icon] || 'icon-video'}">${TASK_ICON_SVG[task.icon] || TASK_ICON_SVG.video}</div>
         <div class="task-body">
           <div class="task-name">${name}</div>
           <div class="task-desc">${desc}</div>
           <div class="task-reward"><span class="mini-coin">$</span> +${reward.toLocaleString()}</div>
+          ${progressHtml}
         </div>
         ${btnHtml}
       </div>`;
@@ -2362,12 +2421,24 @@ function startLinkTask(taskId, encodedUrl, reward, dailyLimit, btnEl){
   }, 1000);
 }
 
+function topTaskReward(tasks){
+  let max = 0, maxCount = 0;
+  tasks.forEach(tk => {
+    if(!tk.nameKey && tk.kind === 'rewarded_ad') return;
+    const r = Number(tk.reward) || 0;
+    if(r > max){ max = r; maxCount = 1; }
+    else if(r === max && r > 0){ maxCount++; }
+  });
+  return maxCount === 1 ? max : 0;
+}
+
 function renderTaskLists(){
   const tasks = catalogTasks.length ? catalogTasks : DEFAULT_TASKS;
+  const maxReward = topTaskReward(tasks);
   const homeEl = document.getElementById('homeTaskList');
   const allEl = document.getElementById('allTaskList');
-  if(homeEl) homeEl.innerHTML = tasks.slice(0, 4).map(taskRowHtml).join('');
-  if(allEl) allEl.innerHTML = tasks.map(taskRowHtml).join('');
+  if(homeEl) homeEl.innerHTML = tasks.slice(0, 4).map(tk => taskRowHtml(tk, maxReward)).join('');
+  if(allEl) allEl.innerHTML = tasks.map(tk => taskRowHtml(tk, maxReward)).join('');
   applyTaskFilter();
 }
 
