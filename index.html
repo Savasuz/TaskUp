@@ -318,9 +318,13 @@
   .copy-btn:active{ transform:scale(0.93); background:var(--purple-dim); }
   .profile-row{ display:flex; justify-content:space-between; align-items:center; padding:13px 2px; border-bottom:1px solid var(--line); font-size:14px; transition:opacity .12s ease; }
   .row-flex{ display:flex; align-items:center; gap:12px; }
-  .row-icon{ width:26px; height:26px; color:var(--muted); flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-  .row-icon svg{ width:26px; height:26px; }
-  .row-icon img{ width:26px; height:26px; object-fit:contain; image-rendering:auto; border-radius:6px; display:block; }
+  .row-icon{ width:34px; height:34px; border-radius:10px; color:#fff; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--line); }
+  .row-icon svg{ width:19px; height:19px; }
+  .row-icon img{ width:34px; height:34px; object-fit:contain; image-rendering:auto; border-radius:10px; display:block; }
+  .row-icon.c-blue{ background:var(--blue); } .row-icon.c-purple{ background:var(--purple); }
+  .row-icon.c-amber{ background:var(--amber); } .row-icon.c-green{ background:var(--green); }
+  .row-icon.c-teal{ background:#17C3B2; } .row-icon.c-red{ background:var(--red); }
+  .row-icon.c-orange{ background:var(--orange); }
   .profile-row:last-child{ border-bottom:none; }
   .profile-row .muted{ color:var(--muted); font-size:12.5px; }
   .signout-btn{ width:100%; margin-top:16px; padding:13px; border-radius:11px; border:1.5px solid var(--red); background:none; color:var(--red);
@@ -339,8 +343,8 @@
   .nav-item.active .nav-icon{ animation:navBounce .35s ease; }
   @keyframes navBounce{ 0%{ transform:scale(1); } 40%{ transform:scale(1.25) translateY(-3px); } 100%{ transform:scale(1); } }
   .nav-icon{ font-size:18px; display:block; margin-bottom:3px; }
-  .nav-icon svg{ width:30px; height:30px; margin:0 auto; }
-  .nav-icon img{ width:30px; height:30px; margin:0 auto; display:block; object-fit:contain; image-rendering:auto; border-radius:7px; }
+  .nav-icon svg{ width:38px; height:38px; margin:0 auto; }
+  .nav-icon img{ width:38px; height:38px; margin:0 auto; display:block; object-fit:contain; image-rendering:auto; border-radius:9px; }
   .icon-btn svg{ width:18px; height:18px; }
   .icon-btn img{ width:18px; height:18px; border-radius:5px; object-fit:cover; }
   .nav-label{ font-size:9.5px; font-family:'Space Grotesk', sans-serif; font-weight:600; }
@@ -893,22 +897,22 @@ setTimeout(function(){
       </div>
       <div class="card" style="padding:6px 4px">
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('language')">
-          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span><span data-i18n="langMenuItem">Til / Language</span></span><span class="muted" id="currentLangLabel">O'zbekcha ›</span>
+          <span class="row-flex"><span class="row-icon c-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span><span data-i18n="langMenuItem">Til / Language</span></span><span class="muted" id="currentLangLabel">O'zbekcha ›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="toggleSound()">
-          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></span><span data-i18n="soundMenuItem">Ovoz effektlari</span></span><span class="muted" id="soundStateLbl">Yoqilgan</span>
+          <span class="row-flex"><span class="row-icon c-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></span><span data-i18n="soundMenuItem">Ovoz effektlari</span></span><span class="muted" id="soundStateLbl">Yoqilgan</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('leaderboard')">
           <span class="row-flex"><span class="row-icon"><img src="assets/menu/menu-reyting.jpg" alt=""></span><span data-i18n="leaderboardMenuItem">Reyting</span></span><span class="muted">›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('level')">
-          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span data-i18n="levelMenuItem">Level</span></span><span class="muted">›</span>
+          <span class="row-flex"><span class="row-icon c-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span data-i18n="levelMenuItem">Level</span></span><span class="muted">›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('history')">
-          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span><span data-i18n="paymentHistoryMenuItem">To'lov tarixi</span></span><span class="muted">›</span>
+          <span class="row-flex"><span class="row-icon c-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span><span data-i18n="paymentHistoryMenuItem">To'lov tarixi</span></span><span class="muted">›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('tasks')">
-          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span data-i18n="taskHistoryMenuItem">Vazifalar tarixi</span></span><span class="muted">›</span>
+          <span class="row-flex"><span class="row-icon c-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span data-i18n="taskHistoryMenuItem">Vazifalar tarixi</span></span><span class="muted">›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('friends')">
           <span class="row-flex"><span class="row-icon"><img src="assets/menu/menu-dostlar.jpg" alt=""></span><span data-i18n="myFriendsMenuItem">Do'stlarim</span></span><span class="muted">›</span>
@@ -917,10 +921,10 @@ setTimeout(function(){
           <span class="row-flex"><span class="row-icon"><img src="assets/menu/menu-yordam.jpg" alt=""></span><span data-i18n="helpMenuItem">Yordam / Qo'llab-quvvatlash</span></span><span class="muted">›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="openDocViewer('privacy-policy.html','privacyMenuItem')">
-          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><span data-i18n="privacyMenuItem">Maxfiylik siyosati</span></span><span class="muted">›</span>
+          <span class="row-flex"><span class="row-icon c-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><span data-i18n="privacyMenuItem">Maxfiylik siyosati</span></span><span class="muted">›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer; border-bottom:none" onclick="openDocViewer('terms-of-service.html','termsMenuItem')">
-          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></span><span data-i18n="termsMenuItem">Foydalanish shartlari</span></span><span class="muted">›</span>
+          <span class="row-flex"><span class="row-icon c-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></span><span data-i18n="termsMenuItem">Foydalanish shartlari</span></span><span class="muted">›</span>
         </div>
       </div>
       <button class="signout-btn" onclick="signOutUser()"><img src="assets/menu/menu-chiqish.jpg" alt=""><span data-i18n="logoutBtn">Chiqish</span></button>
