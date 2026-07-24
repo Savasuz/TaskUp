@@ -318,9 +318,9 @@
   .copy-btn:active{ transform:scale(0.93); background:var(--purple-dim); }
   .profile-row{ display:flex; justify-content:space-between; align-items:center; padding:13px 2px; border-bottom:1px solid var(--line); font-size:14px; transition:opacity .12s ease; }
   .row-flex{ display:flex; align-items:center; gap:12px; }
-  .row-icon{ width:20px; height:20px; color:var(--muted); flex-shrink:0; }
-  .row-icon svg{ width:20px; height:20px; }
-  .row-icon img{ width:20px; height:20px; object-fit:cover; border-radius:5px; display:block; }
+  .row-icon{ width:26px; height:26px; color:var(--muted); flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .row-icon svg{ width:26px; height:26px; }
+  .row-icon img{ width:26px; height:26px; object-fit:contain; image-rendering:auto; border-radius:6px; display:block; }
   .profile-row:last-child{ border-bottom:none; }
   .profile-row .muted{ color:var(--muted); font-size:12.5px; }
   .signout-btn{ width:100%; margin-top:16px; padding:13px; border-radius:11px; border:1.5px solid var(--red); background:none; color:var(--red);
@@ -339,8 +339,8 @@
   .nav-item.active .nav-icon{ animation:navBounce .35s ease; }
   @keyframes navBounce{ 0%{ transform:scale(1); } 40%{ transform:scale(1.25) translateY(-3px); } 100%{ transform:scale(1); } }
   .nav-icon{ font-size:18px; display:block; margin-bottom:3px; }
-  .nav-icon svg{ width:20px; height:20px; margin:0 auto; }
-  .nav-icon img{ width:22px; height:22px; margin:0 auto; display:block; object-fit:cover; border-radius:6px; }
+  .nav-icon svg{ width:30px; height:30px; margin:0 auto; }
+  .nav-icon img{ width:30px; height:30px; margin:0 auto; display:block; object-fit:contain; image-rendering:auto; border-radius:7px; }
   .icon-btn svg{ width:18px; height:18px; }
   .icon-btn img{ width:18px; height:18px; border-radius:5px; object-fit:cover; }
   .nav-label{ font-size:9.5px; font-family:'Space Grotesk', sans-serif; font-weight:600; }
