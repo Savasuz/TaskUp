@@ -127,7 +127,7 @@
   .balance-chip-label{ font-size:10.5px; color:var(--muted); }
   .balance-chip-value{ display:flex; align-items:center; gap:5px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; margin-top:2px; }
   .coin-dot{ width:16px; height:16px; border-radius:50%; background:var(--amber); display:inline-flex; align-items:center; justify-content:center; font-size:9px; color:#2A1800; font-weight:700; }
-  .level-chip{ background:var(--purple-dim); color:var(--purple); font-size:11px; font-weight:700; padding:5px 11px; border-radius:20px; cursor:pointer; font-family:'Space Grotesk', sans-serif; white-space:nowrap; display:inline-flex; align-items:center; gap:3px; }
+  .level-chip{ background:var(--purple-dim); color:var(--purple); font-size:11px; font-weight:700; padding:5px 11px; border-radius:20px; cursor:pointer; font-family:'Space Grotesk', sans-serif; }
   .xp-bar-row{ margin-bottom:18px; cursor:pointer; }
   .xp-bar-track{ height:7px; background:var(--bg-card); border:1px solid var(--line); border-radius:5px; overflow:hidden; }
   .xp-bar-fill{ height:100%; background:linear-gradient(90deg, var(--purple), var(--blue)); width:0%; transition:width .6s ease; }
@@ -361,8 +361,8 @@
   .level-hero{ display:flex; flex-direction:column; align-items:center; padding:24px 0 6px; }
   .level-shield{ filter:drop-shadow(0 10px 20px rgba(108,92,231,0.4)); position:relative; color:var(--purple); display:flex; justify-content:center;
     animation:floatY 2.6s ease-in-out infinite; }
-  .level-shield img{ width:90px; height:90px; object-fit:contain; display:block; }
   @keyframes floatY{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-8px); } }
+  .level-shield-num{ position:absolute; margin-top:-46px; margin-left:32px; font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:700; color:#fff; }
   .level-hero-sub{ font-size:12px; color:var(--muted); margin-top:8px; }
   .level-hero-title{ font-family:'Space Grotesk', sans-serif; font-size:20px; font-weight:700; margin-top:2px; }
   .level-reward-row{ display:flex; align-items:center; justify-content:space-between; background:var(--bg-card);
@@ -539,7 +539,7 @@
   #levelUpOverlay.show{ display:flex; }
   .lvlup-box{ text-align:center; animation:lvlPop .5s cubic-bezier(0.2, 1.4, 0.4, 1); perspective:600px; }
   @keyframes lvlPop{ from{ transform:scale(0.4); opacity:0; } to{ transform:scale(1); opacity:1; } }
-  .lvlup-shield{ width:84px; height:84px; object-fit:contain; display:inline-block; transform-style:preserve-3d;
+  .lvlup-shield{ font-size:74px; display:inline-block; transform-style:preserve-3d;
     filter:drop-shadow(0 0 30px rgba(124,92,255,0.8)); }
   .lvlup-shield.spin3d{ animation:badgeSpin 1.5s cubic-bezier(0.3, 0, 0.25, 1), floatY 2.2s ease-in-out 1.5s infinite; }
   @keyframes badgeSpin{ from{ transform:rotateY(0deg) scale(0.6); } 60%{ transform:rotateY(300deg) scale(1.08); } to{ transform:rotateY(360deg) scale(1); } }
@@ -935,7 +935,11 @@ setTimeout(function(){
     <div class="tab-content" id="tab-level">
       <div class="sec-head"><div class="sec-title" data-i18n="levelPageTitle">Level</div><div class="sec-link" onclick="switchTab('profile')" data-i18n="backBtn">‹ Orqaga</div></div>
       <div class="level-hero">
-        <div class="level-shield"><img id="levelHeroShieldImg" src="assets/badges/level-bronza.jpg" alt=""></div>
+        <div class="level-shield"><svg viewBox="0 0 100 110" width="76" height="84">
+<defs><linearGradient id="sh1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9E8CFF"/><stop offset="100%" stop-color="#6C5CE7"/></linearGradient></defs>
+<path d="M50 4 L92 20 V52 C92 80 74 98 50 106 C26 98 8 80 8 52 V20 Z" fill="url(#sh1)" stroke="#FFD873" stroke-width="3"/>
+</svg></div>
+        <div class="level-shield-num" id="levelHeroNum">1</div>
         <div class="level-hero-sub" data-i18n="yourLevelLbl">Sizning levelingiz</div>
         <div class="level-hero-title" id="levelHeroTitle">1-level</div>
         <div class="lvlup-badge" id="levelBadgeLine">🥉 Bronza</div>
@@ -1086,7 +1090,7 @@ setTimeout(function(){
 <!-- ---- LEVEL-UP OVERLAY ---- -->
 <div id="levelUpOverlay" onclick="this.classList.remove('show')">
   <div class="lvlup-box">
-    <img class="lvlup-shield" id="lvlupShieldImg" src="assets/badges/level-bronza.jpg" alt="">
+    <div class="lvlup-shield">🛡️</div>
     <div class="lvlup-title" id="lvlupNum">Level 2!</div>
     <div class="lvlup-badge" id="lvlupBadge">🥉 Bronza</div>
   </div>
@@ -1226,7 +1230,6 @@ const I18N = {
     lbWeekly:"Haftalik", lbAll:"Umumiy", lbRef:"Referal liga", lbLoading:"Yuklanmoqda...", lbError:"Yuklashda xatolik",
     lbEmpty:"Hozircha bo'sh — birinchi bo'ling!", youWord:"siz",
     badgeBronze:"Bronza", badgeSilver:"Kumush", badgeGold:"Oltin", badgeDiamond:"Olmos", badgeLegend:"Afsona",
-    badgeEmerald:"Zumrad", badgeAmethyst:"Ametist", badgeSapphire:"Safir", badgeRuby:"Rubin", badgeMythic:"Afsonaviy",
     soundMenuItem:"Ovoz effektlari", soundOnLbl:"Yoqilgan ›", soundOffLbl:"O'chirilgan ›",
     helpTitle:"Yordam", helpText:"Savol yoki muammo bormi? Biz bilan bog'laning — odatda bir necha soat ichida javob beramiz.", helpTelegram:"Telegram orqali yozish", helpEmail:"Email yozish",
     errOffline:"Internet aloqasi yo'q. Ulanishni tekshirib, qayta urinib ko'ring", errNetwork:"Server bilan aloqa uzildi. Bir necha soniyadan keyin qayta urinib ko'ring", errAuth:"Sessiya muddati tugagan — ilovadan chiqib, qaytadan kiring", errPermission:"Ruxsat yo'q — sahifani yangilang yoki qaytadan kiring", errUnknown:"Kutilmagan xatolik. Qayta urinib ko'ring",
@@ -1292,7 +1295,6 @@ const I18N = {
     lbWeekly:"Weekly", lbAll:"All-time", lbRef:"Referral league", lbLoading:"Loading...", lbError:"Failed to load",
     lbEmpty:"Empty for now — be the first!", youWord:"you",
     badgeBronze:"Bronze", badgeSilver:"Silver", badgeGold:"Gold", badgeDiamond:"Diamond", badgeLegend:"Legend",
-    badgeEmerald:"Emerald", badgeAmethyst:"Amethyst", badgeSapphire:"Sapphire", badgeRuby:"Ruby", badgeMythic:"Mythic",
     soundMenuItem:"Sound effects", soundOnLbl:"On ›", soundOffLbl:"Off ›",
     helpTitle:"Help", helpText:"Questions or problems? Contact us — we usually reply within a few hours.", helpTelegram:"Message us on Telegram", helpEmail:"Write an email",
     errOffline:"No internet connection. Check your connection and try again", errNetwork:"Lost connection to the server. Try again in a few seconds", errAuth:"Session expired — sign out and log in again", errPermission:"No permission — refresh the page or log in again", errUnknown:"Unexpected error. Please try again",
@@ -1358,7 +1360,6 @@ const I18N = {
     lbWeekly:"Неделя", lbAll:"Все время", lbRef:"Реферальная лига", lbLoading:"Загрузка...", lbError:"Ошибка загрузки",
     lbEmpty:"Пока пусто — будьте первым!", youWord:"вы",
     badgeBronze:"Бронза", badgeSilver:"Серебро", badgeGold:"Золото", badgeDiamond:"Алмаз", badgeLegend:"Легенда",
-    badgeEmerald:"Изумруд", badgeAmethyst:"Аметист", badgeSapphire:"Сапфир", badgeRuby:"Рубин", badgeMythic:"Мифический",
     soundMenuItem:"Звуковые эффекты", soundOnLbl:"Вкл ›", soundOffLbl:"Выкл ›",
     helpTitle:"Помощь", helpText:"Вопросы или проблемы? Свяжитесь с нами — обычно отвечаем в течение нескольких часов.", helpTelegram:"Написать в Telegram", helpEmail:"Написать на email",
     errOffline:"Нет интернет-соединения. Проверьте связь и попробуйте снова", errNetwork:"Потеряна связь с сервером. Попробуйте через несколько секунд", errAuth:"Сессия истекла — выйдите и войдите заново", errPermission:"Нет доступа — обновите страницу или войдите заново", errUnknown:"Непредвиденная ошибка. Попробуйте ещё раз",
@@ -1965,7 +1966,7 @@ function renderProfile(){
   document.getElementById('profLifetime').textContent = state.lifetimeCoins.toLocaleString() + ' coin';
   const lnum = getLevelInfo(state.lifetimeCoins).num;
   const lb = levelBadge(lnum);
-  document.getElementById('profLevel').innerHTML = badgeIconHtml(lb, 16) + t(lb.key) + ' • ' + lnum + '-level';
+  document.getElementById('profLevel').textContent = lb.icon + ' ' + t(lb.key) + ' • ' + lnum + '-level';
   document.getElementById('profStreak').textContent = state.streakCount + ' kun';
   const sndLbl = document.getElementById('soundStateLbl');
   if(sndLbl) sndLbl.textContent = soundOn ? t('soundOnLbl') : t('soundOffLbl');
@@ -1984,23 +1985,15 @@ function getLevelInfo(xp){
 }
 /* Level nishonlari (badge) */
 const LEVEL_BADGES = [
-  { min: 91, key: 'badgeLegend',   img: 'assets/badges/level-legendary.jpg', color: '#FFD873' },
-  { min: 81, key: 'badgeMythic',   img: 'assets/badges/level-afsonaviy.jpg', color: '#FF8AFF' },
-  { min: 71, key: 'badgeDiamond',  img: 'assets/badges/level-diamond.jpg',   color: '#7FE7FF' },
-  { min: 61, key: 'badgeRuby',     img: 'assets/badges/level-rubin.jpg',     color: '#FF5C6C' },
-  { min: 51, key: 'badgeSapphire', img: 'assets/badges/level-safir.jpg',     color: '#3E8EFF' },
-  { min: 41, key: 'badgeAmethyst', img: 'assets/badges/level-ametist.jpg',   color: '#B983FF' },
-  { min: 31, key: 'badgeEmerald',  img: 'assets/badges/level-zumrad.jpg',    color: '#2ECC8F' },
-  { min: 21, key: 'badgeGold',     img: 'assets/badges/level-oltin.jpg',     color: '#FFD873' },
-  { min: 11, key: 'badgeSilver',   img: 'assets/badges/level-kumush.jpg',    color: '#C8CCDA' },
-  { min: 1,  key: 'badgeBronze',   img: 'assets/badges/level-bronza.jpg',    color: '#E09B5C' }
+  { min: 50, key: 'badgeLegend', icon: '👑', color: '#FFD873' },
+  { min: 20, key: 'badgeDiamond', icon: '💎', color: '#7FE7FF' },
+  { min: 10, key: 'badgeGold', icon: '🥇', color: '#FFD873' },
+  { min: 5,  key: 'badgeSilver', icon: '🥈', color: '#C8CCDA' },
+  { min: 1,  key: 'badgeBronze', icon: '🥉', color: '#E09B5C' }
 ];
 function levelBadge(num){
   for(const b of LEVEL_BADGES){ if(num >= b.min) return b; }
   return LEVEL_BADGES[LEVEL_BADGES.length - 1];
-}
-function badgeIconHtml(badge, size){
-  return `<img src="${badge.img}" alt="" style="width:${size}px; height:${size}px; object-fit:contain; border-radius:${Math.round(size*0.22)}px; vertical-align:-${Math.round(size*0.2)}px; margin-right:${Math.round(size*0.22)}px">`;
 }
 /* Nishon atrofidan oltin/kumush zarrachalar sochiladi */
 function spawnLevelParticles(color){
@@ -2030,9 +2023,9 @@ function showLevelUp(num){
   const b = levelBadge(num);
   document.getElementById('lvlupNum').textContent = 'Level ' + num + '!';
   const badgeEl = document.getElementById('lvlupBadge');
-  badgeEl.innerHTML = badgeIconHtml(b, 18) + t(b.key);
+  badgeEl.textContent = b.icon + ' ' + t(b.key);
   const shield = document.querySelector('#levelUpOverlay .lvlup-shield');
-  shield.src = b.img;
+  shield.textContent = b.icon;
   const ov = document.getElementById('levelUpOverlay');
   ov.classList.add('show');
   // 3D 360° aylanish va metall shine'ni qayta ishga tushiramiz
@@ -2054,14 +2047,14 @@ function renderLevel(){
   lastKnownLevel = info.num;
   document.getElementById('levelNum').textContent = info.num;
   const badge = levelBadge(info.num);
-  const bIco = document.getElementById('levelBadgeIco'); if(bIco) bIco.innerHTML = badgeIconHtml(badge, 14);
-  const bLine = document.getElementById('levelBadgeLine'); if(bLine) bLine.innerHTML = badgeIconHtml(badge, 18) + t(badge.key);
-  const heroShield = document.getElementById('levelHeroShieldImg'); if(heroShield) heroShield.src = badge.img;
+  const bIco = document.getElementById('levelBadgeIco'); if(bIco) bIco.textContent = badge.icon;
+  const bLine = document.getElementById('levelBadgeLine'); if(bLine) bLine.textContent = badge.icon + ' ' + t(badge.key);
   const pct = Math.min(100, (info.current / info.needed) * 100);
   const fill1 = document.getElementById('xpBarFill'); if(fill1) fill1.style.width = pct + '%';
   const fill2 = document.getElementById('xpBarFill2'); if(fill2) fill2.style.width = pct + '%';
   const xc = document.getElementById('xpCurrent'); if(xc) xc.textContent = info.current;
   const xn = document.getElementById('xpNeeded'); if(xn) xn.textContent = info.needed;
+  document.getElementById('levelHeroNum').textContent = info.num;
   document.getElementById('levelHeroTitle').textContent = info.num + '-level';
   document.getElementById('xpLabel2').textContent = `${info.current} / ${info.needed} XP`;
 
