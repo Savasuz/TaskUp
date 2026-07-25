@@ -1431,9 +1431,12 @@ function saveAvatarCrop(){
 }
 
 function uploadAvatar(blob, btn, prevLabel){
-  storage.ref('avatars/' + currentUid + '/avatar.jpg').put(blob, { contentType: 'image/jpeg' })
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('avatar-upload-timeout')), 20000));
+  const upload = Promise.resolve()
+    .then(() => storage.ref('avatars/' + currentUid + '/avatar.jpg').put(blob, { contentType: 'image/jpeg' }))
     .then((snap) => snap.ref.getDownloadURL())
-    .then((url) => db.collection('users').doc(currentUid).update({ avatarUrl: url }))
+    .then((url) => db.collection('users').doc(currentUid).update({ avatarUrl: url }));
+  Promise.race([upload, timeout])
     .then(() => {
       btn.disabled = false; btn.textContent = prevLabel;
       showToast(t('toastAvatarUploaded'));
