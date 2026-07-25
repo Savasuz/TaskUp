@@ -320,7 +320,8 @@
   .lb-coins{ font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--amber); }
 
   /* ---------- Profile ---------- */
-  .profile-header{ text-align:center; padding:10px 0 20px; }
+  .profile-header{ position:relative; overflow:hidden; border-radius:24px; text-align:center; padding:26px 16px 24px; }
+  .profile-header > *{ position:relative; z-index:1; }
   .profile-avatar{ width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue)); color:#fff;
     display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:22px; }
   .avatar-frame-wrap-profile{ width:128px; height:128px; margin:0 auto 12px; }
@@ -329,6 +330,73 @@
     background:var(--purple); border:2px solid var(--bg); display:flex; align-items:center; justify-content:center;
     cursor:pointer; z-index:2; box-shadow:0 2px 8px rgba(0,0,0,0.4); }
   .profile-phone{ font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--muted); }
+
+  /* ---------- Profil darajasiga mos animatsion fon ---------- */
+  .profile-level-bg{ position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; transition:background 0.4s ease; }
+  .profile-level-bg::before, .profile-level-bg::after{ content:''; position:absolute; inset:0; }
+
+  /* 1) Oddiy - kumush-kulrang */
+  .plvl-oddiy{ background:radial-gradient(circle, #8e9aaf, #2b2f38); }
+  .plvl-oddiy::after{ background:radial-gradient(circle, rgba(255,255,255,0.20), transparent 65%); animation:plvlMistPulse 4s ease-in-out infinite; }
+
+  /* 2) Noyob - zumrad-yashil */
+  .plvl-noyob{ background:radial-gradient(circle, #2ecc71, #0b3d24); }
+  .plvl-noyob::after{ background:radial-gradient(circle, rgba(255,255,255,0.18), transparent 65%); animation:plvlMistPulse 4s ease-in-out infinite; }
+
+  @keyframes plvlMistPulse{ 0%,100%{ opacity:0.35; } 50%{ opacity:0.9; } }
+
+  /* 3) Epic - oltin, aylanuvchi nur chiziq */
+  .plvl-epic{ background:radial-gradient(circle, #ffd700, #7a5c00); }
+  .plvl-epic::before{ background:conic-gradient(from 0deg, transparent 0deg, rgba(255,255,255,0.55) 15deg, transparent 40deg, transparent 180deg, rgba(255,255,255,0.35) 200deg, transparent 230deg);
+    animation:plvlRotate 6s linear infinite; }
+
+  @keyframes plvlRotate{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
+
+  /* 4) Betakror - muzli-ko'k, kristall yaltirash */
+  .plvl-betakror{ background:radial-gradient(circle, #4fc3f7, #0d2b3e); }
+  .plvl-betakror::after{ background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.5) 48%, transparent 66%);
+    background-size:220% 220%; animation:plvlShimmer 3.2s linear infinite; }
+
+  @keyframes plvlShimmer{ 0%{ background-position:130% 0%; } 100%{ background-position:-30% 0%; } }
+
+  /* 5) Afsonaviy - binafsha, aura pulsatsiyasi */
+  .plvl-afsonaviy{ background:radial-gradient(circle, #9b59b6, #2d0a3d); animation:plvlAuraPulse 4s ease-in-out infinite; }
+
+  @keyframes plvlAuraPulse{
+    0%,100%{ box-shadow:inset 0 0 34px rgba(155,89,182,0.4); }
+    50%{ box-shadow:inset 0 0 70px rgba(155,89,182,0.85); }
+  }
+
+  /* 6) Olimdar (eng yuqori) - qizil-oltin ajdar, eng kuchli glow + uchqun zarralari */
+  .plvl-olimdar{ background:radial-gradient(circle, #ff4500, #3d0a00); animation:plvlDragonGlow 3.4s ease-in-out infinite; }
+  .plvl-olimdar::before{ background:conic-gradient(from 0deg, transparent 0deg, rgba(255,215,0,0.6) 20deg, transparent 50deg, transparent 200deg, rgba(255,140,0,0.45) 225deg, transparent 260deg);
+    animation:plvlRotate 6s linear infinite reverse; }
+
+  @keyframes plvlDragonGlow{
+    0%,100%{ box-shadow:inset 0 0 26px 4px rgba(255,69,0,0.5), inset 0 0 0 2px rgba(255,215,0,0.55); }
+    50%{ box-shadow:inset 0 0 60px 14px rgba(255,69,0,0.85), inset 0 0 0 2px rgba(255,215,0,0.95); }
+  }
+
+  .plvl-particle{ display:none; position:absolute; bottom:6%; width:5px; height:5px; border-radius:50%;
+    background:radial-gradient(circle, #FFE9A8, #FF8A00); box-shadow:0 0 6px 2px rgba(255,140,0,0.7); }
+  .plvl-olimdar .plvl-particle{ display:block; animation:plvlEmberRise 5s ease-in infinite; }
+  .plvl-olimdar .plvl-particle:nth-child(1){ left:18%; animation-delay:0s; }
+  .plvl-olimdar .plvl-particle:nth-child(2){ left:40%; animation-delay:1.3s; }
+  .plvl-olimdar .plvl-particle:nth-child(3){ left:62%; animation-delay:2.6s; }
+  .plvl-olimdar .plvl-particle:nth-child(4){ left:82%; animation-delay:3.8s; }
+
+  @keyframes plvlEmberRise{
+    0%{ opacity:0; transform:translateY(0) scale(0.6); }
+    15%{ opacity:1; }
+    85%{ opacity:0.8; }
+    100%{ opacity:0; transform:translateY(-90px) scale(1.1); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .profile-level-bg, .profile-level-bg::before, .profile-level-bg::after, .plvl-particle{
+      animation:none !important;
+    }
+  }
 
   /* ---------- Avatar rasm tanlash / kesish (crop) oynasi ---------- */
   #avatarCropOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.82); backdrop-filter:blur(5px);
@@ -887,6 +955,9 @@ setTimeout(function(){
     <!-- ---- PROFILE TAB ---- -->
     <div class="tab-content" id="tab-profile">
       <div class="profile-header">
+        <div class="profile-level-bg" id="profileLevelBg">
+          <span class="plvl-particle"></span><span class="plvl-particle"></span><span class="plvl-particle"></span><span class="plvl-particle"></span>
+        </div>
         <div class="avatar-frame-wrap avatar-frame-wrap-profile">
           <div class="profile-avatar" id="profileAvatar" onclick="openAvatarPicker()" style="cursor:pointer">--</div>
           <img class="avatar-frame-img" id="profileAvatarFrame" src="assets/avatars/frame-oddiy.png" alt="">
@@ -2255,12 +2326,12 @@ function levelBadge(num){
 }
 /* Avatar ramkalari (frame) - level oralig'iga qarab */
 const AVATAR_FRAMES = [
-  { min: 81, img: 'assets/avatars/frame-olimdar.png' },
-  { min: 61, img: 'assets/avatars/frame-afsonaviy.png' },
-  { min: 46, img: 'assets/avatars/frame-betakror.png' },
-  { min: 31, img: 'assets/avatars/frame-epic.png' },
-  { min: 16, img: 'assets/avatars/frame-noyob.png' },
-  { min: 1,  img: 'assets/avatars/frame-oddiy.png' }
+  { min: 81, img: 'assets/avatars/frame-olimdar.png',   tier: 'olimdar' },
+  { min: 61, img: 'assets/avatars/frame-afsonaviy.png', tier: 'afsonaviy' },
+  { min: 46, img: 'assets/avatars/frame-betakror.png',  tier: 'betakror' },
+  { min: 31, img: 'assets/avatars/frame-epic.png',      tier: 'epic' },
+  { min: 16, img: 'assets/avatars/frame-noyob.png',     tier: 'noyob' },
+  { min: 1,  img: 'assets/avatars/frame-oddiy.png',     tier: 'oddiy' }
 ];
 function avatarFrame(num){
   for(const f of AVATAR_FRAMES){ if(num >= f.min) return f; }
@@ -2327,6 +2398,7 @@ function renderLevel(){
   const frame = avatarFrame(info.num);
   const hf = document.getElementById('homeAvatarFrame'); if(hf) hf.src = frame.img;
   const pf = document.getElementById('profileAvatarFrame'); if(pf) pf.src = frame.img;
+  const lvlBg = document.getElementById('profileLevelBg'); if(lvlBg) lvlBg.className = 'profile-level-bg plvl-' + frame.tier;
   const pct = Math.min(100, (info.current / info.needed) * 100);
   const fill1 = document.getElementById('xpBarFill'); if(fill1) fill1.style.width = pct + '%';
   const fill2 = document.getElementById('xpBarFill2'); if(fill2) fill2.style.width = pct + '%';
