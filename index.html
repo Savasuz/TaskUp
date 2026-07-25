@@ -240,22 +240,34 @@
   .wallet-amount{ font-family:'Space Grotesk', sans-serif; font-size:32px; font-weight:700; margin:6px 0 2px; display:flex; align-items:center; justify-content:center; gap:8px; }
   .wallet-sub{ font-size:12.5px; color:rgba(255,255,255,0.7); font-family:'JetBrains Mono', monospace; }
 
-  /* ---------- Payment methods ---------- */
-  .pay-method{ display:flex; align-items:center; gap:12px; background:var(--bg-card); border:1.5px solid var(--line); border-radius:14px;
-    padding:13px 14px; margin-bottom:9px; cursor:pointer; transition:border-color .15s ease; }
-  .pay-method.active{ border-color:var(--purple); background:var(--purple-dim); }
-  .pay-icon{ width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
-    color:#fff; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14px; flex-shrink:0; }
-  .pay-body{ flex:1; display:flex; flex-direction:column; }
-  .pay-body b{ font-size:13.5px; }
-  .pay-body span{ font-size:11px; color:var(--muted); margin-top:1px; }
-  .pay-radio{ width:20px; height:20px; border-radius:50%; border:2px solid var(--line); flex-shrink:0; position:relative; }
-  .pay-method.active .pay-radio{ border-color:var(--purple); }
-  .pay-method.active .pay-radio::after{ content:''; position:absolute; inset:3px; border-radius:50%; background:var(--purple); }
-
-  #cashoutAmount{ width:100%; background:var(--bg-card); border:1px solid var(--line); color:var(--text);
-    padding:13px 14px; border-radius:11px; font-size:15px; font-family:'JetBrains Mono', monospace; outline:none; margin-bottom:12px; }
-  #cashoutAmount:focus{ border-color:var(--purple); }
+  /* ---------- Pul yechish (cashout) oynasi ---------- */
+  #cashoutOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.82); backdrop-filter:blur(5px);
+    z-index:90; align-items:flex-end; justify-content:center; }
+  #cashoutOverlay.show{ display:flex; }
+  .cashout-panel{ background:#fff; border-radius:24px 24px 0 0; width:100%; max-width:420px; max-height:88vh;
+    overflow-y:auto; animation:sheetUp .25s ease; padding-bottom:env(safe-area-inset-bottom); }
+  .cashout-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:18px 18px 6px; }
+  .cashout-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; color:#15161F; }
+  .cashout-close-x{ width:30px; height:30px; border-radius:50%; background:#F1F2F6; color:#6B6E80;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px; flex-shrink:0; }
+  .cashout-back{ width:30px; height:30px; border-radius:50%; background:#F1F2F6; color:#15161F;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:19px; flex-shrink:0; }
+  .cashout-selected-method{ display:flex; align-items:center; gap:8px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14px; color:#15161F; }
+  .cashout-selected-method img{ height:20px; max-width:60px; object-fit:contain; }
+  .pay-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px; }
+  .pay-grid-item{ background:#F5F6FA; border-radius:16px; padding:22px 12px; display:flex; flex-direction:column;
+    align-items:center; gap:12px; cursor:pointer; border:1.5px solid transparent; transition:transform .12s ease, border-color .15s ease; }
+  .pay-grid-item:active{ transform:scale(0.96); }
+  .pay-grid-item.active{ border-color:var(--purple); background:#EFECFD; }
+  .pay-grid-item img{ height:34px; max-width:100%; object-fit:contain; }
+  .pay-grid-item span{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13px; color:#15161F; text-align:center; }
+  .cashout-step{ padding:0 18px 22px; }
+  .cashout-step .section-label{ margin:16px 2px 8px; }
+  .cashout-limits{ display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:2px; }
+  .cashout-panel input[type=text]{ background:#F5F6FA; border:1.5px solid #E4E6EF; color:#15161F; }
+  .cashout-panel input[type=text]:focus{ border-color:var(--purple); }
+  .cashout-panel .progress-track{ background:#EFEFF4; border-color:#E4E6EF; }
+  .cashout-panel .cashout-btn{ background:#EFEFF4; color:#9096A8; border:1px solid #E4E6EF; }
 
   /* ---------- Payment history ---------- */
   .ph-item{ background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:9px; }
@@ -693,7 +705,7 @@ setTimeout(function(){
         <div class="big-balance-value"><span class="coin-dot" style="width:26px;height:26px;font-size:14px">$</span><span id="coinCount">0</span></div>
         <div class="bal-som">= <span id="somEstHome">0</span> so'm</div>
         <div class="big-balance-actions">
-          <button class="bal-action-btn primary" onclick="event.stopPropagation(); switchTab('wallet')" data-i18n="btnWithdraw">Pul yechish</button>
+          <button class="bal-action-btn primary" onclick="event.stopPropagation(); openCashout()" data-i18n="btnWithdraw">Pul yechish</button>
           <button class="bal-action-btn" onclick="event.stopPropagation(); switchTab('history')" data-i18n="btnHistory">Tarix</button>
         </div>
       </div>
@@ -816,39 +828,7 @@ setTimeout(function(){
         <div class="wallet-sub">= <span id="somEst">0</span> so'm</div>
       </div>
 
-      <div class="section-label" data-i18n="choosePayMethod">To'lov usulini tanlang</div>
-      <div class="pay-method active" data-method="uzcard" onclick="selectPayMethod('uzcard', this)">
-        <div class="pay-icon" style="background:#1B4DE4">U</div>
-        <div class="pay-body"><b>UZCARD</b><span data-i18n="minAmount">Minimal: 10 000 so'm</span></div>
-        <div class="pay-radio"></div>
-      </div>
-      <div class="pay-method" data-method="humo" onclick="selectPayMethod('humo', this)">
-        <div class="pay-icon" style="background:#0FA968">H</div>
-        <div class="pay-body"><b>HUMO</b><span data-i18n="minAmount">Minimal: 10 000 so'm</span></div>
-        <div class="pay-radio"></div>
-      </div>
-      <div class="pay-method" data-method="payme" onclick="selectPayMethod('payme', this)">
-        <div class="pay-icon" style="background:#00C0FA">P</div>
-        <div class="pay-body"><b>Payme</b><span data-i18n="minAmount">Minimal: 10 000 so'm</span></div>
-        <div class="pay-radio"></div>
-      </div>
-      <div class="pay-method" data-method="click" onclick="selectPayMethod('click', this)">
-        <div class="pay-icon" style="background:#3E8EFF">C</div>
-        <div class="pay-body"><b>Click</b><span data-i18n="minAmount">Minimal: 10 000 so'm</span></div>
-        <div class="pay-radio"></div>
-      </div>
-
-      <div class="section-label" data-i18n="cardDetails">Karta ma'lumotlari</div>
-      <input type="text" id="cardNumber" placeholder="8600 1234 5678 9012" inputmode="numeric" maxlength="19" oninput="formatCardNumber(this)" autocomplete="cc-number" style="margin-bottom:10px">
-      <div style="display:flex; gap:10px">
-        <input type="text" id="cardExpiry" placeholder="MM/YY" inputmode="numeric" maxlength="5" oninput="formatCardExpiry(this)" autocomplete="cc-exp" style="margin-bottom:10px; flex:0 0 110px">
-        <input type="text" id="cardHolder" placeholder="Karta egasi (Ism Familiya)" autocomplete="cc-name" style="margin-bottom:10px; flex:1">
-      </div>
-
-      <div class="section-label" data-i18n="enterAmount">Summani kiriting</div>
-      <input type="text" id="cashoutAmount" placeholder="10000" value="10000" inputmode="numeric" style="margin-bottom:6px">
-      <div class="progress-track"><div class="progress-fill" id="cashoutProgress"></div></div>
-      <button class="cashout-btn" id="cashoutBtn" onclick="tryCashout(this)" style="margin-top:6px">Yuklanmoqda...</button>
+      <button class="btn" onclick="openCashout()" data-i18n="btnWithdraw" style="margin-bottom:4px">Pul yechish</button>
 
       <div class="sec-head" style="margin-top:24px">
         <div class="sec-title" data-i18n="recentActivity">So'nggi harakatlar</div>
@@ -1104,6 +1084,59 @@ setTimeout(function(){
   </div>
 </div>
 
+<!-- ---- PUL YECHISH (cashout) OVERLAY ---- -->
+<div id="cashoutOverlay" onclick="if(event.target===this) closeCashout()">
+  <div class="cashout-panel">
+    <!-- 1-EKRAN: to'lov usulini tanlash -->
+    <div class="cashout-step" id="cashoutStep1">
+      <div class="cashout-head">
+        <div class="cashout-title" data-i18n="choosePayMethod">To'lov usulini tanlang</div>
+        <div class="cashout-close-x" onclick="closeCashout()">✕</div>
+      </div>
+      <div class="pay-grid">
+        <div class="pay-grid-item active" data-method="uzcard" onclick="selectPayMethod('uzcard', this)">
+          <img src="assets/payment/uzcard-logo.png" alt="UzCard">
+          <span data-i18n="payUzcardLbl">UzCard</span>
+        </div>
+        <div class="pay-grid-item" data-method="humo" onclick="selectPayMethod('humo', this)">
+          <img src="assets/payment/humo-logo.png" alt="Humo">
+          <span data-i18n="payHumoLbl">Humo karta</span>
+        </div>
+        <div class="pay-grid-item" data-method="payme" onclick="selectPayMethod('payme', this)">
+          <img src="assets/payment/payme-logo.png" alt="Payme">
+          <span data-i18n="payPaymeLbl">Payme</span>
+        </div>
+        <div class="pay-grid-item" data-method="click" onclick="selectPayMethod('click', this)">
+          <img src="assets/payment/click-logo.png" alt="Click">
+          <span data-i18n="payClickLbl">Click</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2-EKRAN: karta ma'lumotlari -->
+    <div class="cashout-step" id="cashoutStep2" style="display:none">
+      <div class="cashout-head">
+        <div class="cashout-back" onclick="cashoutBackToMethods()">‹</div>
+        <div class="cashout-selected-method"><img id="cashoutSelectedLogo" src="assets/payment/uzcard-logo.png" alt=""><span id="cashoutSelectedName"></span></div>
+        <div class="cashout-close-x" onclick="closeCashout()">✕</div>
+      </div>
+
+      <div class="section-label" data-i18n="cardDetails">Karta ma'lumotlari</div>
+      <input type="text" id="cardNumber" placeholder="8600 1234 5678 9012" inputmode="numeric" maxlength="19" oninput="formatCardNumber(this)" autocomplete="cc-number" style="margin-bottom:10px">
+      <div style="display:flex; gap:10px">
+        <input type="text" id="cardExpiry" placeholder="MM/YY" inputmode="numeric" maxlength="5" oninput="formatCardExpiry(this)" autocomplete="cc-exp" style="margin-bottom:10px; flex:0 0 110px">
+        <input type="text" id="cardHolder" placeholder="Karta egasi (Ism Familiya)" autocomplete="cc-name" style="margin-bottom:10px; flex:1">
+      </div>
+
+      <div class="section-label" data-i18n="enterAmount">Summani kiriting</div>
+      <input type="text" id="cashoutAmount" placeholder="10000" value="10000" inputmode="numeric" style="margin-bottom:6px">
+      <div class="cashout-limits"><span data-i18n="minAmount">Minimal: 10 000 so'm</span><span id="cashoutMaxLbl"></span></div>
+      <div class="progress-track"><div class="progress-fill" id="cashoutProgress"></div></div>
+      <button class="cashout-btn" id="cashoutBtn" onclick="tryCashout(this)" style="margin-top:6px">Yuklanmoqda...</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Firebase SDK -->
@@ -1259,6 +1292,7 @@ const I18N = {
     yourRefLink:"Sizning taklif kodingiz", btnCopy:"Nusxalash", orShare:"Bizni kuzating",
     invitedCount:"Taklif qilinganlar", invitedBonus:"Ulardan olingan bonus",
     cashoutBalanceLbl:"YECHISH UCHUN BALANS", choosePayMethod:"To'lov usulini tanlang", minAmount:"Minimal: 10 000 so'm",
+    payUzcardLbl:"UzCard", payHumoLbl:"Humo karta", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Maksimal: {n}",
     enterAmount:"Summani kiriting", recentActivity:"So'nggi harakatlar", paymentHistoryLink:"To'lov tarixi ›",
     noActivity:"Hali harakat yo'q", paymentHistoryTitle:"To'lov tarixim", backBtn:"‹ Orqaga",
     filterAllHist:"Barchasi", filterPending:"Kutilmoqda", filterPaid:"Muvaffaqiyatli", filterCancelled:"Bekor qilingan",
@@ -1325,6 +1359,7 @@ const I18N = {
     yourRefLink:"Your invite code", btnCopy:"Copy", orShare:"Follow us",
     invitedCount:"Friends invited", invitedBonus:"Bonus earned from them",
     cashoutBalanceLbl:"BALANCE TO WITHDRAW", choosePayMethod:"Choose payment method", minAmount:"Minimum: 10,000 UZS",
+    payUzcardLbl:"UzCard", payHumoLbl:"Humo card", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Maximum: {n}",
     enterAmount:"Enter amount", recentActivity:"Recent activity", paymentHistoryLink:"Payment history ›",
     noActivity:"No activity yet", paymentHistoryTitle:"Payment history", backBtn:"‹ Back",
     filterAllHist:"All", filterPending:"Pending", filterPaid:"Successful", filterCancelled:"Cancelled",
@@ -1391,6 +1426,7 @@ const I18N = {
     yourRefLink:"Ваш пригласительный код", btnCopy:"Копировать", orShare:"Мы в соцсетях",
     invitedCount:"Приглашено друзей", invitedBonus:"Полученный от них бонус",
     cashoutBalanceLbl:"БАЛАНС ДЛЯ ВЫВОДА", choosePayMethod:"Выберите способ оплаты", minAmount:"Минимум: 10 000 сум",
+    payUzcardLbl:"UzCard", payHumoLbl:"Humo карта", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Максимум: {n}",
     enterAmount:"Введите сумму", recentActivity:"Последние операции", paymentHistoryLink:"История платежей ›",
     noActivity:"Пока нет операций", paymentHistoryTitle:"История платежей", backBtn:"‹ Назад",
     filterAllHist:"Все", filterPending:"В ожидании", filterPaid:"Успешно", filterCancelled:"Отменено",
@@ -1895,6 +1931,7 @@ function renderBalance(){
   const btn = document.getElementById('cashoutBtn');
   if(coins >= CASHOUT_MIN){ btn.textContent = t('cashoutReady'); btn.classList.add('ready'); }
   else { btn.textContent = `${t('cashoutNeed')} ${(CASHOUT_MIN - coins).toLocaleString()} ${t('cashoutNeedSuffix')}`; btn.classList.remove('ready'); }
+  updateCashoutMaxLbl();
 
   updateTaskCardStates();
 }
@@ -2495,10 +2532,43 @@ function filterTasks(cat, chipEl){
   applyTaskFilter();
 }
 
+const PAY_METHOD_INFO = {
+  uzcard: { img: 'assets/payment/uzcard-logo.png', key: 'payUzcardLbl' },
+  humo:   { img: 'assets/payment/humo-logo.png',   key: 'payHumoLbl' },
+  payme:  { img: 'assets/payment/payme-logo.png',  key: 'payPaymeLbl' },
+  click:  { img: 'assets/payment/click-logo.png',  key: 'payClickLbl' }
+};
 function selectPayMethod(method, el){
-  document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('active'));
+  sndClick();
+  document.querySelectorAll('.pay-grid-item').forEach(m => m.classList.remove('active'));
   el.classList.add('active');
   state.payMethod = method;
+  const info = PAY_METHOD_INFO[method];
+  if(info){
+    document.getElementById('cashoutSelectedLogo').src = info.img;
+    document.getElementById('cashoutSelectedName').textContent = t(info.key);
+  }
+  document.getElementById('cashoutStep1').style.display = 'none';
+  document.getElementById('cashoutStep2').style.display = '';
+}
+function openCashout(){
+  sndClick();
+  if(!currentUid) return;
+  document.getElementById('cashoutStep1').style.display = '';
+  document.getElementById('cashoutStep2').style.display = 'none';
+  updateCashoutMaxLbl();
+  document.getElementById('cashoutOverlay').classList.add('show');
+}
+function closeCashout(){
+  document.getElementById('cashoutOverlay').classList.remove('show');
+}
+function cashoutBackToMethods(){
+  document.getElementById('cashoutStep2').style.display = 'none';
+  document.getElementById('cashoutStep1').style.display = '';
+}
+function updateCashoutMaxLbl(){
+  const el = document.getElementById('cashoutMaxLbl');
+  if(el) el.textContent = t('maxAmountLbl').replace('{n}', (state.coins || 0).toLocaleString());
 }
 
 
