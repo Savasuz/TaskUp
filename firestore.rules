@@ -65,6 +65,13 @@ service cloud.firestore {
         && request.resource.data.taskCounts.size() == 0
       );
 
+      // Egasi profil rasmi havolasini (avatarUrl) mustaqil yangilay oladi -
+      // pul/anti-cheat maydonlariga aloqasi yo'q, shu sabab alohida qoida.
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['avatarUrl'])
+        && request.resource.data.avatarUrl is string
+        && request.resource.data.avatarUrl.size() < 500;
+
       allow delete: if isAdmin();
 
       // Tarix: yozish faqat server/admin orqali (mukofotlar serverda yoziladi)

@@ -325,7 +325,36 @@
     display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:22px; }
   .avatar-frame-wrap-profile{ width:128px; height:128px; margin:0 auto 12px; }
   .avatar-frame-wrap-profile .avatar-frame-img{ width:128px; height:128px; }
+  .avatar-edit-badge{ position:absolute; width:28px; height:28px; border-radius:50%; right:24px; bottom:24px;
+    background:var(--purple); border:2px solid var(--bg); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; z-index:2; box-shadow:0 2px 8px rgba(0,0,0,0.4); }
   .profile-phone{ font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--muted); }
+
+  /* ---------- Avatar rasm tanlash / kesish (crop) oynasi ---------- */
+  #avatarCropOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.82); backdrop-filter:blur(5px);
+    z-index:95; align-items:center; justify-content:center; }
+  #avatarCropOverlay.show{ display:flex; }
+  .crop-panel{ background:var(--bg-alt); border:1px solid var(--line); border-radius:24px; padding:20px;
+    width:calc(100% - 40px); max-width:340px; text-align:center; animation:sheetUp .25s ease; position:relative; }
+  .crop-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .crop-close{ width:30px; height:30px; border-radius:50%; background:var(--bg-card); border:1px solid var(--line);
+    color:var(--muted); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px; }
+  .crop-stage{ width:260px; height:260px; margin:0 auto; border-radius:50%; overflow:hidden; position:relative;
+    background:#000; cursor:grab; touch-action:none; border:1px solid var(--line); }
+  .crop-stage:active{ cursor:grabbing; }
+  .crop-stage img{ position:absolute; top:0; left:0; max-width:none; max-height:none; user-select:none;
+    -webkit-user-drag:none; pointer-events:none; will-change:transform; }
+  .crop-zoom-row{ display:flex; align-items:center; gap:10px; margin:18px 4px 4px; }
+  .crop-zoom-row svg{ flex-shrink:0; color:var(--muted); }
+  .crop-zoom-row input[type=range]{ flex:1; accent-color:var(--purple); }
+  .crop-hint{ font-size:11.5px; color:var(--muted); margin-top:8px; }
+  .crop-actions{ display:flex; gap:10px; margin-top:18px; }
+  .crop-btn{ flex:1; border-radius:12px; padding:12px; font-size:13.5px; font-weight:700; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif; border:1px solid var(--line); transition:transform .12s ease; }
+  .crop-btn:active{ transform:scale(0.96); }
+  .crop-btn-cancel{ background:var(--bg-card); color:var(--text); }
+  .crop-btn-save{ background:var(--purple); color:#fff; border-color:var(--purple); }
+  .crop-btn-save:disabled{ opacity:0.55; cursor:default; }
   .referral-box{ background:var(--bg); border:1px dashed var(--line); border-radius:10px; padding:12px 14px;
     display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
   .referral-code{ font-family:'JetBrains Mono', monospace; font-size:15px; font-weight:600; color:var(--purple); letter-spacing:1px; }
@@ -859,9 +888,11 @@ setTimeout(function(){
     <div class="tab-content" id="tab-profile">
       <div class="profile-header">
         <div class="avatar-frame-wrap avatar-frame-wrap-profile">
-          <div class="profile-avatar" id="profileAvatar">--</div>
+          <div class="profile-avatar" id="profileAvatar" onclick="openAvatarPicker()" style="cursor:pointer">--</div>
           <img class="avatar-frame-img" id="profileAvatarFrame" src="assets/avatars/frame-oddiy.png" alt="">
+          <div class="avatar-edit-badge" onclick="openAvatarPicker()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
         </div>
+        <input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="onAvatarFileSelected(this.files[0])">
         <div class="profile-phone" id="profilePhone">+998 -- --- -- --</div>
       </div>
       <div class="card">
@@ -1137,6 +1168,29 @@ setTimeout(function(){
   </div>
 </div>
 
+<!-- ---- AVATAR RASM TANLASH / KESISH OVERLAY ---- -->
+<div id="avatarCropOverlay" onclick="if(event.target===this) closeAvatarCrop()">
+  <div class="crop-panel">
+    <div class="crop-head">
+      <div class="sec-title" data-i18n="avatarCropTitle">Rasmni moslashtiring</div>
+      <div class="crop-close" onclick="closeAvatarCrop()">✕</div>
+    </div>
+    <div class="crop-stage" id="cropStage">
+      <img id="cropImg" src="" alt="">
+    </div>
+    <div class="crop-zoom-row">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="range" id="cropZoom" min="100" max="300" value="100" oninput="onCropZoomChange(this.value)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M21 21l-4.35-4.35"/><path d="M10 7v6M7 10h6"/></svg>
+    </div>
+    <div class="crop-hint" data-i18n="avatarCropHint">Suring va moslang</div>
+    <div class="crop-actions">
+      <button class="crop-btn crop-btn-cancel" data-i18n="avatarCropCancel" onclick="closeAvatarCrop()">Bekor qilish</button>
+      <button class="crop-btn crop-btn-save" id="cropSaveBtn" data-i18n="avatarCropSave" onclick="saveAvatarCrop()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Firebase SDK -->
@@ -1144,6 +1198,7 @@ setTimeout(function(){
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
 <script>
 const firebaseConfig = {
@@ -1159,6 +1214,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 const fns = firebase.app().functions();
+const storage = firebase.storage();
 // APK (WebView) muhitida ham sessiya saqlanishi uchun aniq LOCAL persistence
 try { auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){}); } catch(e){}
 const APP_URL = 'https://savasuz.github.io/TaskUp/';
@@ -1232,7 +1288,7 @@ function getTaskLabel(id){
 }
 
 let state = {
-  email: '', referralCode: '',
+  email: '', referralCode: '', avatarUrl: '',
   coins: 0, lifetimeCoins: 0,
   taskCounts: {}, tasksCompletedTotal: 0, dailyEarned: 0,
   friendsCount: 0, friendsBonus: 0, cashedOutTotal: 0,
@@ -1240,6 +1296,155 @@ let state = {
   history: [], paymentHistory: []
 };
 let lastRenderedCoins = null;
+const USER_ICON_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+function renderAvatarImage(){
+  const home = document.getElementById('homeAvatar');
+  const profile = document.getElementById('profileAvatar');
+  if(!home || !profile) return;
+  if(state.avatarUrl){
+    const imgHtml = `<img src="${state.avatarUrl}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`;
+    home.innerHTML = imgHtml;
+    profile.innerHTML = imgHtml;
+  } else {
+    home.innerHTML = USER_ICON_SVG;
+    profile.innerHTML = USER_ICON_SVG.replace('width="22" height="22"', 'width="30" height="30"');
+  }
+}
+
+/* ---------------- Avatar rasm tanlash / kesish (crop) ---------------- */
+const CROP_STAGE_SIZE = 260;
+const CROP_OUTPUT_SIZE = 400;
+let cropImgNatW = 0, cropImgNatH = 0;
+let cropScale = 1, cropBaseScale = 1, cropTx = 0, cropTy = 0;
+let cropDragging = false, cropDragStartX = 0, cropDragStartY = 0, cropStartTx = 0, cropStartTy = 0;
+
+function openAvatarPicker(){
+  document.getElementById('avatarFileInput').click();
+}
+
+function onAvatarFileSelected(file){
+  if(!file) return;
+  const input = document.getElementById('avatarFileInput');
+  if(!file.type || !file.type.startsWith('image/')){
+    showToast(t('toastAvatarType'), true);
+    if(input) input.value = '';
+    return;
+  }
+  if(file.size > 5 * 1024 * 1024){
+    showToast(t('toastAvatarSize'), true);
+    if(input) input.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = document.getElementById('cropImg');
+    img.onload = () => {
+      cropImgNatW = img.naturalWidth;
+      cropImgNatH = img.naturalHeight;
+      cropBaseScale = CROP_STAGE_SIZE / Math.min(cropImgNatW, cropImgNatH);
+      document.getElementById('cropZoom').value = 100;
+      applyCropTransform(1, 0, 0);
+      document.getElementById('avatarCropOverlay').classList.add('show');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  if(input) input.value = '';
+}
+
+function clampCropPan(tx, ty, scale){
+  const dispW = cropImgNatW * cropBaseScale * scale;
+  const dispH = cropImgNatH * cropBaseScale * scale;
+  const maxTx = Math.max(0, (dispW - CROP_STAGE_SIZE) / 2);
+  const maxTy = Math.max(0, (dispH - CROP_STAGE_SIZE) / 2);
+  return { tx: Math.min(maxTx, Math.max(-maxTx, tx)), ty: Math.min(maxTy, Math.max(-maxTy, ty)) };
+}
+
+function applyCropTransform(zoomFactor, tx, ty){
+  cropScale = zoomFactor;
+  const clamped = clampCropPan(tx, ty, zoomFactor);
+  cropTx = clamped.tx; cropTy = clamped.ty;
+  const img = document.getElementById('cropImg');
+  const dispW = cropImgNatW * cropBaseScale * cropScale;
+  const dispH = cropImgNatH * cropBaseScale * cropScale;
+  img.style.width = dispW + 'px';
+  img.style.height = dispH + 'px';
+  img.style.transform = `translate(${(CROP_STAGE_SIZE - dispW) / 2 + cropTx}px, ${(CROP_STAGE_SIZE - dispH) / 2 + cropTy}px)`;
+}
+
+function onCropZoomChange(val){
+  applyCropTransform(Number(val) / 100, cropTx, cropTy);
+}
+
+(function initCropDrag(){
+  const stage = document.getElementById('cropStage');
+  if(!stage) return;
+  stage.addEventListener('pointerdown', (e) => {
+    if(!cropImgNatW) return;
+    cropDragging = true;
+    cropDragStartX = e.clientX; cropDragStartY = e.clientY;
+    cropStartTx = cropTx; cropStartTy = cropTy;
+    stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener('pointermove', (e) => {
+    if(!cropDragging) return;
+    applyCropTransform(cropScale, cropStartTx + (e.clientX - cropDragStartX), cropStartTy + (e.clientY - cropDragStartY));
+  });
+  stage.addEventListener('pointerup', () => { cropDragging = false; });
+  stage.addEventListener('pointercancel', () => { cropDragging = false; });
+})();
+
+function closeAvatarCrop(){
+  document.getElementById('avatarCropOverlay').classList.remove('show');
+  document.getElementById('cropImg').src = '';
+  cropImgNatW = 0; cropImgNatH = 0;
+}
+
+function saveAvatarCrop(){
+  if(!currentUid || !cropImgNatW) return;
+  const btn = document.getElementById('cropSaveBtn');
+  const prevLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '...';
+  const effScale = cropBaseScale * cropScale;
+  const dispW = cropImgNatW * effScale;
+  const dispH = cropImgNatH * effScale;
+  const offX = (CROP_STAGE_SIZE - dispW) / 2 + cropTx;
+  const offY = (CROP_STAGE_SIZE - dispH) / 2 + cropTy;
+  const srcX = -offX / effScale;
+  const srcY = -offY / effScale;
+  const srcW = CROP_STAGE_SIZE / effScale;
+  const srcH = CROP_STAGE_SIZE / effScale;
+  const canvas = document.createElement('canvas');
+  canvas.width = CROP_OUTPUT_SIZE;
+  canvas.height = CROP_OUTPUT_SIZE;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(document.getElementById('cropImg'), srcX, srcY, srcW, srcH, 0, 0, CROP_OUTPUT_SIZE, CROP_OUTPUT_SIZE);
+  canvas.toBlob((blob) => {
+    if(!blob){
+      btn.disabled = false; btn.textContent = prevLabel;
+      showToast(t('toastAvatarError'), true);
+      return;
+    }
+    uploadAvatar(blob, btn, prevLabel);
+  }, 'image/jpeg', 0.85);
+}
+
+function uploadAvatar(blob, btn, prevLabel){
+  storage.ref('avatars/' + currentUid + '/avatar.jpg').put(blob, { contentType: 'image/jpeg' })
+    .then((snap) => snap.ref.getDownloadURL())
+    .then((url) => db.collection('users').doc(currentUid).update({ avatarUrl: url }))
+    .then(() => {
+      btn.disabled = false; btn.textContent = prevLabel;
+      showToast(t('toastAvatarUploaded'));
+      closeAvatarCrop();
+    })
+    .catch((err) => {
+      console.error(err);
+      btn.disabled = false; btn.textContent = prevLabel;
+      showToast(t('toastAvatarError'), true);
+    });
+}
 
 /* ---------------- Language ---------------- */
 let currentLang = 'uz';
@@ -1250,6 +1455,8 @@ const I18N = {
     navL1:"Asosiy", navL2:"Vazifalar", navL3:"Do'stlar", navL4:"Pul", navL5:"Profil", dailyCapSuffix:"kunlik limit",
     newsTitle:"Yangiliklar", newsEmpty:"Hozircha yangiliklar yo'q",
     cardDetails:"Karta ma'lumotlari", toastCardNumber:"Karta raqamini to'liq kiriting (16 raqam)", toastCardExpiry:"Amal qilish sanasini kiriting (MM/YY)", toastCardHolder:"Karta egasi ism-familiyasini kiriting",
+    avatarCropTitle:"Rasmni moslashtiring", avatarCropHint:"Suring va moslang", avatarCropCancel:"Bekor qilish", avatarCropSave:"Saqlash",
+    toastAvatarType:"Faqat rasm faylini tanlang", toastAvatarSize:"Rasm hajmi 5 MB dan kichik bo'lsin", toastAvatarUploaded:"Profil rasmi yangilandi", toastAvatarError:"Rasmni yuklashda xatolik yuz berdi",
     enterRefCode:"Sizni taklif qilishganmi? Kodni kiriting", btnRedeem:"Faollashtirish", toastEnterCode:"Taklif kodini kiriting", toastRefRedeemed:"tanga! Referral faollashdi", toastRefAlready:"Siz allaqachon kod kiritgansiz", toastRefNotFound:"Bunday kod topilmadi", toastRefOwn:"O'z kodingizni kirita olmaysiz", toastRefError:"Xatolik yuz berdi",
     btnClaim:"Olish", adSoon:"Ilovada tez orada", toastNotStarted:"Vazifa hali boshlanmagan", toastEnded:"Vazifa muddati tugagan", toastTotalLimit:"Vazifa umumiy limiti tugagan",
     toastNotEnough:"Balansingizda buncha tanga yo'q",
@@ -1317,6 +1524,8 @@ const I18N = {
     navL1:"Home", navL2:"Tasks", navL3:"Friends", navL4:"Wallet", navL5:"Profile", dailyCapSuffix:"daily cap",
     newsTitle:"News", newsEmpty:"No news yet",
     cardDetails:"Card details", toastCardNumber:"Enter the full card number (16 digits)", toastCardExpiry:"Enter the expiry date (MM/YY)", toastCardHolder:"Enter the cardholder name",
+    avatarCropTitle:"Adjust your photo", avatarCropHint:"Drag and adjust", avatarCropCancel:"Cancel", avatarCropSave:"Save",
+    toastAvatarType:"Please select an image file", toastAvatarSize:"Image size must be under 5 MB", toastAvatarUploaded:"Profile photo updated", toastAvatarError:"Failed to upload photo",
     enterRefCode:"Were you invited? Enter the code", btnRedeem:"Activate", toastEnterCode:"Enter the referral code", toastRefRedeemed:"coins! Referral activated", toastRefAlready:"You already used a code", toastRefNotFound:"Code not found", toastRefOwn:"You can't use your own code", toastRefError:"Something went wrong",
     btnClaim:"Claim", adSoon:"Soon in the app", toastNotStarted:"Task hasn't started yet", toastEnded:"Task has ended", toastTotalLimit:"Task completion limit reached",
     toastNotEnough:"You don't have that many coins",
@@ -1384,6 +1593,8 @@ const I18N = {
     navL1:"Главная", navL2:"Задания", navL3:"Друзья", navL4:"Вывод", navL5:"Профиль", dailyCapSuffix:"дневной лимит",
     newsTitle:"Новости", newsEmpty:"Пока новостей нет",
     cardDetails:"Данные карты", toastCardNumber:"Введите полный номер карты (16 цифр)", toastCardExpiry:"Введите срок действия (ММ/ГГ)", toastCardHolder:"Введите имя владельца карты",
+    avatarCropTitle:"Настройте фото", avatarCropHint:"Перетащите и настройте", avatarCropCancel:"Отмена", avatarCropSave:"Сохранить",
+    toastAvatarType:"Выберите файл изображения", toastAvatarSize:"Размер изображения должен быть меньше 5 МБ", toastAvatarUploaded:"Фото профиля обновлено", toastAvatarError:"Ошибка загрузки фото",
     enterRefCode:"Вас пригласили? Введите код", btnRedeem:"Активировать", toastEnterCode:"Введите реферальный код", toastRefRedeemed:"монет! Реферал активирован", toastRefAlready:"Вы уже использовали код", toastRefNotFound:"Код не найден", toastRefOwn:"Нельзя использовать свой код", toastRefError:"Произошла ошибка",
     btnClaim:"Получить", adSoon:"Скоро в приложении", toastNotStarted:"Задание ещё не началось", toastEnded:"Задание завершено", toastTotalLimit:"Лимит задания исчерпан",
     toastNotEnough:"У вас недостаточно монет",
@@ -1620,6 +1831,8 @@ function subscribeUser(uid){
     state.lastSpin = data.lastSpin || null;
     state.referralCode = data.referralCode || state.referralCode;
     state.email = data.email || state.email;
+    state.avatarUrl = data.avatarUrl || '';
+    renderAvatarImage();
     renderAll();
   }, err => console.error(err));
   loadHistory(uid);
@@ -1651,9 +1864,7 @@ function finishOnboarding(){
 function enterApp(){
   document.getElementById('appScreen').style.display = 'flex';
   document.getElementById('appScreen').style.flexDirection = 'column';
-  const userIconSvg = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
-  document.getElementById('homeAvatar').innerHTML = userIconSvg;
-  document.getElementById('profileAvatar').innerHTML = userIconSvg.replace('width="22" height="22"', 'width="30" height="30"');
+  renderAvatarImage();
   document.getElementById('profilePhone').textContent = state.email || '';
   document.getElementById('greetName').textContent = t('defaultUserName');
   document.getElementById('referralLink').textContent = state.referralCode;
