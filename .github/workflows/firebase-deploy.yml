@@ -1,4 +1,4 @@
-name: Firebase deploy (functions + rules)
+name: Firebase deploy (functions + rules + indexes)
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - 'functions/**'
       - 'firestore.rules'
+      - 'firestore.indexes.json'
       - 'firebase.json'
   workflow_dispatch:
 
@@ -37,7 +38,7 @@ jobs:
       - name: Install functions dependencies
         run: npm --prefix functions install
 
-      - name: Deploy functions + firestore rules
+      - name: Deploy functions + firestore rules + indexes
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
-        run: npx firebase-tools@latest deploy --only functions,firestore:rules --project taskup-df8ee --non-interactive --force
+        run: npx firebase-tools@latest deploy --only functions,firestore:rules,firestore:indexes --project taskup-df8ee --non-interactive --force
