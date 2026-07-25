@@ -121,7 +121,7 @@
   .list-status{ font-size:10px; font-weight:700; margin-top:3px; }
   .status-faol, .status-paid{ color:var(--green); }
   .status-nofaol, .status-pending{ color:var(--amber); }
-  .status-ban, .status-rejected{ color:var(--red); }
+  .status-ban, .status-cancelled{ color:var(--red); }
 
   /* ---- Task row with toggle ---- */
   .task-row{ display:flex; align-items:center; gap:12px; background:var(--bg-card); border:1px solid var(--line);
@@ -439,7 +439,7 @@ setTimeout(function(){
         <div class="chip active" data-f="all" onclick="filterPayments('all',this)" data-i18n="chipAll">Barchasi</div>
         <div class="chip" data-f="pending" onclick="filterPayments('pending',this)" data-i18n="chipPending">Kutmoqda</div>
         <div class="chip" data-f="paid" onclick="filterPayments('paid',this)" data-i18n="chipPaid">To'landi</div>
-        <div class="chip" data-f="rejected" onclick="filterPayments('rejected',this)" data-i18n="chipRejected">Rad etildi</div>
+        <div class="chip" data-f="cancelled" onclick="filterPayments('cancelled',this)" data-i18n="chipCancelled">Bekor qilingan</div>
       </div>
       <div class="overview-card">
         <div><div class="overview-lbl" data-i18n="totalPayments">Jami to'lovlar</div><div class="overview-val" id="paymentsTotalVal">0</div><div class="overview-growth">↑ 15.3% o'tgan 30 kun</div></div>
@@ -692,8 +692,8 @@ const ADMIN_I18N = {
     otpCheckSpam:"Kelmasa Spam papkasini tekshiring — yuboruvchi: noreply@taskup-df8ee.firebaseapp.com",
     otpEnableHint:"Firebase Console → Authentication → Sign-in method → Email/Password ichida \"Email link (passwordless sign-in)\" yoqilmagan!",
     otpDomainHint:"Firebase Console → Authentication → Settings → Authorized domains ga savasuz.github.io qo'shilmagan!",
-    chipPending:"Kutmoqda", chipPaid:"To'landi", chipRejected:"Rad etildi",
-    statusActive:"Faol", statusBanned:"Ban qilingan", statusPaid:"To'landi", statusPending:"Kutmoqda", statusRejected:"Rad etildi",
+    chipPending:"Kutmoqda", chipPaid:"To'landi", chipCancelled:"Bekor qilingan",
+    statusActive:"Faol", statusBanned:"Ban qilingan", statusPaid:"To'landi", statusPending:"Kutmoqda", statusCancelled:"Bekor qilingan",
     btnBan:"Bloklash", btnUnban:"Blokdan chiqarish", btnApprove:"Tasdiqlash", btnReject:"Rad etish",
     tasksTitle:"Vazifalar", noTasks:"Vazifalar yo'q", perDay:"kuniga", addTaskTitle:"Yangi vazifa qo'shish",
     lblCategory:"Kategoriya", lblTaskName:"Vazifa nomi", lblTaskDesc:"Vazifa haqida", lblReward:"Mukofot (tanga)",
@@ -745,8 +745,8 @@ const ADMIN_I18N = {
     otpCheckSpam:"Check your Spam folder — sender: noreply@taskup-df8ee.firebaseapp.com",
     otpEnableHint:"\"Email link (passwordless sign-in)\" is not enabled in Firebase Console → Authentication → Sign-in method → Email/Password!",
     otpDomainHint:"savasuz.github.io is missing from Firebase Console → Authentication → Settings → Authorized domains!",
-    chipPending:"Pending", chipPaid:"Paid", chipRejected:"Rejected",
-    statusActive:"Active", statusBanned:"Banned", statusPaid:"Paid", statusPending:"Pending", statusRejected:"Rejected",
+    chipPending:"Pending", chipPaid:"Paid", chipCancelled:"Cancelled",
+    statusActive:"Active", statusBanned:"Banned", statusPaid:"Paid", statusPending:"Pending", statusCancelled:"Cancelled",
     btnBan:"Ban", btnUnban:"Unban", btnApprove:"Approve", btnReject:"Reject",
     tasksTitle:"Tasks", noTasks:"No tasks", perDay:"per day", addTaskTitle:"Add new task",
     lblCategory:"Category", lblTaskName:"Task name", lblTaskDesc:"About the task", lblReward:"Reward (coins)",
@@ -798,8 +798,8 @@ const ADMIN_I18N = {
     otpCheckSpam:"Проверьте папку Спам — отправитель: noreply@taskup-df8ee.firebaseapp.com",
     otpEnableHint:"В Firebase Console → Authentication → Sign-in method → Email/Password не включён \"Email link (passwordless sign-in)\"!",
     otpDomainHint:"savasuz.github.io отсутствует в Firebase Console → Authentication → Settings → Authorized domains!",
-    chipPending:"Ожидает", chipPaid:"Оплачено", chipRejected:"Отклонено",
-    statusActive:"Активен", statusBanned:"Заблокирован", statusPaid:"Оплачено", statusPending:"Ожидает", statusRejected:"Отклонено",
+    chipPending:"Ожидает", chipPaid:"Оплачено", chipCancelled:"Отменено",
+    statusActive:"Активен", statusBanned:"Заблокирован", statusPaid:"Оплачено", statusPending:"Ожидает", statusCancelled:"Отменено",
     btnBan:"Заблокировать", btnUnban:"Разблокировать", btnApprove:"Подтвердить", btnReject:"Отклонить",
     tasksTitle:"Задания", noTasks:"Нет заданий", perDay:"в день", addTaskTitle:"Добавить задание",
     lblCategory:"Категория", lblTaskName:"Название задания", lblTaskDesc:"О задании", lblReward:"Награда (монеты)",
@@ -973,7 +973,7 @@ function renderHome(){
     <div class="act-row">
       <div class="row-avatar">${initials(p.email)}</div>
       <div class="act-body"><div class="act-name">${escHtml(p.email||'—')}</div><div class="act-desc">${t('cashoutReqLabel')}</div></div>
-      <div class="act-right"><div class="act-amount pos">${fmt(p.amountSom || Math.round((p.amountCoins||0)*1.2))} so'm</div><div class="act-time status-${p.status}">${p.status==='paid'?t('statusPaid'):p.status==='pending'?t('statusPending'):t('statusRejected')}</div></div>
+      <div class="act-right"><div class="act-amount pos">${fmt(p.amountSom || Math.round((p.amountCoins||0)*1.2))} so'm</div><div class="act-time status-${p.status}">${p.status==='paid'?t('statusPaid'):p.status==='pending'?t('statusPending'):t('statusCancelled')}</div></div>
     </div>`).join('') : `<div style="text-align:center;color:var(--muted);padding:20px;font-size:12.5px">${t('noActivity')}</div>`;
 }
 
@@ -1164,7 +1164,7 @@ function renderPayments(){
       <div class="row-avatar">${initials(p.email)}</div>
       <div class="list-body"><div class="list-name">${escHtml(p.email||'—')}</div><div class="list-meta">${(p.payMethod||'uzcard').toUpperCase()} • ${fmt(p.amountCoins)} coin</div>${cardLine}</div>
       <div class="list-right"><div class="list-val">${fmt(p.amountSom || Math.round((p.amountCoins||0)*1.2))} so'm</div>
-        <div class="list-status status-${p.status}">${p.status==='paid'?'● '+t('statusPaid'):p.status==='pending'?'● '+t('statusPending'):'● '+t('statusRejected')}</div>
+        <div class="list-status status-${p.status}">${p.status==='paid'?'● '+t('statusPaid'):p.status==='pending'?'● '+t('statusPending'):'● '+t('statusCancelled')}</div>
         ${p.status==='pending' ? `<div style="margin-top:5px"><span onclick="approvePayment('${p.id}')" style="color:var(--green);font-size:10px;cursor:pointer;margin-right:8px">✓ ${t('btnApprove')}</span><span onclick="rejectPayment('${p.id}','${p.uid}',${p.amountCoins})" style="color:var(--red);font-size:10px;cursor:pointer">✕ ${t('btnReject')}</span></div>` : ``}
       </div>
     </div>`;
@@ -1181,7 +1181,7 @@ function rejectPayment(id, uid, amountCoins){
     return tx.get(userRef).then((doc) => {
       const data = doc.data() || {};
       tx.update(userRef, { coins: (data.coins||0) + amountCoins, cashedOutTotal: Math.max(0,(data.cashedOutTotal||0) - amountCoins) });
-      tx.update(reqRef, { status: 'rejected' });
+      tx.update(reqRef, { status: 'cancelled' });
     });
   }).then(() => showToast(t('paymentRejected'))).catch(err => { console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); });
 }
