@@ -266,7 +266,11 @@
   .list-row{ display:flex; align-items:center; background:var(--bg-card); border:1px solid var(--line); border-radius:14px;
     padding:11px 14px; margin-bottom:8px; }
   .row-avatar{ width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--purple),var(--blue));
-    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; overflow:hidden; }
+  .row-avatar svg{ width:55%; height:55%; }
+  .avatar-frame-wrap-lb-row{ width:52px; height:52px; flex-shrink:0; }
+  .avatar-frame-wrap-lb-row .avatar-frame-img{ width:52px; height:52px; }
+  .avatar-frame-wrap-lb-row .row-avatar{ width:28px; height:28px; }
   .list-body{ flex:1; min-width:0; }
   .list-name{ font-size:13px; font-weight:600; }
   .list-val{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--amber); font-weight:600; display:flex; align-items:center; gap:4px; }
@@ -405,9 +409,16 @@
   /* ---------- Podium ---------- */
   .podium{ display:flex; align-items:flex-end; justify-content:center; gap:10px; padding:16px 4px 0; }
   .podium-slot{ flex:1; display:flex; flex-direction:column; align-items:center; position:relative; }
-  .podium-avatar{ width:52px; height:52px; border-radius:50%; background:var(--bg-card); border:2px solid var(--line);
-    display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:6px; }
-  .podium-avatar.gold{ border-color:var(--amber); width:60px; height:60px; font-size:28px; }
+  .avatar-frame-wrap-lb-podium{ width:76px; height:76px; margin-bottom:6px; }
+  .avatar-frame-wrap-lb-podium .avatar-frame-img{ width:76px; height:76px; }
+  .avatar-frame-wrap-lb-podium.gold{ width:88px; height:88px; }
+  .avatar-frame-wrap-lb-podium.gold .avatar-frame-img{ width:88px; height:88px; }
+  .podium-avatar{ width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue));
+    color:#fff; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .podium-avatar svg{ width:55%; height:55%; }
+  .podium-avatar.gold{ border-color:var(--amber); width:50px; height:50px; }
+  .podium-avatar.silver{ border-color:#C0C0C0; }
+  .podium-avatar.bronze{ border-color:#CD7F32; }
   .podium-crown{ font-size:20px; margin-bottom:2px; }
   .podium-name{ font-size:11.5px; font-weight:700; text-align:center; }
   .podium-coin{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--amber); margin:2px 0 8px; }
@@ -961,20 +972,29 @@ setTimeout(function(){
       </div>
       <div class="podium">
         <div class="podium-slot second">
-          <div class="podium-avatar"><svg viewBox="0 0 24 24" width="22" height="22" fill="#C0C0C0" stroke="var(--bg)" stroke-width="1"><circle cx="12" cy="14" r="7"/><path d="M9 2h6l-1.5 6h-3z"/></svg></div>
+          <div class="avatar-frame-wrap avatar-frame-wrap-lb-podium">
+            <div class="podium-avatar silver" id="p2Avatar">--</div>
+            <img class="avatar-frame-img" id="p2Frame" src="assets/avatars/frame-oddiy.png" alt="">
+          </div>
           <div class="podium-name" id="p2Name">--</div>
           <div class="podium-coin"><span class="mini-coin">$</span> <span id="p2Coin">0</span></div>
           <div class="podium-bar" style="height:70px">2</div>
         </div>
         <div class="podium-slot first">
           <div class="podium-crown"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:var(--amber)"><path d="M2 18h20l-2-9-5 4-3-7-3 7-5-4z"/></svg></div>
-          <div class="podium-avatar gold"><svg viewBox="0 0 24 24" width="26" height="26" fill="var(--amber)" stroke="var(--bg)" stroke-width="1"><circle cx="12" cy="14" r="7"/><path d="M9 2h6l-1.5 6h-3z"/></svg></div>
+          <div class="avatar-frame-wrap avatar-frame-wrap-lb-podium gold">
+            <div class="podium-avatar gold" id="p1Avatar">--</div>
+            <img class="avatar-frame-img" id="p1Frame" src="assets/avatars/frame-oddiy.png" alt="">
+          </div>
           <div class="podium-name" id="p1Name">--</div>
           <div class="podium-coin"><span class="mini-coin">$</span> <span id="p1Coin">0</span></div>
           <div class="podium-bar" style="height:95px">1</div>
         </div>
         <div class="podium-slot third">
-          <div class="podium-avatar"><svg viewBox="0 0 24 24" width="22" height="22" fill="#CD7F32" stroke="var(--bg)" stroke-width="1"><circle cx="12" cy="14" r="7"/><path d="M9 2h6l-1.5 6h-3z"/></svg></div>
+          <div class="avatar-frame-wrap avatar-frame-wrap-lb-podium">
+            <div class="podium-avatar bronze" id="p3Avatar">--</div>
+            <img class="avatar-frame-img" id="p3Frame" src="assets/avatars/frame-oddiy.png" alt="">
+          </div>
           <div class="podium-name" id="p3Name">--</div>
           <div class="podium-coin"><span class="mini-coin">$</span> <span id="p3Coin">0</span></div>
           <div class="podium-bar" style="height:52px">3</div>
@@ -2462,20 +2482,39 @@ function loadLeaderboard(period, el){
     document.getElementById('lbRestList').innerHTML = `<div class="activity-empty">${t('lbError')}</div>`;
   });
 }
+function lbAvatarInnerHtml(entry){
+  return entry.avatarUrl
+    ? `<img src="${escapeHtml(entry.avatarUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`
+    : USER_ICON_SVG;
+}
+function updatePodiumAvatar(prefix, entry){
+  const frame = avatarFrame(getLevelInfo(entry.lifetimeCoins || 0).num);
+  const avatarEl = document.getElementById(prefix + 'Avatar');
+  const frameEl = document.getElementById(prefix + 'Frame');
+  if(avatarEl) avatarEl.innerHTML = lbAvatarInnerHtml(entry);
+  if(frameEl) frameEl.src = frame.img;
+}
 function renderLeaderboardData(top, period){
   const fmtV = v => (v || 0).toLocaleString();
-  const get = i => top[i] || { name: '—', value: 0 };
+  const get = i => top[i] || { name: '—', value: 0, avatarUrl: '', lifetimeCoins: 0 };
   document.getElementById('p1Name').textContent = get(0).name; document.getElementById('p1Coin').textContent = fmtV(get(0).value);
   document.getElementById('p2Name').textContent = get(1).name; document.getElementById('p2Coin').textContent = fmtV(get(1).value);
   document.getElementById('p3Name').textContent = get(2).name; document.getElementById('p3Coin').textContent = fmtV(get(2).value);
+  updatePodiumAvatar('p1', get(0)); updatePodiumAvatar('p2', get(1)); updatePodiumAvatar('p3', get(2));
   const rest = top.slice(3);
-  document.getElementById('lbRestList').innerHTML = rest.length ? rest.map((r, i) => `
+  document.getElementById('lbRestList').innerHTML = rest.length ? rest.map((r, i) => {
+    const frame = avatarFrame(getLevelInfo(r.lifetimeCoins || 0).num);
+    return `
     <div class="list-row" style="${r.me?'border-color:var(--purple)':''}">
       <div style="width:22px; text-align:center; font-family:'Space Grotesk',sans-serif; font-weight:700; color:var(--muted)">${i+4}</div>
-      <div class="row-avatar" style="margin-left:8px">${escapeHtml((r.name||'?').slice(0,2).toUpperCase())}</div>
+      <div class="avatar-frame-wrap avatar-frame-wrap-lb-row" style="margin-left:8px">
+        <div class="row-avatar">${lbAvatarInnerHtml(r)}</div>
+        <img class="avatar-frame-img" src="${frame.img}" alt="">
+      </div>
       <div class="list-body" style="margin-left:8px"><div class="list-name">${escapeHtml(r.name)}${r.me ? ' (' + t('youWord') + ')' : ''}</div></div>
       <div class="list-val">${period === 'referrals' ? '👥' : '<span class="mini-coin">$</span>'} ${fmtV(r.value)}</div>
-    </div>`).join('') : (top.length ? '' : `<div class="activity-empty">${t('lbEmpty')}</div>`);
+    </div>`;
+  }).join('') : (top.length ? '' : `<div class="activity-empty">${t('lbEmpty')}</div>`);
 }
 function renderLeaderboard(){
   const c = lbCache[currentLbPeriod];

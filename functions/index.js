@@ -349,7 +349,7 @@ exports.getLeaderboard = onCall(async (req) => {
     let value = d[field] || 0;
     if (period === 'weekly' && d.weekStamp !== ws) value = 0;
     if (value <= 0) return;
-    top.push({ name: maskEmail(d.email), value, me: doc.id === uid });
+    top.push({ name: maskEmail(d.email), value, me: doc.id === uid, avatarUrl: d.avatarUrl || '', lifetimeCoins: d.lifetimeCoins || 0 });
   });
   return { period, top };
 });
