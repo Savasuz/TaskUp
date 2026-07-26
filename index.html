@@ -216,6 +216,12 @@
   .invite-hero{ padding:24px 10px 20px; }
   .invite-emoji{ display:flex; justify-content:center; margin-bottom:8px; }
   .invite-emoji img{ width:200px; height:200px; object-fit:contain; }
+
+  /* ---------- Vazifalar bo'sh holati ---------- */
+  .tasks-empty{ display:none; flex-direction:column; align-items:center; text-align:center; padding:36px 24px 20px; }
+  .tasks-empty img{ width:190px; height:190px; object-fit:contain; margin-bottom:14px; }
+  .tasks-empty-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; margin-bottom:6px; }
+  .tasks-empty-sub{ font-size:12.5px; color:var(--muted); max-width:280px; line-height:1.5; }
   .section-label{ font-size:11.5px; color:var(--muted); margin:16px 2px 8px; font-family:'JetBrains Mono', monospace; letter-spacing:0.5px; }
 
   /* ---------- Share row ---------- */
@@ -787,6 +793,11 @@ setTimeout(function(){
       </div>
 
       <div id="allTaskList"></div>
+      <div id="tasksEmptyState" class="tasks-empty">
+        <img src="assets/menu/no-tasks.png" alt="">
+        <div class="tasks-empty-title" data-i18n="noTasksTitle">Hali vazifa yo'q</div>
+        <div class="tasks-empty-sub" data-i18n="noTasksSub">Yangi vazifalar tez orada paydo bo'ladi. Bildirishnomalarni yoqib qo'ying va hech narsani o'tkazib yubormang!</div>
+      </div>
     </div>
 
     <!-- ---- FRIENDS TAB ---- -->
@@ -1494,6 +1505,7 @@ const I18N = {
     taskTgName:"Telegram kanalga obuna bo'lish", taskTgDesc:"Kanalga obuna bo'ling",
     taskRateName:"O'yin o'ynab baho berish", taskRateDesc:"O'yinni o'ynang va 5 yulduz bering",
     btnDo:"Bajarish", filterAll:"Barcha", filterSimple:"Oddiy", filterPremium:"Premium", filterBonus:"Bonus",
+    noTasksTitle:"Hali vazifa yo'q", noTasksSub:"Yangi vazifalar tez orada paydo bo'ladi. Bildirishnomalarni yoqib qo'ying va hech narsani o'tkazib yubormang!",
     inviteHeroTitle:"Do'stlaringizni taklif qiling", inviteHeroSub:"Har bir do'stingiz uchun 20% bonus oling",
     yourRefLink:"Sizning taklif kodingiz", btnCopy:"Nusxalash", orShare:"Bizni kuzating",
     invitedCount:"Taklif qilinganlar", invitedBonus:"Ulardan olingan bonus",
@@ -1563,6 +1575,7 @@ const I18N = {
     taskTgName:"Subscribe to Telegram channel", taskTgDesc:"Subscribe to the channel",
     taskRateName:"Play & rate the game", taskRateDesc:"Play the game and give 5 stars",
     btnDo:"Complete", filterAll:"All", filterSimple:"Simple", filterPremium:"Premium", filterBonus:"Bonus",
+    noTasksTitle:"No tasks yet", noTasksSub:"New tasks are coming soon. Turn on notifications so you don't miss anything!",
     inviteHeroTitle:"Invite your friends", inviteHeroSub:"Get a 20% bonus for every friend",
     yourRefLink:"Your invite code", btnCopy:"Copy", orShare:"Follow us",
     invitedCount:"Friends invited", invitedBonus:"Bonus earned from them",
@@ -1632,6 +1645,7 @@ const I18N = {
     taskTgName:"Подписаться на Telegram-канал", taskTgDesc:"Подпишитесь на канал",
     taskRateName:"Сыграть и оценить игру", taskRateDesc:"Сыграйте в игру и поставьте 5 звёзд",
     btnDo:"Выполнить", filterAll:"Все", filterSimple:"Простые", filterPremium:"Премиум", filterBonus:"Бонус",
+    noTasksTitle:"Пока нет заданий", noTasksSub:"Новые задания скоро появятся. Включите уведомления, чтобы ничего не пропустить!",
     inviteHeroTitle:"Пригласите друзей", inviteHeroSub:"Получайте 20% бонус за каждого друга",
     yourRefLink:"Ваш пригласительный код", btnCopy:"Копировать", orShare:"Мы в соцсетях",
     invitedCount:"Приглашено друзей", invitedBonus:"Полученный от них бонус",
@@ -2868,9 +2882,14 @@ function renderTaskLists(){
 }
 
 function applyTaskFilter(){
+  let anyVisible = false;
   document.querySelectorAll('#tab-tasks .task').forEach(el => {
-    el.style.display = (currentTaskFilter === 'all' || el.dataset.cat === currentTaskFilter) ? 'flex' : 'none';
+    const visible = (currentTaskFilter === 'all' || el.dataset.cat === currentTaskFilter);
+    el.style.display = visible ? 'flex' : 'none';
+    if(visible) anyVisible = true;
   });
+  const emptyEl = document.getElementById('tasksEmptyState');
+  if(emptyEl) emptyEl.style.display = anyVisible ? 'none' : 'flex';
 }
 
 function filterTasks(cat, chipEl){
