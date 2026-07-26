@@ -116,8 +116,15 @@
     transition:transform .12s ease, background .12s ease; }
   .bal-action-btn:active{ transform:scale(0.95); }
   .bal-action-btn.primary{ background:#fff; color:var(--purple); }
-  .avatar-frame-wrap{ position:relative; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .avatar-frame-wrap{ position:relative; flex-shrink:0; }
   .avatar-frame-img{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; object-fit:contain; }
+  /* Ramka (frame) rasmlarining ichki halqasi canvas markazidan ~6% yuqorida joylashgan
+     (pastda osilib turuvchi marvarid/gerb bezaklari uchun joy qoldirilgan) — shu sababli
+     avatar rasmi ham xuddi shu nuqtaga (frame bilan bir xil markazlashtirish usuli:
+     position:absolute + translate(-50%,-50%)) moslashtirilgan, canvas markaziga emas. */
+  .avatar-frame-wrap .profile-avatar,
+  .avatar-frame-wrap .podium-avatar,
+  .avatar-frame-wrap .row-avatar{ position:absolute; left:50%; top:44%; transform:translate(-50%,-50%); }
   .balance-chip{ background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:9px 14px; cursor:pointer; flex-shrink:0; }
   .balance-chip-label{ font-size:10.5px; color:var(--muted); }
   .balance-chip-value{ display:flex; align-items:center; gap:5px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; margin-top:2px; }
@@ -1309,7 +1316,7 @@ function renderAvatarImage(){
   const profile = document.getElementById('profileAvatar');
   if(!home && !profile) return;
   if(state.avatarUrl){
-    const imgHtml = `<img src="${state.avatarUrl}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`;
+    const imgHtml = `<img src="${state.avatarUrl}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;border-radius:inherit">`;
     if(home) home.innerHTML = imgHtml;
     if(profile) profile.innerHTML = imgHtml;
   } else {
@@ -2498,7 +2505,7 @@ function loadLeaderboard(period, el){
 }
 function lbAvatarInnerHtml(entry){
   return entry.avatarUrl
-    ? `<img src="${escapeHtml(entry.avatarUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`
+    ? `<img src="${escapeHtml(entry.avatarUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;border-radius:inherit">`
     : USER_ICON_SVG;
 }
 function updatePodiumAvatar(prefix, entry){
