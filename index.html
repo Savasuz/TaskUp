@@ -72,16 +72,16 @@
   .auth-error{ color:var(--red); font-size:12.5px; margin-top:10px; min-height:16px; text-align:center; }
   .auth-hint{ color:var(--muted); font-size:11.5px; margin-top:10px; text-align:center; line-height:1.5; }
 
-  #onboardScreen{ display:none; flex-direction:column; justify-content:center; min-height:100vh; padding:0 22px; text-align:center; }
-  .onboard-icon{ font-size:44px; margin-bottom:14px; }
-  .onboard-title{ font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:700; margin-bottom:10px; }
-  .onboard-steps{ text-align:left; margin:20px 0; }
-  .onboard-step{ display:flex; gap:12px; margin-bottom:16px; align-items:flex-start; }
-  .onboard-num{ width:26px; height:26px; border-radius:50%; background:var(--bg-card); border:1px solid var(--line);
-    display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono', monospace;
-    font-size:12px; color:var(--purple); flex-shrink:0; margin-top:1px; }
-  .onboard-step-text b{ display:block; font-size:14px; margin-bottom:2px; }
-  .onboard-step-text span{ font-size:12.5px; color:var(--muted); }
+  #onboardScreen{ display:none; flex-direction:column; position:fixed; inset:0; z-index:60; background:#05040a; overflow:hidden; }
+  .onboard-track{ display:flex; flex:1; min-height:0; width:100%; touch-action:pan-y; }
+  .onboard-slide{ flex:0 0 100%; width:100%; height:100%; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .onboard-slide img{ max-width:100%; max-height:100%; object-fit:contain; display:block; user-select:none; -webkit-user-drag:none; pointer-events:none; }
+  .onboard-next-btn{ flex-shrink:0; margin:14px auto max(18px, env(safe-area-inset-bottom)); z-index:2;
+    padding:13px 44px; border-radius:30px; border:none; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14.5px; color:#fff;
+    background:linear-gradient(135deg, var(--blue), var(--green));
+    box-shadow:0 8px 22px rgba(62,142,255,0.45); transition:transform .15s ease; }
+  .onboard-next-btn:active{ transform:scale(0.95); }
 
   #loadingScreen{ position:fixed; inset:0; display:flex; flex-direction:column;
     align-items:center; justify-content:center; gap:16px; z-index:100;
@@ -757,17 +757,12 @@ setTimeout(function(){
 
 <!-- ================= ONBOARDING ================= -->
 <div id="onboardScreen">
-  <div class="onboard-icon"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.83L7 15"/></svg></div>
-  <div class="onboard-title" data-i18n="obTitle">Xush kelibsiz!</div>
-  <div class="onboard-steps">
-    <div class="onboard-step"><div class="onboard-num">1</div>
-      <div class="onboard-step-text"><b data-i18n="obStep1T">Vazifa bajaring</b><span data-i18n="obStep1D">Video ko'ring, ilova yuklang, so'rovnoma to'ldiring</span></div></div>
-    <div class="onboard-step"><div class="onboard-num">2</div>
-      <div class="onboard-step-text"><b data-i18n="obStep2T">Coin yig'ing</b><span data-i18n="obStep2D">Har bir vazifa uchun coin balansingizga qo'shiladi</span></div></div>
-    <div class="onboard-step"><div class="onboard-num">3</div>
-      <div class="onboard-step-text"><b data-i18n="obStep3T">Pulga aylantiring</b><span data-i18n="obStep3D">10 000 coin = $1, Payme yoki Click orqali yeching</span></div></div>
+  <div class="onboard-track" id="onboardTrack">
+    <div class="onboard-slide"><img src="assets/onboarding/onboarding-1.jpg" alt=""></div>
+    <div class="onboard-slide"><img src="assets/onboarding/onboarding-2.jpg" alt=""></div>
+    <div class="onboard-slide"><img src="assets/onboarding/onboarding-3.jpg" alt=""></div>
   </div>
-  <button class="btn" onclick="finishOnboarding()" data-i18n="btnStart">Boshlash</button>
+  <button class="onboard-next-btn" id="onboardNextBtn" onclick="onboardNext()">Keyingi</button>
 </div>
 
 <!-- ================= MAIN APP ================= -->
@@ -1549,7 +1544,7 @@ const I18N = {
     shareTitle:"Do'stlaringga ko'rsat! 🎉", shareWheel:"🎡 Omadli g'ildirakda {n} tanga yutdim!", shareLevel:"🏆 TaskUp'da {n}-levelga chiqdim!", shareCashout:"💸 TaskUp'da ishlagan pulimni yechdim!",
     shareTg:"Telegram'da ulashish", shareIg:"Instagram Story'ga qo'shish", shareClose:"Yopish",
     shareInviteLine:"Siz ham vazifa bajarib pul ishlang:", shareCodeLine:"Taklif kodim:", shareImgSaved:"Rasm yuklab olindi — Instagram Story'ga qo'shing 📸",
-    splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish",
+    splashSub:"Vazifa bajarib, pul ishlang!", btnStart:"Boshlash", btnLogin:"Kirish", obNext:"Keyingi",
     authSub:"Vazifa bajaring, coin yig'ing, pulga aylantiring", lblPhone:"Telefon raqami", tabSignup:"Ro'yxatdan o'tish", tabLogin:"Kirish", lblEmail:"Email", lblPassword:"Parol", btnSignup:"Ro'yxatdan o'tish", btnLoginSubmit:"Kirish", forgotPass:"Parolni unutdingizmi?",
     btnSendCode:"SMS kod yuborish", lblCode:"SMS orqali kelgan kod", btnConfirm:"Tasdiqlash",
     authHint:"Telefon raqamingizga haqiqiy SMS kod yuboriladi", obTitle:"Xush kelibsiz!",
@@ -1618,7 +1613,7 @@ const I18N = {
     shareTitle:"Show your friends! 🎉", shareWheel:"🎡 I won {n} coins on the Lucky Wheel!", shareLevel:"🏆 I reached level {n} on TaskUp!", shareCashout:"💸 I cashed out my TaskUp earnings!",
     shareTg:"Share on Telegram", shareIg:"Add to Instagram Story", shareClose:"Close",
     shareInviteLine:"Earn money doing tasks too:", shareCodeLine:"My invite code:", shareImgSaved:"Image saved — add it to your Instagram Story 📸",
-    splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In",
+    splashSub:"Complete tasks and earn money!", btnStart:"Get Started", btnLogin:"Log In", obNext:"Next",
     authSub:"Complete tasks, collect coins, cash out", lblPhone:"Phone number", tabSignup:"Sign up", tabLogin:"Log in", lblEmail:"Email", lblPassword:"Password", btnSignup:"Sign up", btnLoginSubmit:"Log in", forgotPass:"Forgot password?",
     btnSendCode:"Send SMS code", lblCode:"SMS verification code", btnConfirm:"Confirm",
     authHint:"A real SMS code will be sent to your phone", obTitle:"Welcome!",
@@ -1687,7 +1682,7 @@ const I18N = {
     shareTitle:"Покажи друзьям! 🎉", shareWheel:"🎡 Я выиграл {n} монет в Колесе удачи!", shareLevel:"🏆 Я достиг {n}-го уровня в TaskUp!", shareCashout:"💸 Я вывел свой заработок в TaskUp!",
     shareTg:"Поделиться в Telegram", shareIg:"Добавить в Instagram Story", shareClose:"Закрыть",
     shareInviteLine:"Зарабатывай на заданиях и ты:", shareCodeLine:"Мой код приглашения:", shareImgSaved:"Картинка сохранена — добавьте её в Instagram Story 📸",
-    splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти",
+    splashSub:"Выполняй задания, зарабатывай!", btnStart:"Начать", btnLogin:"Войти", obNext:"Далее",
     authSub:"Выполняйте задания, собирайте монеты, выводите деньги", lblPhone:"Номер телефона", tabSignup:"Регистрация", tabLogin:"Вход", lblEmail:"Email", lblPassword:"Пароль", btnSignup:"Зарегистрироваться", btnLoginSubmit:"Войти", forgotPass:"Забыли пароль?",
     btnSendCode:"Отправить SMS-код", lblCode:"Код из SMS", btnConfirm:"Подтвердить",
     authHint:"На ваш номер будет отправлен настоящий SMS-код", obTitle:"Добро пожаловать!",
@@ -1751,7 +1746,7 @@ function selectLanguage(lang, el){
   document.getElementById('greetName').textContent = t('defaultUserName');
   applyStaticTranslations();
   // Re-render dynamic content so it reflects the new language too
-  renderBalance(); renderStreak(); renderActivity(); renderPaymentHistory('all'); renderLevel();
+  renderBalance(); renderStreak(); renderActivity(); renderPaymentHistory('all'); renderLevel(); updateOnboardUI(false);
   showToast(t('toastLangChanged'));
 }
 
@@ -1870,6 +1865,8 @@ function initUserData(uid){
       }).then(() => {
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('onboardScreen').style.display = 'flex';
+        onboardIndex = 0;
+        updateOnboardUI(false);
         subscribeUser(uid);
       });
     } else {
@@ -1930,6 +1927,55 @@ function logActivity(label, amount){
     label, amount, at: firebase.firestore.FieldValue.serverTimestamp()
   }).then(() => loadHistory(currentUid)).catch(err => console.error(err));
 }
+
+/* ---------------- Onboarding karuseli ---------------- */
+const ONBOARD_SLIDES = 3;
+let onboardIndex = 0;
+let onboardDragging = false;
+let onboardDragStartX = 0;
+let onboardDragDeltaX = 0;
+
+function updateOnboardUI(animate){
+  const track = document.getElementById('onboardTrack');
+  if(!track) return;
+  track.style.transition = animate === false ? 'none' : 'transform .32s cubic-bezier(.2,.8,.2,1)';
+  track.style.transform = `translateX(${-onboardIndex * 100}%)`;
+  const btn = document.getElementById('onboardNextBtn');
+  if(btn) btn.textContent = onboardIndex === ONBOARD_SLIDES - 1 ? t('btnStart') : t('obNext');
+}
+
+function onboardNext(){
+  if(onboardIndex < ONBOARD_SLIDES - 1){
+    onboardIndex++;
+    updateOnboardUI();
+  } else {
+    finishOnboarding();
+  }
+}
+
+(function initOnboardSwipe(){
+  const track = document.getElementById('onboardTrack');
+  if(!track) return;
+  const dragStart = (x) => { onboardDragging = true; onboardDragStartX = x; onboardDragDeltaX = 0; track.style.transition = 'none'; };
+  const dragMove = (x) => {
+    if(!onboardDragging) return;
+    onboardDragDeltaX = x - onboardDragStartX;
+    track.style.transform = `translateX(calc(${-onboardIndex * 100}% + ${onboardDragDeltaX}px))`;
+  };
+  const dragEnd = () => {
+    if(!onboardDragging) return;
+    onboardDragging = false;
+    const threshold = 55;
+    if(onboardDragDeltaX < -threshold && onboardIndex < ONBOARD_SLIDES - 1) onboardIndex++;
+    else if(onboardDragDeltaX > threshold && onboardIndex > 0) onboardIndex--;
+    onboardDragDeltaX = 0;
+    updateOnboardUI();
+  };
+  track.addEventListener('pointerdown', (e) => { dragStart(e.clientX); track.setPointerCapture(e.pointerId); });
+  track.addEventListener('pointermove', (e) => dragMove(e.clientX));
+  track.addEventListener('pointerup', dragEnd);
+  track.addEventListener('pointercancel', dragEnd);
+})();
 
 function finishOnboarding(){
   document.getElementById('onboardScreen').style.display = 'none';
