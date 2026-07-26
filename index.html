@@ -81,10 +81,20 @@
   @keyframes spin{ to{ transform:rotate(360deg); } }
   .loading-text{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:rgba(255,255,255,0.55); letter-spacing:2px; }
 
-  /* ---------- Header (greeting + balance chip) ---------- */
-  .home-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:10px;
-    padding:14px; border-radius:20px; overflow:hidden;
-    background-image:url('assets/branding/profile-header-bg.jpg'); background-size:cover; background-position:center; }
+  /* ---------- Bosh sahifa reklama karuseli (auto-slide) ---------- */
+  .ad-carousel{ position:relative; border-radius:20px; overflow:hidden; margin-bottom:14px; }
+  .ad-track{ display:flex; touch-action:pan-y; }
+  .ad-slide{ position:relative; flex:0 0 100%; width:100%; aspect-ratio:1640/959; }
+  .ad-slide img{ width:100%; height:100%; object-fit:cover; display:block; user-select:none; -webkit-user-drag:none; pointer-events:none; }
+  .ad-dots{ position:absolute; left:50%; bottom:10px; transform:translateX(-50%); display:flex; gap:6px; z-index:2; pointer-events:none; }
+  .ad-dots span{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.4); transition:all .2s ease; }
+  .ad-dots span.active{ background:#fff; width:16px; border-radius:4px; }
+  .ad-bonus-timer{ position:absolute; left:79.5%; top:40%; width:19.8%; height:7.6%; z-index:1;
+    background:rgba(15,5,40,0.92); border-radius:6px; display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace; font-weight:700; color:#fff; font-size:3.4vw; pointer-events:none; }
+  .ad-bonus-claim{ position:absolute; left:80.2%; top:58.9%; width:18.9%; height:11%; z-index:2;
+    background:transparent; border:none; cursor:pointer; padding:0; }
+  @media (min-width:480px){ .ad-bonus-timer{ font-size:16px; } }
 
   /* ---------- Top icon row ---------- */
   .top-icon-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
@@ -106,18 +116,12 @@
     transition:transform .12s ease, background .12s ease; }
   .bal-action-btn:active{ transform:scale(0.95); }
   .bal-action-btn.primary{ background:#fff; color:var(--purple); }
-  .greet{ display:flex; align-items:center; gap:12px; }
-  .greet-avatar{ width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue)); color:#fff;
-    display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; flex-shrink:0; }
   .avatar-frame-wrap{ position:relative; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .avatar-frame-img{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; object-fit:contain; }
-  .greet-name{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; }
-  .greet-sub{ font-size:11.5px; color:var(--muted); margin-top:1px; max-width:180px; line-height:1.3; }
   .balance-chip{ background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:9px 14px; cursor:pointer; flex-shrink:0; }
   .balance-chip-label{ font-size:10.5px; color:var(--muted); }
   .balance-chip-value{ display:flex; align-items:center; gap:5px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; margin-top:2px; }
   .coin-dot{ width:16px; height:16px; border-radius:50%; background:var(--amber); display:inline-flex; align-items:center; justify-content:center; font-size:9px; color:#2A1800; font-weight:700; }
-  .level-chip{ background:var(--purple-dim); color:var(--purple); font-size:11px; font-weight:700; padding:5px 11px; border-radius:20px; cursor:pointer; font-family:'Space Grotesk', sans-serif; white-space:nowrap; display:inline-flex; align-items:center; gap:3px; }
   .xp-bar-row{ margin-bottom:18px; cursor:pointer; }
   .xp-bar-track{ height:7px; background:var(--bg-card); border:1px solid var(--line); border-radius:5px; overflow:hidden; }
   .xp-bar-fill{ height:100%; background:linear-gradient(90deg, var(--purple), var(--blue)); width:0%; transition:width .6s ease; }
@@ -426,12 +430,6 @@
   /* ---------- HOME redesign (TaskCoin style) — faqat bosh sahifa ---------- */
   #tab-home .icon-btn{ background:transparent; border:none; width:34px; height:34px; }
   #tab-home .icon-btn svg{ width:21px; height:21px; }
-  #tab-home .greet-avatar{ width:48px; height:48px; border-radius:16px;
-    background:linear-gradient(135deg,#8B7BFF,#5B4BD6);
-    box-shadow:0 6px 16px rgba(108,92,231,0.4), inset 0 1px 0 rgba(255,255,255,0.25); }
-  .avatar-frame-wrap-home{ width:96px; height:96px; }
-  .avatar-frame-wrap-home .avatar-frame-img{ width:96px; height:96px; }
-  #tab-home .greet-name{ font-size:16px; }
 
   #tab-home .big-balance-card{
     background:linear-gradient(160deg,#2A1E56 0%,#1B1433 48%,#141021 100%);
@@ -689,18 +687,20 @@ setTimeout(function(){
         <div class="icon-btn" style="position:relative" onclick="openNews()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-badge" id="notifBadge" style="display:none">0</span></div>
       </div>
 
-      <div class="home-header">
-        <div class="greet">
-          <div class="avatar-frame-wrap avatar-frame-wrap-home">
-            <div class="greet-avatar" id="homeAvatar">--</div>
-            <img class="avatar-frame-img" id="homeAvatarFrame" src="assets/avatars/frame-oddiy.png" alt="">
-          </div>
-          <div>
-            <div class="greet-name"><span data-i18n="helloWord">Salom</span>, <span id="greetName">Foydalanuvchi</span>! <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.83L7 15"/></svg></div>
-            <div class="greet-sub" id="greetSubTxt" data-i18n="greetSub">Topshiriqlarni bajaring va daromad qiling</div>
+      <div class="ad-carousel" id="adCarousel">
+        <div class="ad-track" id="adTrack">
+          <div class="ad-slide"><img src="assets/ads/ad-tasks.jpg" alt=""></div>
+          <div class="ad-slide"><img src="assets/ads/ad-referral.jpg" alt=""></div>
+          <div class="ad-slide"><img src="assets/ads/ad-withdraw.jpg" alt=""></div>
+          <div class="ad-slide">
+            <img src="assets/ads/ad-daily-bonus.jpg" alt="">
+            <div class="ad-bonus-timer" id="dailyTimerAd">00:00:00</div>
+            <button class="ad-bonus-claim" id="streakBtnAd" onclick="claimStreak()" aria-label="Kunlik bonus"></button>
           </div>
         </div>
-        <div class="level-chip" onclick="switchTab('level')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <span data-i18n="levelWord">Level</span> <span id="levelNum">1</span> <span id="levelBadgeIco">🥉</span></div>
+        <div class="ad-dots" id="adDots">
+          <span class="active"></span><span></span><span></span><span></span>
+        </div>
       </div>
 
       <div class="big-balance-card" onclick="switchTab('wallet')">
@@ -1276,14 +1276,14 @@ const USER_ICON_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" fill="non
 function renderAvatarImage(){
   const home = document.getElementById('homeAvatar');
   const profile = document.getElementById('profileAvatar');
-  if(!home || !profile) return;
+  if(!home && !profile) return;
   if(state.avatarUrl){
     const imgHtml = `<img src="${state.avatarUrl}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`;
-    home.innerHTML = imgHtml;
-    profile.innerHTML = imgHtml;
+    if(home) home.innerHTML = imgHtml;
+    if(profile) profile.innerHTML = imgHtml;
   } else {
-    home.innerHTML = USER_ICON_SVG;
-    profile.innerHTML = USER_ICON_SVG.replace('width="22" height="22"', 'width="30" height="30"');
+    if(home) home.innerHTML = USER_ICON_SVG;
+    if(profile) profile.innerHTML = USER_ICON_SVG.replace('width="22" height="22"', 'width="30" height="30"');
   }
 }
 
@@ -1653,7 +1653,7 @@ function selectLanguage(lang, el){
   document.querySelectorAll('.lang-row').forEach(r => r.classList.remove('selected'));
   el.classList.add('selected');
   document.getElementById('currentLangLabel').textContent = LANG_NAMES[lang] + ' ›';
-  document.getElementById('greetName').textContent = t('defaultUserName');
+  const greetNameEl = document.getElementById('greetName'); if(greetNameEl) greetNameEl.textContent = t('defaultUserName');
   applyStaticTranslations();
   // Re-render dynamic content so it reflects the new language too
   renderBalance(); renderStreak(); renderActivity(); renderPaymentHistory('all'); renderLevel(); updateOnboardUI(false);
@@ -1900,12 +1900,68 @@ function finishOnboardingIntro(mode){
   track.addEventListener('pointercancel', dragEnd);
 })();
 
+/* ---------------- Bosh sahifa reklama karuseli (auto-slide, har 5s) ---------------- */
+const AD_SLIDES = 4;
+const AD_AUTOPLAY_MS = 5000;
+let adIndex = 0;
+let adAutoplayTimer = null;
+let adDragging = false;
+let adDragStartX = 0;
+let adDragDeltaX = 0;
+
+function updateAdUI(animate){
+  const track = document.getElementById('adTrack');
+  if(!track) return;
+  track.style.transition = animate === false ? 'none' : 'transform .4s cubic-bezier(.2,.8,.2,1)';
+  track.style.transform = `translateX(${-adIndex * 100}%)`;
+  document.querySelectorAll('#adDots span').forEach((dot, i) => dot.classList.toggle('active', i === adIndex));
+}
+
+function adGoTo(index, animate){
+  adIndex = ((index % AD_SLIDES) + AD_SLIDES) % AD_SLIDES;
+  updateAdUI(animate);
+}
+
+function resetAdAutoplay(){
+  if(adAutoplayTimer) clearInterval(adAutoplayTimer);
+  adAutoplayTimer = setInterval(() => adGoTo(adIndex + 1), AD_AUTOPLAY_MS);
+}
+
+(function initAdCarousel(){
+  const track = document.getElementById('adTrack');
+  if(!track) return;
+  const dragStart = (x) => { adDragging = true; adDragStartX = x; adDragDeltaX = 0; track.style.transition = 'none'; };
+  const dragMove = (x) => {
+    if(!adDragging) return;
+    adDragDeltaX = x - adDragStartX;
+    track.style.transform = `translateX(calc(${-adIndex * 100}% + ${adDragDeltaX}px))`;
+  };
+  const dragEnd = () => {
+    if(!adDragging) return;
+    adDragging = false;
+    const threshold = 45;
+    if(adDragDeltaX < -threshold) adIndex = (adIndex + 1) % AD_SLIDES;
+    else if(adDragDeltaX > threshold) adIndex = (adIndex - 1 + AD_SLIDES) % AD_SLIDES;
+    adDragDeltaX = 0;
+    updateAdUI();
+    resetAdAutoplay();
+  };
+  track.addEventListener('pointerdown', (e) => {
+    if(e.target.closest('.ad-bonus-claim')) return; // Tugma bosilganda svayp/pointer capture ushbu klikni yutib qo'ymasin
+    dragStart(e.clientX); track.setPointerCapture(e.pointerId);
+  });
+  track.addEventListener('pointermove', (e) => dragMove(e.clientX));
+  track.addEventListener('pointerup', dragEnd);
+  track.addEventListener('pointercancel', dragEnd);
+  resetAdAutoplay();
+})();
+
 function enterApp(){
   document.getElementById('appScreen').style.display = 'flex';
   document.getElementById('appScreen').style.flexDirection = 'column';
   renderAvatarImage();
   document.getElementById('profilePhone').textContent = state.email || '';
-  document.getElementById('greetName').textContent = t('defaultUserName');
+  const greetNameEl = document.getElementById('greetName'); if(greetNameEl) greetNameEl.textContent = t('defaultUserName');
   document.getElementById('referralLink').textContent = state.referralCode;
   renderAll();
   applyStaticTranslations();
@@ -2235,6 +2291,7 @@ function startDailyTimer(){
     const m = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
     const s = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
     document.getElementById('dailyTimer').textContent = `${h}:${m}:${s}`;
+    const adTimer = document.getElementById('dailyTimerAd'); if(adTimer) adTimer.textContent = `${h}:${m}:${s}`;
   }
   update(); setInterval(update, 1000);
 }
@@ -2355,7 +2412,7 @@ function renderLevel(){
     showLevelUp(info.num);
   }
   lastKnownLevel = info.num;
-  document.getElementById('levelNum').textContent = info.num;
+  const levelNumEl = document.getElementById('levelNum'); if(levelNumEl) levelNumEl.textContent = info.num;
   const badge = levelBadge(info.num);
   const bIco = document.getElementById('levelBadgeIco'); if(bIco) bIco.innerHTML = badgeIconHtml(badge, 14);
   const bLine = document.getElementById('levelBadgeLine'); if(bLine) bLine.innerHTML = badgeIconHtml(badge, 18) + t(badge.key);
