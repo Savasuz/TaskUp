@@ -112,8 +112,9 @@
     border-radius:20px; min-width:16px; height:16px; display:flex; align-items:center; justify-content:center; padding:0 3px; }
 
   /* ---------- Balans pill (header, sticky) ---------- */
-  .balance-pill{ position:relative; overflow:hidden; flex:1; min-width:0; height:34px; box-sizing:border-box;
-    display:flex; align-items:center; gap:7px;
+  /* Pill kontent bo'yicha qisqaradi (cho'zilmaydi) — chapda, bell o'ngda qoladi. */
+  .balance-pill{ position:relative; overflow:hidden; flex:0 1 auto; max-width:62%; height:36px; box-sizing:border-box;
+    display:flex; align-items:center; gap:8px;
     background:linear-gradient(180deg, #8570F2 0%, #6C4FE0 38%, #4B33B0 72%, #382584 100%);
     border:1px solid rgba(199,181,255,0.5); border-radius:999px; padding:3px 14px 3px 3px; cursor:pointer;
     box-shadow:0 6px 16px rgba(45,20,110,0.45), inset 0 2px 0 rgba(255,255,255,0.22), inset 0 -4px 8px rgba(0,0,0,0.32); }
@@ -124,8 +125,8 @@
     background:radial-gradient(circle at 35% 28%, #FFF3B0, #FFC93C 55%, #C9861A 100%);
     display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.35); }
   .balance-pill-coin svg{ width:15px; height:15px; }
-  .balance-pill-amount{ position:relative; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; color:#fff;
+  .balance-pill-amount{ position:relative; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; color:#fff;
     text-shadow:0 1px 2px rgba(0,0,0,0.25); }
   .balance-pill-wallet{ position:relative; flex-shrink:0; color:#fff; opacity:0.95; display:flex; }
   .balance-pill-wallet svg{ width:17px; height:17px; }
@@ -707,7 +708,6 @@ setTimeout(function(){
     <!-- ---- HOME TAB ---- -->
     <div class="tab-content active" id="tab-home">
       <div class="top-icon-row">
-        <div class="icon-btn" onclick="switchTab('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></div>
         <div class="balance-pill" onclick="switchTab('wallet')">
           <div class="balance-pill-coin"><svg viewBox="0 0 24 24"><text x="12" y="17" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="15" fill="#2A1800">$</text></svg></div>
           <span class="balance-pill-amount" id="coinCount">0</span>
