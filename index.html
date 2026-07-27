@@ -260,11 +260,51 @@
     box-shadow:0 4px 12px rgba(0,0,0,0.3); transition:transform .12s ease; }
   .share-item:active .share-icon{ transform:scale(0.9); }
 
-  /* ---------- Wallet hero ---------- */
-  .wallet-hero{ background:linear-gradient(135deg, #4B3FCB, #2E2670); border-radius:18px; padding:22px; text-align:center; margin-bottom:20px; position:relative; overflow:hidden; }
-  .wallet-emoji{ font-size:32px; margin-bottom:8px; }
-  .wallet-amount{ font-family:'Space Grotesk', sans-serif; font-size:32px; font-weight:700; margin:6px 0 2px; display:flex; align-items:center; justify-content:center; gap:8px; }
-  .wallet-sub{ font-size:12.5px; color:rgba(255,255,255,0.7); font-family:'JetBrains Mono', monospace; }
+  /* ---------- Wallet: "Yechish uchun balans" kartasi ----------
+     Fon sifatida assets/wallet-balance-card.png ning YUQORI (karta) qismi
+     ishlatiladi — rasmda hamyon + tangalar illyustratsiyasi o'ngda, chap tomoni
+     esa bo'sh, matn shu yerga HTML qatlam sifatida yoziladi (rasm ichida matn yo'q).
+     Rasm 1402x1122; karta bandi x:27..1376 (1349), y:44..856 (812). Shu kesimni
+     ko'rsatish uchun background-size/position foizlari quyidagicha hisoblangan:
+       size-x = imageW/cropW = 1402/1349 = 103.93%   size-y = 1122/812 = 138.18%
+       pos-x  = cropX/(imageW-cropW) = 27/53 = 50.94%
+       pos-y  = cropY/(imageH-cropH) = 44/310 = 14.19% */
+  .wallet-card{ position:relative; width:100%; aspect-ratio:1349/812; border-radius:18px; overflow:hidden;
+    margin-bottom:12px; background-image:url('assets/wallet-balance-card.png');
+    background-size:103.93% 138.18%; background-position:50.94% 14.19%; background-repeat:no-repeat; }
+  /* Matn qatlami — illyustratsiya boshlanadigan joygacha (chap ~46%) */
+  .wallet-card-text{ position:absolute; left:8%; top:50%; transform:translateY(-50%); width:46%;
+    display:flex; flex-direction:column; }
+  .wallet-card-eyebrow{ font-size:clamp(8px, 2.4vw, 11px); letter-spacing:0.14em; font-weight:600;
+    color:rgba(255,255,255,0.62); line-height:1.2; }
+  .wallet-card-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; letter-spacing:0.02em;
+    font-size:clamp(15px, 5vw, 23px); line-height:1.15; color:#fff; margin-top:2px; }
+  .wallet-card-amount{ display:flex; align-items:center; gap:7px; margin-top:10px;
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:clamp(17px, 5.6vw, 26px);
+    line-height:1.1; color:#fff; }
+  .wallet-card-amount span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .wallet-card-coin{ flex-shrink:0; width:clamp(17px, 5.4vw, 25px); height:clamp(17px, 5.4vw, 25px);
+    border-radius:50%; background:radial-gradient(circle at 35% 28%, #FFF3B0, #FFC93C 55%, #C9861A 100%);
+    display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.35); }
+  .wallet-card-coin svg{ width:58%; height:58%; }
+  .wallet-card-som{ margin-top:5px; font-family:'JetBrains Mono', monospace;
+    font-size:clamp(9.5px, 2.9vw, 13px); color:rgba(255,255,255,0.62); line-height:1.3;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* ---------- Wallet: "Pul yechish" tugmasi (rasmdagi pastki panel CSS bilan) ---------- */
+  .wallet-withdraw-btn{ display:flex; align-items:stretch; width:100%; height:clamp(52px, 15.5vw, 64px);
+    padding:0; border:none; border-radius:15px; overflow:hidden; cursor:pointer; margin-bottom:4px;
+    background:linear-gradient(180deg, #8D13F4 0%, #5A00C8 46%, #2E008B 100%);
+    box-shadow:0 8px 22px rgba(90,0,200,0.38); transition:transform .12s ease; }
+  .wallet-withdraw-btn:active{ transform:scale(0.98); }
+  .wwb-icon{ flex:0 0 31%; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg, #FBF4FC 0%, #DCC0FB 55%, #C49AFF 100%); }
+  .wwb-icon svg{ width:clamp(38px, 11vw, 50px); height:auto; }
+  .wwb-main{ flex:1; min-width:0; display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:0 10px; font-family:'Space Grotesk', sans-serif; font-weight:700; color:#fff;
+    font-size:clamp(13px, 4vw, 16px); }
+  .wwb-main span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .wwb-main svg{ flex-shrink:0; width:clamp(15px, 4.4vw, 19px); height:clamp(15px, 4.4vw, 19px); }
 
   /* ---------- Pul yechish (cashout) oynasi ---------- */
   #cashoutOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.82); backdrop-filter:blur(5px);
@@ -839,26 +879,36 @@ setTimeout(function(){
 
     <!-- ---- WALLET TAB ---- -->
     <div class="tab-content" id="tab-wallet">
-      <div class="wallet-hero">
-        <div class="wallet-emoji"><svg viewBox="0 0 200 160" width="140" height="112">
-<defs>
-  <linearGradient id="wh1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9E8CFF"/><stop offset="100%" stop-color="#6C5CE7"/></linearGradient>
-  <radialGradient id="wh2" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="#FFF3B0"/><stop offset="55%" stop-color="#FFC93C"/><stop offset="100%" stop-color="#C9861A"/></radialGradient>
-</defs>
-<circle cx="165" cy="25" r="13" fill="url(#wh2)"/><circle cx="185" cy="55" r="9" fill="url(#wh2)"/><circle cx="145" cy="10" r="7" fill="url(#wh2)"/>
-<rect x="15" y="45" width="150" height="100" rx="20" fill="url(#wh1)"/>
-<rect x="15" y="45" width="150" height="100" rx="20" fill="#000" opacity="0.08"/>
-<rect x="15" y="45" width="150" height="30" rx="15" fill="#8477F2"/>
-<rect x="115" y="95" width="52" height="38" rx="10" fill="#4B3FCB"/>
-<circle cx="141" cy="114" r="9" fill="#FFD873"/>
-<circle cx="40" cy="118" r="14" fill="url(#wh2)"/><circle cx="68" cy="132" r="10" fill="url(#wh2)"/>
-</svg></div>
-        <div class="eyebrow" style="position:relative" data-i18n="cashoutBalanceLbl">YECHISH UCHUN BALANS</div>
-        <div class="wallet-amount"><span class="coin-dot" style="width:20px;height:20px;font-size:11px">$</span> <span id="coinCount2">0</span></div>
-        <div class="wallet-sub">= <span id="somEst">0</span> so'm</div>
+      <div class="wallet-card">
+        <div class="wallet-card-text">
+          <div class="wallet-card-eyebrow" data-i18n="walletEyebrow">YECHISH UCHUN</div>
+          <div class="wallet-card-title" data-i18n="walletBalanceTitle">BALANS</div>
+          <div class="wallet-card-amount">
+            <span class="wallet-card-coin"><svg viewBox="0 0 24 24"><text x="12" y="17.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="16" fill="#2A1800">$</text></svg></span>
+            <span id="coinCount2">0</span>
+          </div>
+          <div class="wallet-card-som">= <span id="somEst">0</span> so'm</div>
+        </div>
       </div>
 
-      <button class="btn" onclick="openCashout()" data-i18n="btnWithdraw" style="margin-bottom:4px">Pul yechish</button>
+      <button class="wallet-withdraw-btn" onclick="openCashout()">
+        <span class="wwb-icon"><svg viewBox="0 0 60 42" fill="none">
+          <line x1="2" y1="14" x2="16" y2="14" stroke="#6C2BD9" stroke-width="3.4" stroke-linecap="round"/>
+          <line x1="0" y1="21" x2="13" y2="21" stroke="#6C2BD9" stroke-width="3.4" stroke-linecap="round" opacity="0.75"/>
+          <line x1="3" y1="28" x2="15" y2="28" stroke="#6C2BD9" stroke-width="3.4" stroke-linecap="round" opacity="0.5"/>
+          <rect x="21" y="8" width="30" height="21" rx="4.5" fill="#4B12B8"/>
+          <rect x="21" y="8" width="30" height="21" rx="4.5" fill="#7B3FF2" opacity="0.55"/>
+          <rect x="26" y="13.5" width="17" height="3.6" rx="1.8" fill="#EDE4FF"/>
+          <circle cx="45.5" cy="29.5" r="9" fill="#FFC221"/>
+          <circle cx="45.5" cy="29.5" r="9" fill="url(#wwbCoin)"/>
+          <text x="45.5" y="34" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="12" fill="#2A1800">$</text>
+          <defs><radialGradient id="wwbCoin" cx="35%" cy="28%" r="75%"><stop offset="0%" stop-color="#FFF3B0"/><stop offset="55%" stop-color="#FFC93C"/><stop offset="100%" stop-color="#C9861A"/></radialGradient></defs>
+        </svg></span>
+        <span class="wwb-main">
+          <span data-i18n="btnWithdraw">Pul yechish</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+      </button>
 
       <div class="sec-head" style="margin-top:24px">
         <div class="sec-title" data-i18n="recentActivity">So'nggi harakatlar</div>
@@ -1512,7 +1562,7 @@ const I18N = {
     inviteHeroTitle:"Do'stlaringizni taklif qiling", inviteHeroSub:"Har bir do'stingiz uchun 20% bonus oling",
     yourRefLink:"Sizning taklif kodingiz", btnCopy:"Nusxalash", orShare:"Bizni kuzating",
     invitedCount:"Taklif qilinganlar", invitedBonus:"Ulardan olingan bonus",
-    cashoutBalanceLbl:"YECHISH UCHUN BALANS", choosePayMethod:"To'lov usulini tanlang", minAmount:"Minimal: 10 000 so'm",
+    cashoutBalanceLbl:"YECHISH UCHUN BALANS", walletEyebrow:"YECHISH UCHUN", walletBalanceTitle:"BALANS", choosePayMethod:"To'lov usulini tanlang", minAmount:"Minimal: 10 000 so'm",
     payUzcardLbl:"UzCard", payHumoLbl:"Humo karta", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Maksimal: {n}",
     enterAmount:"Summani kiriting", recentActivity:"So'nggi harakatlar", paymentHistoryLink:"To'lov tarixi ›",
     noActivity:"Hali harakat yo'q", noPaymentHistory:"Hali to'lov tarixi yo'q", paymentHistoryTitle:"To'lov tarixim", backBtn:"‹ Orqaga",
@@ -1582,7 +1632,7 @@ const I18N = {
     inviteHeroTitle:"Invite your friends", inviteHeroSub:"Get a 20% bonus for every friend",
     yourRefLink:"Your invite code", btnCopy:"Copy", orShare:"Follow us",
     invitedCount:"Friends invited", invitedBonus:"Bonus earned from them",
-    cashoutBalanceLbl:"BALANCE TO WITHDRAW", choosePayMethod:"Choose payment method", minAmount:"Minimum: 10,000 UZS",
+    cashoutBalanceLbl:"BALANCE TO WITHDRAW", walletEyebrow:"BALANCE TO", walletBalanceTitle:"WITHDRAW", choosePayMethod:"Choose payment method", minAmount:"Minimum: 10,000 UZS",
     payUzcardLbl:"UzCard", payHumoLbl:"Humo card", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Maximum: {n}",
     enterAmount:"Enter amount", recentActivity:"Recent activity", paymentHistoryLink:"Payment history ›",
     noActivity:"No activity yet", noPaymentHistory:"No payment history yet", paymentHistoryTitle:"Payment history", backBtn:"‹ Back",
@@ -1652,7 +1702,7 @@ const I18N = {
     inviteHeroTitle:"Пригласите друзей", inviteHeroSub:"Получайте 20% бонус за каждого друга",
     yourRefLink:"Ваш пригласительный код", btnCopy:"Копировать", orShare:"Мы в соцсетях",
     invitedCount:"Приглашено друзей", invitedBonus:"Полученный от них бонус",
-    cashoutBalanceLbl:"БАЛАНС ДЛЯ ВЫВОДА", choosePayMethod:"Выберите способ оплаты", minAmount:"Минимум: 10 000 сум",
+    cashoutBalanceLbl:"БАЛАНС ДЛЯ ВЫВОДА", walletEyebrow:"БАЛАНС ДЛЯ", walletBalanceTitle:"ВЫВОДА", choosePayMethod:"Выберите способ оплаты", minAmount:"Минимум: 10 000 сум",
     payUzcardLbl:"UzCard", payHumoLbl:"Humo карта", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Максимум: {n}",
     enterAmount:"Введите сумму", recentActivity:"Последние операции", paymentHistoryLink:"История платежей ›",
     noActivity:"Пока нет операций", noPaymentHistory:"Пока нет истории платежей", paymentHistoryTitle:"История платежей", backBtn:"‹ Назад",
