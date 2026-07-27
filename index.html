@@ -9,6 +9,10 @@
 <meta http-equiv="Expires" content="0">
 <title>TaskUp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<!-- Splash fon va illyustratsiyasi birinchi ko'rinadigan narsa — ular shriftdan
+     ham oldin, yuqori ustuvorlik bilan yuklansin -->
+<link rel="preload" as="image" href="assets/splash-background.png" fetchpriority="high">
+<link rel="preload" as="image" href="assets/splash-screen.png" fetchpriority="high">
 <!-- Shrift birinchi chizishni bloklamasligi uchun asinxron yuklanadi -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -76,11 +80,13 @@
     text-decoration:underline; cursor:pointer; margin-bottom:max(18px, env(safe-area-inset-bottom)); z-index:2; }
 
   /* ---------- Splash (yuklanish) ekrani ----------
-     Fon rangi assets/splash-screen.png ichidagi fon bilan bir xil (#02000E ga yaqin),
-     shuning uchun rasm kesimining chetlari ko'rinmaydi. */
+     Fon: assets/splash-background.png (statik, animatsiyasiz). background-color rasm
+     yuklanguncha va cover'dan keyingi bo'sh joy uchun zaxira sifatida qoladi. */
   #loadingScreen{ position:fixed; inset:0; display:flex; flex-direction:column;
     align-items:center; justify-content:center; gap:0; z-index:100; padding:16px; overflow:hidden;
-    background:#02000E; }
+    background-color:#02000E;
+    background-image:url('assets/splash-background.png');
+    background-size:cover; background-position:center; background-repeat:no-repeat; }
   /* Rasmdan FAQAT illyustratsiya qismi olinadi — undagi tayyor "TaskUp", tavsif,
      "72%" va binafsha progress bar kesib tashlanadi (ular quyida HTML/CSS bilan
      qayta yasalgan, shunda progress bar haqiqatan animatsiyalanadi va yashil bo'ladi).
@@ -92,6 +98,10 @@
     background-image:url('assets/splash-screen.png');
     background-size:111.71% 176.10%; background-position:41.67% 8.09%;
     background-repeat:no-repeat; border:none; box-shadow:none;
+    /* Illyustratsiyaning o'z foni deyarli qora (#02000E). Fon rasmi ustiga oddiy
+       qo'yilsa qorong'i to'rtburchak bo'lib ajralib turardi; "screen" rejimida
+       qora piksellar shaffofdek ishlaydi va illyustratsiya fonga singib ketadi. */
+    mix-blend-mode:lighten;
     animation:loadFloat 3.2s ease-in-out infinite; }
   @keyframes loadFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
   .loading-title{ font-family:'Space Grotesk',sans-serif,Arial; font-size:clamp(24px,7vw,30px);
