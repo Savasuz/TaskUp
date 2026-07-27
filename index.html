@@ -23,8 +23,14 @@
   *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
   html,body{ background:var(--bg); color:var(--text); font-family:'Inter', sans-serif; min-height:100vh; }
   .app{ max-width:480px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; }
-  .screen{ flex:1; padding:14px 16px 96px; overflow-y:auto; }
-  .tab-content{ display:none; }
+  /* overflow-y ATAYLAB qo'yilmagan: sahifani oyna (window) scroll qiladi, shuning uchun
+     .screen ichida scroll konteyner yaratilsa, header'dagi position:sticky ishlamay qoladi
+     (sticky eng yaqin scroll qiluvchi ajdodga nisbatan qotadi). */
+  .screen{ flex:1; padding:0 16px 96px; }
+  /* Bosh sahifada tepa padding sticky header'ning o'zida (.top-icon-row), qolgan
+     tablarda esa bu yerda beriladi. */
+  .tab-content{ display:none; padding-top:14px; }
+  #tab-home{ padding-top:0; }
   .tab-content.active{ display:block; animation:fadeIn .3s ease; }
   @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
   #authScreen{ display:none; flex-direction:column; justify-content:center; min-height:100vh; padding:0 20px; }
@@ -96,26 +102,33 @@
     background:transparent; border:none; cursor:pointer; padding:0; }
   @media (min-width:480px){ .ad-bonus-timer{ font-size:16px; } }
 
-  /* ---------- Top icon row ---------- */
-  .top-icon-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  /* ---------- Top icon row (sticky header, holds balans pill) ---------- */
+  .top-icon-row{ display:flex; justify-content:space-between; align-items:center; gap:10px;
+    position:sticky; top:0; z-index:40; background:var(--bg);
+    margin:0 -16px 14px; padding:14px 16px 10px; }
   .icon-btn{ width:38px; height:38px; border-radius:11px; background:var(--bg-card); border:1px solid var(--line);
-    display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; }
+    display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; flex-shrink:0; }
   .notif-badge{ position:absolute; top:-5px; right:-5px; background:var(--red); color:#fff; font-size:9px; font-weight:700;
     border-radius:20px; min-width:16px; height:16px; display:flex; align-items:center; justify-content:center; padding:0 3px; }
 
-  /* ---------- Big premium balance card ---------- */
-  .big-balance-card{ background:linear-gradient(135deg, #4B3FCB, #2E2670); border-radius:20px; padding:22px;
-    margin-bottom:18px; position:relative; overflow:hidden; cursor:pointer; }
-  .bal-emoji-bg{ position:absolute; right:16px; top:14px; opacity:0.9; color:rgba(255,255,255,0.9); }
-  .big-balance-card .balance-chip-label{ font-size:12px; color:rgba(255,255,255,0.75); position:relative; }
-  .big-balance-value{ font-family:'Space Grotesk', sans-serif; font-size:34px; font-weight:700; color:#fff;
-    display:flex; align-items:center; gap:8px; margin:6px 0 16px; position:relative; }
-  .big-balance-actions{ display:flex; gap:10px; position:relative; }
-  .bal-action-btn{ border:none; padding:10px 18px; border-radius:11px; font-family:'Space Grotesk', sans-serif;
-    font-weight:700; font-size:12.5px; cursor:pointer; background:rgba(255,255,255,0.14); color:#fff;
-    transition:transform .12s ease, background .12s ease; }
-  .bal-action-btn:active{ transform:scale(0.95); }
-  .bal-action-btn.primary{ background:#fff; color:var(--purple); }
+  /* ---------- Balans pill (header, sticky) ---------- */
+  .balance-pill{ position:relative; overflow:hidden; flex:1; min-width:0; height:34px; box-sizing:border-box;
+    display:flex; align-items:center; gap:7px;
+    background:linear-gradient(180deg, #8570F2 0%, #6C4FE0 38%, #4B33B0 72%, #382584 100%);
+    border:1px solid rgba(199,181,255,0.5); border-radius:999px; padding:3px 14px 3px 3px; cursor:pointer;
+    box-shadow:0 6px 16px rgba(45,20,110,0.45), inset 0 2px 0 rgba(255,255,255,0.22), inset 0 -4px 8px rgba(0,0,0,0.32); }
+  .balance-pill::before{ content:''; position:absolute; left:6%; right:6%; top:8%; height:34%; border-radius:999px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.32), rgba(255,255,255,0)); pointer-events:none; }
+  .balance-pill:active{ transform:scale(0.97); }
+  .balance-pill-coin{ position:relative; flex-shrink:0; width:26px; height:26px; border-radius:50%;
+    background:radial-gradient(circle at 35% 28%, #FFF3B0, #FFC93C 55%, #C9861A 100%);
+    display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.35); }
+  .balance-pill-coin svg{ width:15px; height:15px; }
+  .balance-pill-amount{ position:relative; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; color:#fff;
+    text-shadow:0 1px 2px rgba(0,0,0,0.25); }
+  .balance-pill-wallet{ position:relative; flex-shrink:0; color:#fff; opacity:0.95; display:flex; }
+  .balance-pill-wallet svg{ width:17px; height:17px; }
   .avatar-frame-wrap{ position:relative; flex-shrink:0; }
   .avatar-frame-img{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; object-fit:contain; z-index:1; }
   /* Ramka (frame) rasmlarining ichki halqasi canvas markazidan biroz yuqorida joylashgan
@@ -131,7 +144,6 @@
   .avatar-frame-wrap .podium-avatar,
   .avatar-frame-wrap .row-avatar{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:0; }
   .balance-chip{ background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:9px 14px; cursor:pointer; flex-shrink:0; }
-  .balance-chip-label{ font-size:10.5px; color:var(--muted); }
   .balance-chip-value{ display:flex; align-items:center; gap:5px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; margin-top:2px; }
   .coin-dot{ width:16px; height:16px; border-radius:50%; background:var(--amber); display:inline-flex; align-items:center; justify-content:center; font-size:9px; color:#2A1800; font-weight:700; }
   .xp-bar-row{ margin-bottom:18px; cursor:pointer; }
@@ -463,26 +475,6 @@
   #tab-home .icon-btn{ background:transparent; border:none; width:34px; height:34px; }
   #tab-home .icon-btn svg{ width:21px; height:21px; }
 
-  #tab-home .big-balance-card{
-    background:linear-gradient(160deg,#2A1E56 0%,#1B1433 48%,#141021 100%);
-    border:1px solid rgba(124,92,255,0.45);
-    box-shadow:0 12px 36px rgba(108,92,231,0.28), inset 0 1px 0 rgba(255,255,255,0.07);
-    border-radius:22px; padding:20px; margin-bottom:16px; }
-  #tab-home .bal-glow{ position:absolute; right:-30px; top:-30px; width:150px; height:150px; border-radius:50%;
-    background:radial-gradient(circle, rgba(124,92,255,0.35), transparent 70%); pointer-events:none; }
-  #tab-home .bal-emoji-bg{ color:#8B7BFF; opacity:1; right:20px; top:22px;
-    filter:drop-shadow(0 8px 18px rgba(108,92,231,0.55)); }
-  #tab-home .bal-coin-deco{ position:absolute; right:-7px; top:-9px; width:22px; height:22px; border-radius:50%;
-    background:linear-gradient(135deg,#FFD86B,#FFB020); color:#2A1800; font-size:11px; font-weight:800;
-    display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(255,176,32,0.5); }
-  #tab-home .big-balance-value{ font-size:36px; margin:8px 0 4px; }
-  #tab-home .bal-som{ font-size:12.5px; color:rgba(255,255,255,0.55); font-family:'JetBrains Mono',monospace;
-    margin-bottom:16px; position:relative; }
-  #tab-home .bal-action-btn{ flex:1; padding:13px 18px; border-radius:13px; font-size:13px;
-    background:rgba(255,255,255,0.09); border:1px solid rgba(255,255,255,0.12); }
-  #tab-home .bal-action-btn.primary{ background:linear-gradient(135deg,#8B7BFF,#6C5CE7); color:#fff; border:none;
-    box-shadow:0 6px 18px rgba(108,92,231,0.5), inset 0 1px 0 rgba(255,255,255,0.2); }
-
   #tab-home .daily-card{ border:1px solid rgba(46,204,143,0.4); border-radius:18px; gap:12px;
     background:linear-gradient(135deg, rgba(46,204,143,0.12), var(--bg-card) 60%);
     margin:2px 0 20px; }
@@ -716,6 +708,11 @@ setTimeout(function(){
     <div class="tab-content active" id="tab-home">
       <div class="top-icon-row">
         <div class="icon-btn" onclick="switchTab('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></div>
+        <div class="balance-pill" onclick="switchTab('wallet')">
+          <div class="balance-pill-coin"><svg viewBox="0 0 24 24"><text x="12" y="17" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="15" fill="#2A1800">$</text></svg></div>
+          <span class="balance-pill-amount" id="coinCount">0</span>
+          <div class="balance-pill-wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
+        </div>
         <div class="icon-btn" style="position:relative" onclick="openNews()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-badge" id="notifBadge" style="display:none">0</span></div>
       </div>
 
@@ -732,18 +729,6 @@ setTimeout(function(){
         </div>
         <div class="ad-dots" id="adDots">
           <span class="active"></span><span></span><span></span><span></span>
-        </div>
-      </div>
-
-      <div class="big-balance-card" onclick="switchTab('wallet')">
-        <div class="bal-glow"></div>
-        <div class="bal-emoji-bg"><svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg><span class="bal-coin-deco">$</span></div>
-        <div class="balance-chip-label" id="balanceLabelTxt" data-i18n="balanceLbl">Balansingiz</div>
-        <div class="big-balance-value"><span class="coin-dot" style="width:26px;height:26px;font-size:14px">$</span><span id="coinCount">0</span></div>
-        <div class="bal-som">= <span id="somEstHome">0</span> so'm</div>
-        <div class="big-balance-actions">
-          <button class="bal-action-btn primary" onclick="event.stopPropagation(); openCashout()" data-i18n="btnWithdraw">Pul yechish</button>
-          <button class="bal-action-btn" onclick="event.stopPropagation(); switchTab('history')" data-i18n="btnHistory">Tarix</button>
         </div>
       </div>
 
@@ -2048,7 +2033,9 @@ function switchTab(tab){
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
+  // Sahifani oyna (window) scroll qiladi — tab almashganda tepaga qaytaramiz.
   document.querySelector('.screen').scrollTop = 0;
+  window.scrollTo(0, 0);
   if(tab === 'leaderboard') loadLeaderboard(currentLbPeriod, document.querySelector('#tab-leaderboard .lb-tab[data-p="' + currentLbPeriod + '"]'));
   if(tab === 'history') loadPaymentHistory(currentUid);
 }
@@ -2289,8 +2276,6 @@ function renderBalance(){
   document.getElementById('coinCount2').textContent = coins.toLocaleString();
   const somEl = document.getElementById('somEst');
   if(somEl) somEl.textContent = Math.round(coins * COIN_TO_SOM).toLocaleString();
-  const somHomeEl = document.getElementById('somEstHome');
-  if(somHomeEl) somHomeEl.textContent = Math.round(coins * COIN_TO_SOM).toLocaleString();
   if(lastRenderedCoins !== null && coins !== lastRenderedCoins){
     coinEl.parentElement.classList.remove('pulse'); void coinEl.parentElement.offsetWidth; coinEl.parentElement.classList.add('pulse');
   }
