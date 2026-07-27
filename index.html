@@ -22,6 +22,9 @@
     --bg:#0A0B10; --bg-alt:#14151D; --bg-card:#181A24; --line:#242631;
     --text:#F2F3F7; --muted:#8A8D9B;
     --purple:#6C5CE7; --purple-dim:rgba(108,92,231,0.16);
+    /* Ikonka uchun yorug'roq binafsha — to'q kartada --purple dan yaxshiroq
+       kontrast beradi (#8B5CF6 / #181A24 => 4.1:1, UI elementlari uchun 3:1 talab) */
+    --purple-icon:#8B5CF6;
     --amber:#FFB020; --red:#FF5C6C; --green:#2ECC8F; --blue:#3E8EFF; --orange:#FF8A3D;
   }
   *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
@@ -474,10 +477,17 @@
   .profile-row{ display:flex; justify-content:space-between; align-items:center; padding:13px 2px; border-bottom:1px solid var(--line); font-size:14px; transition:opacity .12s ease; }
   .row-flex{ display:flex; align-items:center; gap:12px; }
   .row-flex > span:last-child{ font-weight:600; font-size:14.5px; line-height:1; }
-  .row-icon{ width:20px; height:20px; color:var(--muted); flex-shrink:0; }
+  /* Sozlamalar qatorlaridagi barcha ikonkalar bir xil binafsha ohangda (accent) */
+  .row-icon{ width:20px; height:20px; color:var(--purple-icon); flex-shrink:0; }
   .row-icon svg{ width:20px; height:20px; }
   .profile-row:last-child{ border-bottom:none; }
+  /* O'ngdagi "›" strelkalar ATAYLAB neytral kulrang qoldirildi: ikonkalar accent
+     bo'lgani uchun strelkalar ham binafsha bo'lsa, ikkalasi bir-biri bilan
+     raqobatlashib, vizual ierarxiya yo'qolardi. */
   .profile-row .muted{ color:var(--muted); font-size:12.5px; }
+  /* Holat matni: faol — yashil, nofaol — kulrang */
+  .profile-row .muted.status-on{ color:var(--green); font-weight:600; }
+  .profile-row .muted.status-off{ color:var(--muted); }
   .signout-btn{ width:100%; margin-top:16px; padding:13px; border-radius:11px; border:1.5px solid var(--red); background:none; color:var(--red);
     font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:13.5px; cursor:pointer; transition:transform .12s ease, background .12s ease; }
   .signout-btn:active{ transform:scale(0.98); background:rgba(255,92,108,0.1); }
@@ -1044,7 +1054,7 @@
           <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span><span data-i18n="langMenuItem">Til / Language</span></span><span class="muted" id="currentLangLabel">O'zbekcha ›</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="toggleSound()">
-          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></span><span data-i18n="soundMenuItem">Ovoz effektlari</span></span><span class="muted" id="soundStateLbl">Yoqilgan</span>
+          <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></span><span data-i18n="soundMenuItem">Ovoz effektlari</span></span><span class="muted status-on" id="soundStateLbl">Yoqilgan</span>
         </div>
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('leaderboard')">
           <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3a2 2 0 0 1-2 4"/><path d="M7 5H4a2 2 0 0 0 2 4"/></svg></span><span data-i18n="leaderboardMenuItem">Reyting</span></span><span class="muted">›</span>
@@ -1371,11 +1381,19 @@ function getAudioCtx(){
 }
 /* Ovoz effektlari sozlamasi — Profil > Ovoz effektlari orqali o'chiriladi */
 let soundOn = localStorage.getItem('taskupSound') !== '0';
+/* Holat matni ham, uning rangi ham shu yerda belgilanadi (yoqilgan — yashil,
+   o'chirilgan — kulrang), shunda ikkalasi hech qachon bir-biriga zid bo'lmaydi */
+function renderSoundState(){
+  const lbl = document.getElementById('soundStateLbl');
+  if(!lbl) return;
+  lbl.textContent = soundOn ? t('soundOnLbl') : t('soundOffLbl');
+  lbl.classList.toggle('status-on', soundOn);
+  lbl.classList.toggle('status-off', !soundOn);
+}
 function toggleSound(){
   soundOn = !soundOn;
   localStorage.setItem('taskupSound', soundOn ? '1' : '0');
-  const lbl = document.getElementById('soundStateLbl');
-  if(lbl) lbl.textContent = soundOn ? t('soundOnLbl') : t('soundOffLbl');
+  renderSoundState();
   if(soundOn) sndClick();
 }
 function playTone(freq, duration, type, startTime, gainPeak){
@@ -2501,8 +2519,7 @@ function renderProfile(){
   const lb = levelBadge(lnum);
   document.getElementById('profLevel').innerHTML = badgeIconHtml(lb, 16) + t(lb.key) + ' • ' + lnum + '-level';
   document.getElementById('profStreak').textContent = state.streakCount + ' kun';
-  const sndLbl = document.getElementById('soundStateLbl');
-  if(sndLbl) sndLbl.textContent = soundOn ? t('soundOnLbl') : t('soundOffLbl');
+  renderSoundState();
 }
 
 /* ---------------- Level / XP system ---------------- */
