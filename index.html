@@ -88,7 +88,7 @@
        size-x = 916/820 = 111.71%   size-y = 1717/975 = 176.10%
        pos-x  = 40/(916-820) = 41.67%   pos-y = 60/(1717-975) = 8.09%
      Tashqi ramka (chetdagi binafsha chiziq) kesimdan tashqarida qoladi. */
-  .loading-art{ width:min(72vw, 280px); aspect-ratio:820/975; flex-shrink:0;
+  .loading-art{ width:min(88vw, 380px); aspect-ratio:820/975; flex-shrink:0;
     background-image:url('assets/splash-screen.png');
     background-size:111.71% 176.10%; background-position:41.67% 8.09%;
     background-repeat:no-repeat; border:none; box-shadow:none;
@@ -100,13 +100,13 @@
     text-align:center; }
   .loading-bar{ width:min(62vw, 235px); height:8px; border-radius:99px; margin-top:26px;
     background:rgba(255,255,255,0.09); overflow:hidden; }
-  .loading-bar-fill{ width:42%; height:100%; border-radius:99px;
+  /* Kenglik JS orqali 0% -> 100% ga o'zgaradi (requestAnimationFrame) */
+  .loading-bar-fill{ width:0%; height:100%; border-radius:99px;
     background:linear-gradient(90deg,#16A34A,#22C55E 55%,#4ADE80);
-    box-shadow:0 0 12px rgba(34,197,94,0.55);
-    animation:loadBar 1.3s ease-in-out infinite; }
-  @keyframes loadBar{ 0%{ transform:translateX(-110%); } 100%{ transform:translateX(250%); } }
+    box-shadow:0 0 12px rgba(34,197,94,0.55); }
   .loading-text{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:rgba(74,222,128,0.8);
     letter-spacing:2px; margin-top:14px; }
+  #loadPct{ color:#4ADE80; font-weight:700; }
 
   /* ---------- Bosh sahifa reklama karuseli (auto-slide) ---------- */
   .ad-carousel{ position:relative; border-radius:20px; overflow:hidden; margin-bottom:14px; }
@@ -720,15 +720,57 @@
   <div class="loading-art"></div>
   <div class="loading-title">TaskUp</div>
   <div class="loading-sub">Vazifalaringiz — biz bilan tartibli</div>
-  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
-  <div class="loading-text">YUKLANMOQDA...</div>
+  <div class="loading-bar"><div class="loading-bar-fill" id="loadBarFill"></div></div>
+  <div class="loading-text">YUKLANMOQDA... <span id="loadPct">0%</span></div>
 </div>
 <script>
-// Zaxira: 8 soniyada nima bo'lsa ham loading yopiladi (CDN yuklanmay qolsa ham foydalanuvchi qora ekranda qolmasin)
-setTimeout(function(){
-  var l = document.getElementById('loadingScreen');
-  if(l && l.style.display !== 'none') l.style.display = 'none';
-}, 8000);
+/* Splash progress: 0% -> 100% 3 soniyada, so'ng splash yopiladi.
+   Yopilish AYNAN progress tugashiga bog'langan — alohida taymer yo'q.
+
+   Bitta muhim shart: splash sessiya aniqlanmasdan (onAuthStateChanged) yopilsa,
+   ostidagi barcha ekranlar hali display:none bo'lgani uchun foydalanuvchi qora
+   ekranni ko'rardi. Shuning uchun progress 100% ga yetganda sessiya hali
+   aniqlanmagan bo'lsa, bar 99% da kutib turadi va sessiya aniqlangan zahoti
+   100% ga to'lib yopiladi. Odatda sessiya 3 soniyadan tez aniqlanadi, ya'ni
+   amalda splash aynan progress 100% bo'lganda — 3 soniyada — yopiladi. */
+(function(){
+  var DURATION = 3000;
+  var screenEl = document.getElementById('loadingScreen');
+  var fillEl = document.getElementById('loadBarFill');
+  var pctEl = document.getElementById('loadPct');
+  var startedAt = (window.performance && performance.now) ? performance.now() : Date.now();
+  var authReady = false, hidden = false, rafId = null;
+
+  function now(){ return (window.performance && performance.now) ? performance.now() : Date.now(); }
+  function hide(){
+    if(hidden) return;
+    hidden = true;
+    if(rafId) cancelAnimationFrame(rafId);
+    fillEl.style.width = '100%';
+    pctEl.textContent = '100%';
+    screenEl.style.display = 'none';
+  }
+  function render(){
+    var t = Math.min(1, (now() - startedAt) / DURATION);
+    // sessiya aniqlanmaguncha 99% dan oshmaymiz
+    var shown = (t >= 1 && !authReady) ? 0.99 : t;
+    var pct = Math.floor(shown * 100);
+    fillEl.style.width = pct + '%';
+    pctEl.textContent = pct + '%';
+    if(t >= 1 && authReady){ hide(); return; }
+    rafId = requestAnimationFrame(render);
+  }
+  rafId = requestAnimationFrame(render);
+
+  /* Sessiya aniqlangach chaqiriladi (onAuthStateChanged ichidan) */
+  window.splashAuthReady = function(){
+    authReady = true;
+    if(now() - startedAt >= DURATION) hide();
+  };
+  /* Zaxira: 8 soniyada nima bo'lsa ham yopiladi (CDN yuklanmay qolsa ham
+     foydalanuvchi cheksiz yuklanish ekranida qolmasin) */
+  setTimeout(hide, 8000);
+})();
 </script>
 
 <!-- ================= AUTH ================= -->
@@ -1846,7 +1888,10 @@ function submitAuth(){
 }
 
 auth.onAuthStateChanged((user) => {
-  document.getElementById('loadingScreen').style.display = 'none';
+  // Splashni to'g'ridan-to'g'ri yashirmaymiz: progress 100% ga yetganda yopiladi.
+  // Bu yerda faqat "sessiya aniqlandi" deb belgilaymiz.
+  if(window.splashAuthReady) window.splashAuthReady();
+  else document.getElementById('loadingScreen').style.display = 'none';
   if(user){
     // Avtomatik kirish: onboarding va auth ekranlarini yashiramiz
     document.getElementById('onboardScreen').style.display = 'none';
