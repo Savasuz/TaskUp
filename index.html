@@ -2255,13 +2255,20 @@ function fireConfetti(){
 }
 
 /* ---------------- Rendering ---------------- */
+/* Pul/tanga summalarini formatlash: minglik ajratgich sifatida uzilmas probel
+   ("102 230") — o'zbekcha yozuv qoidasiga mos va brauzer localega bog'liq emas.
+   Uzilmas probel ( ) ishlatilgani uchun son qatorlar orasida bo'linib ketmaydi. */
+function fmtNum(n){
+  return Math.round(Number(n) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u00A0');
+}
+
 function animateCount(el, from, to, duration){
   const start = performance.now();
   function tick(now){
     const t = Math.min(1, (now-start)/duration);
     const eased = 1 - Math.pow(1-t, 3);
-    el.textContent = Math.round(from + (to-from)*eased).toLocaleString();
-    if(t < 1) requestAnimationFrame(tick); else el.textContent = to.toLocaleString();
+    el.textContent = fmtNum(from + (to-from)*eased);
+    if(t < 1) requestAnimationFrame(tick); else el.textContent = fmtNum(to);
   }
   requestAnimationFrame(tick);
 }
@@ -2273,9 +2280,9 @@ function renderBalance(){
   const coinEl = document.getElementById('coinCount');
   const from = lastRenderedCoins === null ? coins : lastRenderedCoins;
   animateCount(coinEl, from, coins, 500);
-  document.getElementById('coinCount2').textContent = coins.toLocaleString();
+  document.getElementById('coinCount2').textContent = fmtNum(coins);
   const somEl = document.getElementById('somEst');
-  if(somEl) somEl.textContent = Math.round(coins * COIN_TO_SOM).toLocaleString();
+  if(somEl) somEl.textContent = fmtNum(Math.round(coins * COIN_TO_SOM));
   if(lastRenderedCoins !== null && coins !== lastRenderedCoins){
     coinEl.parentElement.classList.remove('pulse'); void coinEl.parentElement.offsetWidth; coinEl.parentElement.classList.add('pulse');
   }
@@ -2285,7 +2292,7 @@ function renderBalance(){
   document.getElementById('cashoutProgress').style.width = pct + '%';
   const btn = document.getElementById('cashoutBtn');
   if(coins >= CASHOUT_MIN){ btn.textContent = t('cashoutReady'); btn.classList.add('ready'); }
-  else { btn.textContent = `${t('cashoutNeed')} ${(CASHOUT_MIN - coins).toLocaleString()} ${t('cashoutNeedSuffix')}`; btn.classList.remove('ready'); }
+  else { btn.textContent = `${t('cashoutNeed')} ${fmtNum(CASHOUT_MIN - coins)} ${t('cashoutNeedSuffix')}`; btn.classList.remove('ready'); }
   updateCashoutMaxLbl();
 
   updateTaskCardStates();
@@ -2356,7 +2363,7 @@ function renderActivity(){
 }
 
 function renderProfile(){
-  document.getElementById('profLifetime').textContent = state.lifetimeCoins.toLocaleString() + ' coin';
+  document.getElementById('profLifetime').textContent = fmtNum(state.lifetimeCoins) + ' coin';
   const lnum = getLevelInfo(state.lifetimeCoins).num;
   const lb = levelBadge(lnum);
   document.getElementById('profLevel').innerHTML = badgeIconHtml(lb, 16) + t(lb.key) + ' • ' + lnum + '-level';
@@ -2526,7 +2533,7 @@ function updatePodiumAvatar(prefix, entry){
   if(frameEl) frameEl.src = frame.img;
 }
 function renderLeaderboardData(top, period){
-  const fmtV = v => (v || 0).toLocaleString();
+  const fmtV = v => fmtNum(v || 0);
   const get = i => top[i] || { name: '—', value: 0, avatarUrl: '', lifetimeCoins: 0 };
   document.getElementById('p1Name').textContent = get(0).name; document.getElementById('p1Coin').textContent = fmtV(get(0).value);
   document.getElementById('p2Name').textContent = get(1).name; document.getElementById('p2Coin').textContent = fmtV(get(1).value);
@@ -2554,14 +2561,14 @@ function renderLeaderboard(){
 
 function renderStats(){
   document.getElementById('statTasks').textContent = state.tasksCompletedTotal;
-  document.getElementById('statLifetime').textContent = state.lifetimeCoins.toLocaleString();
+  document.getElementById('statLifetime').textContent = fmtNum(state.lifetimeCoins);
   document.getElementById('statInvites').textContent = state.friendsCount;
-  document.getElementById('statCashedOut').textContent = state.cashedOutTotal.toLocaleString();
+  document.getElementById('statCashedOut').textContent = fmtNum(state.cashedOutTotal);
 }
 
 function renderFriends(){
   document.getElementById('friendsCount').textContent = state.friendsCount;
-  document.getElementById('friendsBonus').textContent = state.friendsBonus.toLocaleString() + ' coin';
+  document.getElementById('friendsBonus').textContent = fmtNum(state.friendsBonus) + ' coin';
 }
 
 function fallbackCopy(text){
@@ -2845,7 +2852,7 @@ function taskRowHtml(task, maxReward){
         <div class="task-body">
           <div class="task-name">${name}</div>
           <div class="task-desc">${desc}</div>
-          <div class="task-reward"><span class="mini-coin">$</span> +${reward.toLocaleString()}</div>
+          <div class="task-reward"><span class="mini-coin">$</span> +${fmtNum(reward)}</div>
           ${progressHtml}
         </div>
         ${btnHtml}
@@ -2952,7 +2959,7 @@ function cashoutBackToMethods(){
 }
 function updateCashoutMaxLbl(){
   const el = document.getElementById('cashoutMaxLbl');
-  if(el) el.textContent = t('maxAmountLbl').replace('{n}', (state.coins || 0).toLocaleString());
+  if(el) el.textContent = t('maxAmountLbl').replace('{n}', fmtNum(state.coins || 0));
 }
 
 
@@ -2991,7 +2998,7 @@ function renderPaymentHistory(filter){
     return `
     <div class="ph-item">
       <div class="ph-top">
-        <div class="ph-amount">${p.amountSom.toLocaleString()} so'm</div>
+        <div class="ph-amount">${fmtNum(p.amountSom)} so'm</div>
         <div class="ph-status ${p.status}">${getStatusLabel(p.status)}</div>
       </div>
       <div class="ph-meta">${methodLbl} • ${date}</div>
@@ -3074,7 +3081,7 @@ function tryCashout(btnEl){
 
   // Foydalanuvchi kiritgan summa (tanga)
   const amount = parseInt((document.getElementById('cashoutAmount').value || '').replace(/\D/g, ''), 10) || 0;
-  if(amount < CASHOUT_MIN){ showToast(`${t('toastCashoutMin')} ${CASHOUT_MIN.toLocaleString()}`, true); return; }
+  if(amount < CASHOUT_MIN){ showToast(`${t('toastCashoutMin')} ${fmtNum(CASHOUT_MIN)}`, true); return; }
   if(amount > state.coins){ showToast(t('toastNotEnough'), true); return; }
 
   const cardNumber = (document.getElementById('cardNumber').value || '').replace(/\s/g, '');
@@ -3101,7 +3108,7 @@ function tryCashout(btnEl){
   }).catch((err) => {
     const msg = err && err.message;
     if(msg === 'insufficient'){ showToast(t('toastNotEnough'), true); }
-    else if(msg === 'below-min'){ showToast(`${t('toastCashoutMin')} ${CASHOUT_MIN.toLocaleString()}`, true); }
+    else if(msg === 'below-min'){ showToast(`${t('toastCashoutMin')} ${fmtNum(CASHOUT_MIN)}`, true); }
     else if(msg === 'banned'){ showToast('Hisobingiz bloklangan', true); }
     else { console.error(err); showToast(friendlyError(err), true); }
   }));
