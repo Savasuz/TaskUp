@@ -75,17 +75,38 @@
   .onboard-login-link{ flex-shrink:0; text-align:center; color:var(--muted); font-size:13px;
     text-decoration:underline; cursor:pointer; margin-bottom:max(18px, env(safe-area-inset-bottom)); z-index:2; }
 
+  /* ---------- Splash (yuklanish) ekrani ----------
+     Fon rangi assets/splash-screen.png ichidagi fon bilan bir xil (#02000E ga yaqin),
+     shuning uchun rasm kesimining chetlari ko'rinmaydi. */
   #loadingScreen{ position:fixed; inset:0; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:16px; z-index:100;
-    background:linear-gradient(160deg,#2A1E56 0%,#1B1433 55%,#141021 100%); }
-  .loading-logo{ width:78px; height:78px; border-radius:22px; background:linear-gradient(135deg,#7B6EF0,#6C5CE7);
-    display:flex; align-items:center; justify-content:center; font-size:38px; color:#fff; font-weight:700;
-    box-shadow:0 12px 34px rgba(108,92,231,0.55); animation:loadPulse 1.5s ease-in-out infinite; }
-  @keyframes loadPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.09); } }
-  .loading-title{ font-family:'Space Grotesk',sans-serif,Arial; font-size:27px; font-weight:700; color:#fff; }
-  .spinner{ width:30px; height:30px; border-radius:50%; border:3px solid rgba(255,255,255,0.18); border-top-color:#8B7BFF; animation:spin 0.8s linear infinite; }
-  @keyframes spin{ to{ transform:rotate(360deg); } }
-  .loading-text{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:rgba(255,255,255,0.55); letter-spacing:2px; }
+    align-items:center; justify-content:center; gap:0; z-index:100; padding:16px; overflow:hidden;
+    background:#02000E; }
+  /* Rasmdan FAQAT illyustratsiya qismi olinadi — undagi tayyor "TaskUp", tavsif,
+     "72%" va binafsha progress bar kesib tashlanadi (ular quyida HTML/CSS bilan
+     qayta yasalgan, shunda progress bar haqiqatan animatsiyalanadi va yashil bo'ladi).
+     Rasm 916x1717; illyustratsiya kesimi x:40..860 (820), y:60..1035 (975):
+       size-x = 916/820 = 111.71%   size-y = 1717/975 = 176.10%
+       pos-x  = 40/(916-820) = 41.67%   pos-y = 60/(1717-975) = 8.09%
+     Tashqi ramka (chetdagi binafsha chiziq) kesimdan tashqarida qoladi. */
+  .loading-art{ width:min(72vw, 280px); aspect-ratio:820/975; flex-shrink:0;
+    background-image:url('assets/splash-screen.png');
+    background-size:111.71% 176.10%; background-position:41.67% 8.09%;
+    background-repeat:no-repeat; border:none; box-shadow:none;
+    animation:loadFloat 3.2s ease-in-out infinite; }
+  @keyframes loadFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
+  .loading-title{ font-family:'Space Grotesk',sans-serif,Arial; font-size:clamp(24px,7vw,30px);
+    font-weight:700; color:#fff; margin-top:6px; }
+  .loading-sub{ font-size:clamp(11.5px,3.4vw,14px); color:rgba(255,255,255,0.55); margin-top:6px;
+    text-align:center; }
+  .loading-bar{ width:min(62vw, 235px); height:8px; border-radius:99px; margin-top:26px;
+    background:rgba(255,255,255,0.09); overflow:hidden; }
+  .loading-bar-fill{ width:42%; height:100%; border-radius:99px;
+    background:linear-gradient(90deg,#16A34A,#22C55E 55%,#4ADE80);
+    box-shadow:0 0 12px rgba(34,197,94,0.55);
+    animation:loadBar 1.3s ease-in-out infinite; }
+  @keyframes loadBar{ 0%{ transform:translateX(-110%); } 100%{ transform:translateX(250%); } }
+  .loading-text{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:rgba(74,222,128,0.8);
+    letter-spacing:2px; margin-top:14px; }
 
   /* ---------- Bosh sahifa reklama karuseli (auto-slide) ---------- */
   .ad-carousel{ position:relative; border-radius:20px; overflow:hidden; margin-bottom:14px; }
@@ -211,6 +232,7 @@
   .task-btn:disabled{ opacity:0.35; background:var(--line); color:var(--muted); cursor:default; box-shadow:none; }
   .task-btn .btn-spinner{ width:14px; height:14px; border-radius:50%; border:2px solid rgba(255,255,255,0.35);
     border-top-color:#fff; display:inline-block; animation:spin .7s linear infinite; vertical-align:middle; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
 
   /* ---------- Daily bonus ---------- */
   .daily-card{ background:var(--bg-card); border:1px solid var(--amber); border-radius:16px; padding:16px;
@@ -695,9 +717,10 @@
 
 <div id="offlineBar" style="display:none; position:fixed; top:0; left:0; right:0; z-index:110; background:#B3261E; color:#fff; text-align:center; padding:8px 12px; font-size:12.5px; font-weight:700; font-family:'Space Grotesk',sans-serif">📡 <span data-i18n="offlineMsg">Internet aloqasi yo'q — ulanish tiklanishini kutyapmiz</span></div>
 <div id="loadingScreen">
-  <div class="loading-logo">✓</div>
+  <div class="loading-art"></div>
   <div class="loading-title">TaskUp</div>
-  <div class="spinner"></div>
+  <div class="loading-sub">Vazifalaringiz — biz bilan tartibli</div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
   <div class="loading-text">YUKLANMOQDA...</div>
 </div>
 <script>
