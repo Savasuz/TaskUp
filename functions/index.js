@@ -23,15 +23,11 @@ const REFERRAL_BONUS_REFERRER = 1000; // taklif qilgan odamga
 const REFERRAL_BONUS_NEWUSER = 500;   // kodni kiritgan yangi foydalanuvchiga
 const PAY_METHODS = ['uzcard', 'humo', 'payme', 'click'];
 
-// index.html'dagi standart (Firestore'da bo'lmagan) vazifalar bilan bir xil
-const DEFAULT_TASKS = {
-  video:    { reward: 50,   dailyLimit: 8,  label: "Video ko'rish" },
-  download: { reward: 120,  dailyLimit: 3,  label: 'Ilova yuklash' },
-  survey:   { reward: 80,   dailyLimit: 1,  label: "So'rovnomada ishtirok etish" },
-  ad:       { reward: 40,   dailyLimit: 10, label: "Reklama ko'rish" },
-  telegram: { reward: 70,   dailyLimit: 1,  label: 'Telegram kanalga obuna' },
-  rate:     { reward: 150,  dailyLimit: 1,  label: "O'yin o'ynab baho berish" }
-};
+/* DIQQAT: bu yerda avval DEFAULT_TASKS (video/download/survey/ad/telegram/rate)
+   bor edi va Firestore'da bunday vazifa umuman bo'lmasa ham mukofot berilardi.
+   Ya'ni admin vazifani o'chirgandan keyin ham foydalanuvchi o'sha id bilan
+   haqiqiy tanga yiga olardi. Endi mukofot FAQAT Firestore'dagi mavjud va
+   active:true vazifa uchun beriladi. */
 
 function levelOf(lifetimeCoins) { return Math.floor((lifetimeCoins || 0) / XP_PER_LEVEL) + 1; }
 function dailyCap(level) {
@@ -71,36 +67,30 @@ exports.completeTask = onCall(async (req) => {
 
   const taskRef = db.collection('tasks').doc(taskId);
   const preSnap = await taskRef.get();
-  if (!preSnap.exists && !DEFAULT_TASKS[taskId]) throw new HttpsError('not-found', 'task-not-found');
-  const isCatalogTask = preSnap.exists;
+  if (!preSnap.exists) throw new HttpsError('not-found', 'task-not-found');
 
   const userRef = db.collection('users').doc(uid);
   return db.runTransaction(async (tx) => {
     const userDoc = await tx.get(userRef);
-    const taskDoc = isCatalogTask ? await tx.get(taskRef) : null;
+    const taskDoc = await tx.get(taskRef);
 
     if (!userDoc.exists) throw new HttpsError('not-found', 'user-not-found');
     const d = userDoc.data();
     if (d.banned === true) throw new HttpsError('permission-denied', 'banned');
 
-    let reward, limit, label, td = null;
-    if (taskDoc && taskDoc.exists) {
-      td = taskDoc.data();
-      if (td.active !== true) throw new HttpsError('failed-precondition', 'task-inactive');
-      const now = Date.now();
-      if (td.startAt && now < td.startAt) throw new HttpsError('failed-precondition', 'not-started');
-      if (td.endAt && now > td.endAt) throw new HttpsError('failed-precondition', 'ended');
-      if ((td.totalLimit || 0) > 0 && (td.completedCount || 0) >= td.totalLimit) {
-        throw new HttpsError('resource-exhausted', 'total-limit');
-      }
-      reward = Math.floor(Number(td.reward)) || 0;
-      limit = Math.floor(Number(td.dailyLimit)) || 1;
-      label = td.name || taskId;
-    } else if (DEFAULT_TASKS[taskId]) {
-      ({ reward, dailyLimit: limit, label } = DEFAULT_TASKS[taskId]);
-    } else {
-      throw new HttpsError('not-found', 'task-not-found');
+    // Vazifa tranzaksiya ichida qayta o'qiladi — orada o'chirilgan bo'lishi mumkin
+    if (!taskDoc.exists) throw new HttpsError('not-found', 'task-not-found');
+    const td = taskDoc.data();
+    if (td.active !== true) throw new HttpsError('failed-precondition', 'task-inactive');
+    const now = Date.now();
+    if (td.startAt && now < td.startAt) throw new HttpsError('failed-precondition', 'not-started');
+    if (td.endAt && now > td.endAt) throw new HttpsError('failed-precondition', 'ended');
+    if ((td.totalLimit || 0) > 0 && (td.completedCount || 0) >= td.totalLimit) {
+      throw new HttpsError('resource-exhausted', 'total-limit');
     }
+    const reward = Math.floor(Number(td.reward)) || 0;
+    const limit = Math.floor(Number(td.dailyLimit)) || 1;
+    const label = td.name || taskId;
     if (reward <= 0) throw new HttpsError('failed-precondition', 'bad-task');
 
     const today = new Date().toDateString();
@@ -124,7 +114,7 @@ exports.completeTask = onCall(async (req) => {
       lastReset: today,
       ...weeklyPatch(d, actual)
     });
-    if (td && (td.totalLimit || 0) > 0) {
+    if ((td.totalLimit || 0) > 0) {
       tx.update(taskRef, { completedCount: (td.completedCount || 0) + 1 });
     }
     tx.set(userRef.collection('history').doc(), {

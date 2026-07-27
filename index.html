@@ -2601,6 +2601,9 @@ function copyReferral(){
 /* ---------------- Tasks catalog (Firestore `tasks` collection) ---------------- */
 let unsubscribeTasks = null;
 let catalogTasks = [];
+/* Firestore'dan birinchi javob kelgunicha "Hali vazifa yo'q" holatini ko'rsatmaymiz,
+   aks holda yuklanish paytida u bir lahzaga chaqnab ketadi. */
+let tasksLoaded = false;
 let currentTaskFilter = 'all';
 
 const TASK_ICON_SVG = {
@@ -2623,16 +2626,10 @@ const TASK_ICON_PHOTO = {
   instagram: 'assets/tasks/task-instagram.jpg'
 };
 
-/* Firestore `tasks` collection bo'sh bo'lsa ko'rsatiladigan standart vazifalar */
-const DEFAULT_TASKS = [
-  { id:'video', nameKey:'taskVideoName', descKey:'taskVideoDesc2', reward:50, dailyLimit:8, icon:'video', category:'oddiy' },
-  { id:'download', nameKey:'taskDownloadName', descKey:'taskDownloadDesc2', reward:120, dailyLimit:3, icon:'download', category:'oddiy' },
-  { id:'survey', nameKey:'taskSurveyName', descKey:'taskSurveyDesc', reward:80, dailyLimit:1, icon:'survey', category:'premium' },
-  { id:'ad', nameKey:'taskAdName', descKey:'taskAdDesc', reward:40, dailyLimit:10, icon:'ad', category:'oddiy' },
-  { id:'telegram', nameKey:'taskTgName', descKey:'taskTgDesc', reward:70, dailyLimit:1, icon:'telegram', category:'bonus' },
-  { id:'invite', nameKey:'taskInviteName', descKey:'taskInviteDesc', reward:1000, dailyLimit:1, icon:'invite', category:'bonus', action:'friends' },
-  { id:'rate', nameKey:'taskRateName', descKey:'taskRateDesc', reward:150, dailyLimit:1, icon:'rate', category:'premium' }
-];
+/* DIQQAT: bu yerda avval DEFAULT_TASKS (hardcoded "namuna" vazifalar) bor edi va
+   Firestore bo'sh qaytganda ular ko'rsatilardi. Natijada admin paneldan vazifalar
+   o'chirilgan bo'lsa ham ilovada soxta vazifalar ko'rinib turardi. Vazifalar
+   FAQAT Firestore `tasks` collectiondan olinadi — hech qanday fallback yo'q. */
 
 function escapeHtml(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
@@ -2805,17 +2802,24 @@ function subscribeTasksCatalog(){
   unsubscribeTasks = db.collection('tasks').where('active', '==', true).onSnapshot((snap) => {
     catalogTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     catalogTasks.sort((a,b) => (a.order||0) - (b.order||0));
+    tasksLoaded = true;
     renderTaskLists();
-  }, err => { console.error('Vazifalarni yuklashda xato:', err); renderTaskLists(); });
+  }, err => {
+    // Xatoda ham soxta vazifa ko'rsatmaymiz — ro'yxat bo'sh qoladi
+    console.error('Vazifalarni yuklashda xato:', err);
+    catalogTasks = [];
+    tasksLoaded = true;
+    renderTaskLists();
+  });
 }
 
 function taskRowHtml(task, maxReward){
-  const isDefault = !!task.nameKey;
-  const name = isDefault ? `<span data-i18n="${task.nameKey}">${escapeHtml(t(task.nameKey))}</span>` : escapeHtml(task.name);
-  const desc = isDefault ? `<span data-i18n="${task.descKey}">${escapeHtml(t(task.descKey))}</span>` : escapeHtml(task.desc || '');
+  // Vazifalar faqat Firestore'dan keladi — nomi/tavsifi admin panelda kiritiladi
+  const name = escapeHtml(task.name);
+  const desc = escapeHtml(task.desc || '');
   const reward = Number(task.reward) || 0;
   const dailyLimit = Number(task.dailyLimit) || 1;
-  const isAdKind = !isDefault && task.kind === 'rewarded_ad';
+  const isAdKind = task.kind === 'rewarded_ad';
   const count = state.taskCounts[task.id] || 0;
   const limitReached = !isAdKind && count >= dailyLimit;
   const isTop = !isAdKind && maxReward > 0 && reward === maxReward;
@@ -2830,7 +2834,7 @@ function taskRowHtml(task, maxReward){
   } else {
     let action;
     if(task.action === 'friends') action = "switchTab('friends')";
-    else if(!isDefault && task.url) action = `startLinkTask('${escapeHtml(task.id)}', '${encodeURIComponent(task.url)}', ${reward}, ${dailyLimit}, this)`;
+    else if(task.url) action = `startLinkTask('${escapeHtml(task.id)}', '${encodeURIComponent(task.url)}', ${reward}, ${dailyLimit}, this)`;
     else action = `completeTask('${escapeHtml(task.id)}', ${reward}, ${dailyLimit}, this)`;
     btnHtml = `<button class="task-btn" onclick="${action}" data-i18n="btnDo">${t('btnDo')}</button>`;
   }
@@ -2896,7 +2900,7 @@ function topTaskReward(tasks){
 }
 
 function renderTaskLists(){
-  const tasks = catalogTasks.length ? catalogTasks : DEFAULT_TASKS;
+  const tasks = catalogTasks;
   const maxReward = topTaskReward(tasks);
   const homeEl = document.getElementById('homeTaskList');
   const allEl = document.getElementById('allTaskList');
@@ -2913,7 +2917,7 @@ function applyTaskFilter(){
     if(visible) anyVisible = true;
   });
   const emptyEl = document.getElementById('tasksEmptyState');
-  if(emptyEl) emptyEl.style.display = anyVisible ? 'none' : 'flex';
+  if(emptyEl) emptyEl.style.display = (!anyVisible && tasksLoaded) ? 'flex' : 'none';
 }
 
 function filterTasks(cat, chipEl){
