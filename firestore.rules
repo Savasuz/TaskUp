@@ -55,15 +55,17 @@ service cloud.firestore {
         && request.resource.data.cashedOutTotal == 0
         && request.resource.data.dailyEarned == 0;
 
-      // Egasi faqat kunlik hisoblagichlarni NOLGA tushira oladi (yangi kun boshlanishi),
-      // boshqa hech qanday maydonga tegolmaydi
-      allow update: if isAdmin() || (
-        isOwner(uid)
-        && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['taskCounts', 'dailyEarned', 'lastReset'])
-        && request.resource.data.dailyEarned == 0
-        && request.resource.data.taskCounts.size() == 0
-      );
+      // XAVFSIZLIK: kunlik hisoblagichlarni (taskCounts, dailyEarned, lastReset)
+      // egasi O'ZGARTIRA OLMAYDI.
+      // Avval bu qoida egasiga ularni nolga tushirishga ruxsat berardi ("yangi kun"
+      // resetini mijoz bajarardi). Lekin qoida resetni FAQAT kun almashganda emas,
+      // ISTALGAN VAQTDA bajarishga imkon berardi: foydalanuvchi brauzer konsolidan
+      // hisoblagichlarni qayta-qayta nolga tushirib, har bir vazifaning kunlik
+      // limitini ham, umumiy kunlik daromad chegarasini ham cheklovsiz aylanib
+      // o'tishi mumkin edi (completeTask aynan shu maydonlarga ishonadi).
+      // Kun almashinuvi serverda — completeTask tranzaksiyasi ichida — bajariladi,
+      // shuning uchun mijozning yozishiga ehtiyoj yo'q.
+      allow update: if isAdmin();
 
       // Egasi profil rasmi havolasini (avatarUrl) mustaqil yangilay oladi -
       // pul/anti-cheat maydonlariga aloqasi yo'q, shu sabab alohida qoida.

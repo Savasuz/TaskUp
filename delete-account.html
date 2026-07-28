@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index, follow">
+<title>Hisobni o'chirish — TaskUp</title>
+<meta name="description" content="TaskUp hisobingizni va u bilan bog'liq ma'lumotlarni o'chirish uchun so'rov yuborish tartibi.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0B0E14; --bg-alt:#10141D; --line:#1E2530; --text:#EDEFF3; --muted:#7C8494; --green:#12D48C; --red:#FF5C6C; }
+  *{ box-sizing:border-box; }
+  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; margin:0; line-height:1.65; }
+  .wrap{ max-width:640px; margin:0 auto; padding:40px 20px 80px; }
+  h1{ font-family:'Space Grotesk',sans-serif; font-size:26px; margin-bottom:6px; }
+  .updated{ color:var(--muted); font-size:12.5px; font-family:monospace; margin-bottom:30px; }
+  h2{ font-family:'Space Grotesk',sans-serif; font-size:16px; margin:28px 0 10px; color:var(--green); }
+  p, li{ font-size:14px; color:#D7DAE1; }
+  ul, ol{ padding-left:20px; }
+  li{ margin-bottom:8px; }
+  a{ color:var(--green); }
+  .box{ background:var(--bg-alt); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin:16px 0; font-size:13.5px; color:#D7DAE1; }
+  .danger{ background:rgba(255,92,108,0.08); border:1px solid rgba(255,92,108,0.35); border-radius:12px; padding:16px 18px; margin:16px 0; font-size:13.5px; color:#F3CFD3; }
+  .cta{ display:inline-block; background:linear-gradient(180deg,#8D13F4,#5A00C8); color:#fff; text-decoration:none;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; padding:14px 28px; border-radius:12px; margin:8px 0 4px; }
+  table{ width:100%; border-collapse:collapse; margin:14px 0; font-size:13px; }
+  th, td{ text-align:left; padding:8px 10px; border:1px solid var(--line); vertical-align:top; }
+  th{ background:var(--bg-alt); color:var(--text); font-weight:600; width:42%; }
+  td{ color:#D7DAE1; }
+  code{ background:var(--bg-alt); border:1px solid var(--line); border-radius:5px; padding:1px 6px; font-size:12.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Hisobni o'chirish</h1>
+  <div class="updated">Oxirgi yangilanish: 2026-yil 27-iyul • TaskUp</div>
+
+  <p>Ushbu sahifa <b>TaskUp</b> ilovasi (dasturchi: TaskUp) foydalanuvchilariga hisobini va u bilan bog'liq ma'lumotlarni o'chirish uchun mo'ljallangan.</p>
+
+  <h2>1. So'rov yuborish</h2>
+  <p>Hisobingizni o'chirish uchun quyidagi tugma orqali bizga murojaat qiling va xabaringizda <b>hisobingiz elektron pochta manzilini</b> yozing:</p>
+
+  <a class="cta" href="https://t.me/Taskupuz">Telegram orqali so'rov yuborish →</a>
+  <div class="box">
+    Xabar namunasi:<br>
+    <code>Hisobimni o'chirishni so'rayman. Email: sizning@pochtangiz.uz</code>
+  </div>
+  <p>So'rov <b>7 ish kuni</b> ichida bajariladi. Bajarilgandan so'ng sizga tasdiq xabari yuboriladi.</p>
+  <p>Xavfsizlik uchun so'rov faqat hisob egasidan kelganini tekshiramiz — shuning uchun so'rovni hisobingizga bog'langan elektron pochtadan yoki ilovada ko'rsatilgan Telegram akkauntingizdan yuboring.</p>
+
+  <h2>2. Qanday ma'lumotlar o'chiriladi</h2>
+  <p>Hisob o'chirilganda quyidagilar butunlay va qaytarib bo'lmaydigan tarzda olib tashlanadi:</p>
+  <table>
+    <tr><th>Hisob ma'lumotlari</th><td>elektron pochta manzili, parol (Firebase Authentication yozuvi)</td></tr>
+    <tr><th>Profil</th><td>profil rasmi (Firebase Storage'dan fayl ham o'chiriladi)</td></tr>
+    <tr><th>Coin va faoliyat</th><td>coin balansi, jami ishlab topilgan coin, bajarilgan vazifalar soni, kunlik daromad, kunlik bonus (streak), tranzaksiya tarixi</td></tr>
+    <tr><th>Referral</th><td>shaxsiy taklif kodi, sizni taklif qilgan foydalanuvchi bog'lanishi, taklif bonuslari</td></tr>
+    <tr><th>Qurilma</th><td>firibgarlikka qarshi saqlangan qurilma identifikatori</td></tr>
+    <tr><th>To'lov ma'lumotlari</th><td>pul yechish so'rovlaridagi karta raqami, amal qilish muddati va karta egasining ismi</td></tr>
+  </table>
+
+  <h2>3. Nima saqlanib qolishi mumkin</h2>
+  <p>Qonun va buxgalteriya talablariga ko'ra, <b>allaqachon amalga oshirilgan to'lovlar</b> bo'yicha ayrim tranzaksiya yozuvlari (sana va summa) saqlanib qolishi mumkin. Bunday yozuvlardan shaxsni aniqlab bo'lmaydi — ular hisobingizga bog'lanmaydi.</p>
+  <p>Bu yozuvlar soliq va moliyaviy hisobot muddati tugagach o'chiriladi.</p>
+
+  <h2>4. Muhim ogohlantirish</h2>
+  <div class="danger">
+    <b>Yechib olinmagan coinlar bekor qilinadi.</b> Hisob o'chirilgandan so'ng balansingizdagi coinlar tiklanmaydi va ular uchun to'lov amalga oshirilmaydi.
+    <br><br>
+    Agar balansingizda yechish uchun yetarli coin bo'lsa (minimal 10 000 coin), <b>avval pulni yechib oling</b>, so'ngra o'chirish so'rovini yuboring.
+    <br><br>
+    O'chirilgan hisobni tiklab bo'lmaydi. Keyinchalik xohlasangiz, yangi hisob ochishingiz mumkin — lekin eski balans va tarix qaytarilmaydi.
+  </div>
+
+  <h2>5. Faqat ma'lumotni o'chirish (hisobni saqlab qolgan holda)</h2>
+  <p>Agar hisobingizni saqlab, faqat ayrim ma'lumotlarni (masalan, saqlangan karta ma'lumotlari yoki profil rasmi) o'chirishni istasangiz, xuddi shu Telegram manzili orqali aniq nimani o'chirishni yozib so'rov yuboring.</p>
+
+  <h2>6. Bog'lanish</h2>
+  <div class="box">
+    Barcha savollar va so'rovlar uchun: <a href="https://t.me/Taskupuz">@Taskupuz</a> (Telegram).
+  </div>
+
+  <p style="margin-top:28px">
+    <a href="privacy-policy.html">Maxfiylik siyosati</a> &nbsp;·&nbsp;
+    <a href="terms-of-service.html">Foydalanish shartlari</a>
+  </p>
+</div>
+</body>
+</html>
