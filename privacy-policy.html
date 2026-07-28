@@ -43,7 +43,8 @@
     <tr><td><b>Profil rasmi</b> (ixtiyoriy)</td><td>Siz yuklasangiz, Firebase Storage'da saqlanadi. Yuklamasangiz, standart belgi ko'rsatiladi.</td></tr>
     <tr><td><b>Hisob faoliyati</b>: coin balansi, jami ishlab topilgan coin, bajarilgan vazifalar soni, kunlik daromad, kunlik bonus (streak), yechib olingan summa, tranzaksiya tarixi</td><td>Coin tizimini yuritish, kunlik limitlarni hisoblash va sizga tarixni ko'rsatish.</td></tr>
     <tr><td><b>Referral ma'lumotlari</b>: shaxsiy taklif kodingiz, sizni taklif qilgan foydalanuvchi, taklif qilganlaringiz soni va ulardan olingan bonus</td><td>Do'stlarni taklif qilish dasturini yuritish va bonuslarni hisoblash.</td></tr>
-    <tr><td><b>Qurilma identifikatori</b></td><td>Faqat firibgarlikning oldini olish uchun: bitta qurilmada bir nechta hisob ochilishini aniqlash.</td></tr>
+    <tr><td><b>Qurilma identifikatori</b></td><td>Faqat firibgarlikning oldini olish uchun: bitta qurilmada bir nechta hisob ochilishini aniqlash. Identifikator Ilova tomonidan tasodifiy yaratiladi — u telefonning zavod raqami (IMEI), reklama identifikatori yoki shunga o'xshash doimiy qurilma raqami EMAS.</td></tr>
+    <tr><td><b>IP manzil</b></td><td>Qurilma identifikatori bilan birga, faqat firibgarlikni aniqlash uchun oxirgi ulanish IP manzili saqlanadi. Undan joylashuvingizni aniqlash, reklama yoki tahlil maqsadida foydalanilmaydi.</td></tr>
     <tr><td><b>To'lov kartasi ma'lumotlari</b>: karta raqami, amal qilish muddati, karta egasining ismi, tanlangan to'lov usuli</td><td>Faqat siz pul yechish so'rovi yuborganingizda. Batafsil ma'lumot 3-bo'limda.</td></tr>
   </table>
 
@@ -62,6 +63,8 @@
   <h2>3. To'lov kartasi ma'lumotlari — muhim ogohlantirish</h2>
   <div class="warn">
     Pul yechish so'rovini yuborganingizda siz kiritgan <b>karta raqami, amal qilish muddati va karta egasining ismi</b> to'lovni qo'lda amalga oshirish uchun bizning ma'lumotlar bazamizda (Firebase Firestore) saqlanadi.
+    <br><br>
+    <b>Karta raqami va amal qilish muddati ochiq holda saqlanmaydi</b> — ular server tomonda AES-256-GCM algoritmi bilan shifrlanadi. Shifrlash kaliti ma'lumotlar bazasida emas, alohida xavfsiz saqlagichda (Google Secret Manager) turadi va hech qachon brauzerga yuborilmaydi. Kundalik ro'yxatlarda kartaning faqat oxirgi 4 raqami ko'rinadi; to'liq raqamni ochish uchun alohida server so'rovi kerak va har bir ochish kim va qachon qilgani bilan yozib boriladi.
     <br><br>
     Bu ma'lumotlarga faqat <b>siz</b> va <b>to'lovni amalga oshiruvchi administrator</b> kira oladi — bu Firebase xavfsizlik qoidalari bilan cheklangan. Boshqa foydalanuvchilar ularni ko'ra olmaydi.
     <br><br>
@@ -83,6 +86,7 @@
   <h2>5. Ma'lumotlarni saqlash va himoya</h2>
   <ul>
     <li>Ma'lumotlar Google Firebase serverlarida, uzatishda TLS shifrlash bilan saqlanadi</li>
+    <li>Karta raqami va amal qilish muddati bundan tashqari <b>saqlashda ham shifrlanadi</b> (AES-256-GCM), kalit alohida saqlagichda turadi</li>
     <li>Coin balansi kabi moliyaviy maydonlarni foydalanuvchi to'g'ridan-to'g'ri o'zgartira olmaydi — barcha o'zgarishlar server tomonida tekshiriladi</li>
     <li>Har bir foydalanuvchi faqat o'z ma'lumotlarini o'qiy oladi; boshqalarning balansi, kartasi yoki pochtasiga kira olmaydi</li>
     <li>Ma'lumotlaringiz hisobingiz mavjud bo'lgunicha saqlanadi</li>
