@@ -821,9 +821,49 @@
     authReady = true;
     if(now() - startedAt >= DURATION) hide();
   };
-  /* Zaxira: 8 soniyada nima bo'lsa ham yopiladi (CDN yuklanmay qolsa ham
-     foydalanuvchi cheksiz yuklanish ekranida qolmasin) */
-  setTimeout(hide, 8000);
+  /* Zaxira: 8 soniyada splash yopiladi. LEKIN avval tekshiramiz — ostida
+     ko'rsatadigan biror ekran bormi? Firebase CDN yuklanmasa yoki auth
+     javob bermasa hech qaysi ekran yoqilmagan bo'ladi va splash yopilishi
+     foydalanuvchini BO'SH EKRAN oldida qoldiradi. Bunday holatda splashni
+     yopish o'rniga tushunarli xato holatini ko'rsatamiz. */
+  function anyScreenReady(){
+    return ['onboardScreen','authScreen','appScreen'].some(function(id){
+      var e = document.getElementById(id);
+      return e && getComputedStyle(e).display !== 'none';
+    });
+  }
+  function showLoadError(){
+    if(hidden) return;
+    if(rafId) cancelAnimationFrame(rafId);
+    var art = document.querySelector('.loading-art');
+    var bar = document.querySelector('.loading-bar');
+    var sub = document.querySelector('.loading-sub');
+    var txt = document.querySelector('.loading-text');
+    if(art) art.style.display = 'none';
+    if(bar) bar.style.display = 'none';
+    if(sub) sub.textContent = "Ilovani yuklab bo'lmadi";
+    if(txt){
+      txt.innerHTML = "Internet aloqasini tekshiring va qayta urinib ko'ring";
+      txt.style.color = 'rgba(255,255,255,0.6)';
+      txt.style.letterSpacing = '0';
+      txt.style.textAlign = 'center';
+      txt.style.maxWidth = '280px';
+    }
+    if(!document.getElementById('splashRetryBtn')){
+      var b = document.createElement('button');
+      b.id = 'splashRetryBtn';
+      b.textContent = 'Qayta urinish';
+      b.onclick = function(){ location.reload(); };
+      b.style.cssText = 'margin-top:18px;padding:12px 28px;border:none;border-radius:12px;cursor:pointer;'
+        + 'font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:14px;color:#fff;'
+        + 'background:linear-gradient(180deg,#8D13F4,#5A00C8);box-shadow:0 8px 22px rgba(90,0,200,0.4)';
+      screenEl.appendChild(b);
+    }
+  }
+  setTimeout(function(){
+    if(anyScreenReady()) hide();
+    else showLoadError();
+  }, 8000);
 })();
 </script>
 
@@ -1111,8 +1151,13 @@
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="openDocViewer('privacy-policy.html','privacyMenuItem')">
           <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><span data-i18n="privacyMenuItem">Maxfiylik siyosati</span></span><span class="muted">›</span>
         </div>
-        <div class="profile-row" style="padding:13px 14px; cursor:pointer; border-bottom:none" onclick="openDocViewer('terms-of-service.html','termsMenuItem')">
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="openDocViewer('terms-of-service.html','termsMenuItem')">
           <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></span><span data-i18n="termsMenuItem">Foydalanish shartlari</span></span><span class="muted">›</span>
+        </div>
+        <!-- Google Play hisob yaratadigan ilovalardan ilova ICHIDA ham o'chirish
+             yo'lini talab qiladi (veb-URL bilan bir qatorda) -->
+        <div class="profile-row" style="padding:13px 14px; cursor:pointer; border-bottom:none" onclick="openDocViewer('delete-account.html','deleteAccountMenuItem')">
+          <span class="row-flex"><span class="row-icon" style="color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></span><span data-i18n="deleteAccountMenuItem" style="color:var(--red)">Hisobni o'chirish</span></span><span class="muted">›</span>
         </div>
       </div>
       <button class="signout-btn" onclick="signOutUser()" data-i18n="logoutBtn">Chiqish</button>
@@ -1710,7 +1755,7 @@ const I18N = {
     totalEarned:"Umumiy top ilgan", currentLevel:"Joriy daraja", dailyStreakLbl:"Kunlik seriya",
     langMenuItem:"Til / Language", leaderboardMenuItem:"Reyting", levelMenuItem:"Level",
     paymentHistoryMenuItem:"To'lov tarixi", taskHistoryMenuItem:"Vazifalar tarixi", myFriendsMenuItem:"Do'stlarim",
-    helpMenuItem:"Yordam / Qo'llab-quvvatlash", privacyMenuItem:"Maxfiylik siyosati", termsMenuItem:"Foydalanish shartlari",
+    helpMenuItem:"Yordam / Qo'llab-quvvatlash", privacyMenuItem:"Maxfiylik siyosati", termsMenuItem:"Foydalanish shartlari", deleteAccountMenuItem:"Hisobni o'chirish",
     logoutBtn:"Chiqish", levelPageTitle:"Level", yourLevelLbl:"Sizning levelingiz", levelRewardsTitle:"Level mukofotlari",
     leaderboardTitle:"Reyting",
     cashoutReady:"Pulga aylantirish", cashoutNeed:"Yana", cashoutNeedSuffix:"coin kerak",
@@ -1782,7 +1827,7 @@ const I18N = {
     totalEarned:"Total earned", currentLevel:"Current level", dailyStreakLbl:"Daily streak",
     langMenuItem:"Language", leaderboardMenuItem:"Leaderboard", levelMenuItem:"Level",
     paymentHistoryMenuItem:"Payment history", taskHistoryMenuItem:"Task history", myFriendsMenuItem:"My friends",
-    helpMenuItem:"Help / Support", privacyMenuItem:"Privacy policy", termsMenuItem:"Terms of service",
+    helpMenuItem:"Help / Support", privacyMenuItem:"Privacy policy", termsMenuItem:"Terms of service", deleteAccountMenuItem:"Delete account",
     logoutBtn:"Log out", levelPageTitle:"Level", yourLevelLbl:"Your level", levelRewardsTitle:"Level rewards",
     leaderboardTitle:"Leaderboard",
     cashoutReady:"Withdraw", cashoutNeed:"Need", cashoutNeedSuffix:"more coins",
@@ -1854,7 +1899,7 @@ const I18N = {
     totalEarned:"Всего заработано", currentLevel:"Текущий уровень", dailyStreakLbl:"Дней подряд",
     langMenuItem:"Язык", leaderboardMenuItem:"Рейтинг", levelMenuItem:"Уровень",
     paymentHistoryMenuItem:"История платежей", taskHistoryMenuItem:"История заданий", myFriendsMenuItem:"Мои друзья",
-    helpMenuItem:"Помощь / Поддержка", privacyMenuItem:"Политика конфиденциальности", termsMenuItem:"Условия использования",
+    helpMenuItem:"Помощь / Поддержка", privacyMenuItem:"Политика конфиденциальности", termsMenuItem:"Условия использования", deleteAccountMenuItem:"Удалить аккаунт",
     logoutBtn:"Выйти", levelPageTitle:"Уровень", yourLevelLbl:"Ваш уровень", levelRewardsTitle:"Награды за уровень",
     leaderboardTitle:"Рейтинг",
     cashoutReady:"Вывести", cashoutNeed:"Нужно ещё", cashoutNeedSuffix:"монет",
@@ -2036,14 +2081,15 @@ function subscribeUser(uid){
     if(!doc.exists) return;
     const data = doc.data();
     const today = new Date().toDateString();
-    if(data.lastReset !== today){
-      userRef.update({ taskCounts: {}, dailyEarned: 0, lastReset: today });
-      return;
-    }
+    /* Yangi kun: hisoblagichlarni faqat KO'RSATISH uchun nolga tenglaymiz.
+       Firestore'ga yozmaymiz — haqiqiy reset serverda, completeTask tranzaksiyasi
+       ichida atomik bajariladi. (Avval mijoz o'zi yozardi, lekin bu kunlik
+       limitlarni cheklovsiz aylanib o'tish imkonini berardi.) */
+    const newDay = data.lastReset !== today;
     state.coins = data.coins || 0;
     state.lifetimeCoins = data.lifetimeCoins || 0;
-    state.taskCounts = data.taskCounts || {};
-    state.dailyEarned = data.dailyEarned || 0;
+    state.taskCounts = newDay ? {} : (data.taskCounts || {});
+    state.dailyEarned = newDay ? 0 : (data.dailyEarned || 0);
     state.tasksCompletedTotal = data.tasksCompletedTotal || 0;
     state.friendsCount = data.friendsCount || 0;
     state.friendsBonus = data.friendsBonus || 0;
