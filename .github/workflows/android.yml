@@ -33,6 +33,12 @@ jobs:
           # umuman bo'lmasdi, delete-account.html esa ochilmasdi.
           cp index.html privacy-policy.html terms-of-service.html terms.html delete-account.html manifest.json www/
           cp -r assets www/
+          # Dizayn referenslari ilovada ISHLATILMAYDI (bo'limlar CSS/SVG bilan
+          # qayta yasalgan), shuning uchun ular APK ichiga kirmaydi.
+          # Agar biror sahifa ularga havola qilsa, quyidagi "Verify web assets"
+          # qadami buni darrov ushlaydi va build to'xtaydi.
+          rm -f www/assets/stat-cards-premium.png www/assets/daily-bonus-banner.png \
+                www/assets/lucky-wheel-home-banner.png www/assets/lucky-wheel-modal.png
 
       - name: Verify web assets
         run: |
