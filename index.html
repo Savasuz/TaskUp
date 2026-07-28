@@ -216,9 +216,12 @@
   .stat-cards{ display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin:2px 0 16px; }
   .stat-card{ position:relative; overflow:hidden; border-radius:16px; padding:10px 9px 11px;
     display:flex; flex-direction:column; cursor:pointer;
-    background:
-      radial-gradient(120% 90% at 18% 0%, rgba(167,139,250,0.22), transparent 62%),
-      linear-gradient(158deg, #2C1B4A 0%, #1A1030 46%, #0C0817 100%);
+    /* Fon — tayyor binafsha karta rasmi. `cover` proporsiyani saqlaydi
+       (cho'zilmaydi, faqat kerakli qismi kesiladi), shuning uchun kartalar
+       balandligi turlicha bo'lsa ham rasm buzilmaydi. */
+    background-image:url('assets/card-bg-purple.png');
+    background-size:cover; background-position:center; background-repeat:no-repeat;
+    background-color:#1A1030;
     border:1px solid rgba(167,139,250,0.55);
     box-shadow:0 8px 22px rgba(0,0,0,0.55), 0 0 20px rgba(139,92,246,0.28),
       inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -10px 18px rgba(0,0,0,0.35); }
@@ -651,8 +654,10 @@
   /* Kunlik bonus banneri — to'q binafsha-qora gradient, zarrachalar,
      o'ngda dekorativ 3D sovg'a (SVG). Matn hech qachon rasm ichida emas. */
   #tab-home .daily-card{ position:relative; overflow:hidden; align-items:stretch;
-    border:1px solid rgba(139,92,246,0.45); border-radius:20px; gap:10px; padding:15px 14px;
-    background:linear-gradient(150deg, #2A1A46 0%, #1A1030 45%, #0E0A1A 100%);
+    border:1px solid rgba(139,92,246,0.45); border-radius:16px; gap:10px; padding:15px 14px;
+    background-image:url('assets/card-bg-purple.png');
+    background-size:cover; background-position:center; background-repeat:no-repeat;
+    background-color:#1A1030;
     box-shadow:0 8px 22px rgba(0,0,0,0.5), 0 0 20px rgba(124,92,255,0.18),
       inset 0 1px 0 rgba(255,255,255,0.06);
     margin:2px 0 20px; }
@@ -669,7 +674,8 @@
      kulrang rangni olib qolardi — sarlavhadan rangni meros qilib olsin. */
   #tab-home .daily-left b span{ color:inherit; font-size:inherit; }
   #tab-home .daily-left > span{ color:#B7AFD4; }
-  #tab-home .daily-timer{ color:#8F86AE; margin-top:5px; }
+  /* Fon rasmi ustida 4.5:1 kontrast uchun yoritildi (avval #8F86AE -> 4.23:1) */
+  #tab-home .daily-timer{ color:#A79ECB; margin-top:5px; }
   #tab-home .daily-gift{ position:relative; z-index:1; width:96px; flex-shrink:0;
     display:flex; align-items:center; justify-content:center; background:none; box-shadow:none; }
   #tab-home .daily-gift svg{ width:100%; height:auto; display:block; }
@@ -713,8 +719,10 @@
   /* Kunlik sovg'a banneri — to'q binafsha-qora gradient, o'ngda LED-chiroqli
      g'ildirak (SVG). Matn chapda, HTML'da. */
   .wheel-card{ position:relative; overflow:hidden; display:flex; align-items:center; gap:10px;
-    border-radius:20px; padding:15px 14px; margin:2px 0 20px; cursor:pointer;
-    background:linear-gradient(150deg, #2A1A46 0%, #1A1030 45%, #0E0A1A 100%);
+    border-radius:16px; padding:15px 14px; margin:2px 0 20px; cursor:pointer;
+    background-image:url('assets/card-bg-purple.png');
+    background-size:cover; background-position:center; background-repeat:no-repeat;
+    background-color:#1A1030;
     border:1px solid rgba(139,92,246,0.45);
     box-shadow:0 8px 22px rgba(0,0,0,0.5), 0 0 20px rgba(124,92,255,0.18),
       inset 0 1px 0 rgba(255,255,255,0.06); }
