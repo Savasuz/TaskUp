@@ -491,7 +491,6 @@ setTimeout(function(){
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyAkzf5b2npCuazGlqce6-MYn46YISqGw1o",
@@ -508,9 +507,6 @@ const firebaseConfig = {
 const adminFbApp = firebase.initializeApp(firebaseConfig, 'adminSession');
 const auth = adminFbApp.auth();
 const db = adminFbApp.firestore();
-// Karta raqamlari shifrlangan holda saqlanadi — ochish faqat
-// revealCashoutCard Cloud Function orqali (admin huquqi serverda tekshiriladi)
-const adminFns = adminFbApp.functions();
 
 let currentAdminUid = null;
 let usersUnsub = null, tasksUnsub = null, paymentsUnsub = null;
@@ -713,7 +709,7 @@ const ADMIN_I18N = {
     promoMaxLbl:"Necha kishi ishlatishi mumkin (bo'sh = cheksiz)", promoBtn:"Kod yaratish", promoListTitle:"Yaratilgan kodlar",
     promoUsed:"marta ishlatilgan", promoEmpty:"Kodlar yo'q", promoBadCode:"Kod 3-30 ta harf/raqam bo'lsin (A-Z, 0-9)", promoBadReward:"Mukofotni kiriting",
     promoExists:"Bu kod allaqachon mavjud", promoCreated:"Promo kod yaratildi!", promoOn:"Kod yoqildi", promoOff:"Kod o'chirildi", promoDeleted:"Kod o'chirildi", promoConfirmDelete:"Kodni o'chirmoqchimisiz?",
-    paymentsTitle:"To'lovlar", totalPayments:"Jami to'lovlar", noRequests:"So'rovlar yo'q", noCard:"Karta ma'lumotlari kiritilmagan", btnRevealCard:"Ko'rsatish", btnHideCard:"Yashirish", cardDecryptFail:"Shifrni ochib bo'lmadi — CARD_ENC_KEY tekshiring",
+    paymentsTitle:"To'lovlar", totalPayments:"Jami to'lovlar", noRequests:"So'rovlar yo'q", noCard:"Karta ma'lumotlari kiritilmagan",
     newsTitle:"Yangiliklar", lblNewsTitle:"Sarlavha", lblNewsText:"Matn", btnPublish:"E'lon qilish", publishedNews:"E'lon qilingan yangiliklar", noNews:"Yangiliklar yo'q",
     settingsTitle:"Sozlamalar", btnLogout:"Chiqish",
     sendCoinsTitle:"Tanga yuborish", sendCoinsSub:"Foydalanuvchiga tanga sovg'a qilish", sendCoinsShort:"Tanga",
@@ -766,7 +762,7 @@ const ADMIN_I18N = {
     promoMaxLbl:"Max uses (empty = unlimited)", promoBtn:"Create code", promoListTitle:"Created codes",
     promoUsed:"times used", promoEmpty:"No codes", promoBadCode:"Code must be 3-30 letters/digits (A-Z, 0-9)", promoBadReward:"Enter a reward",
     promoExists:"This code already exists", promoCreated:"Promo code created!", promoOn:"Code enabled", promoOff:"Code disabled", promoDeleted:"Code deleted", promoConfirmDelete:"Delete this code?",
-    paymentsTitle:"Payments", totalPayments:"Total payments", noRequests:"No requests", noCard:"No card details provided", btnRevealCard:"Reveal", btnHideCard:"Hide", cardDecryptFail:"Decryption failed — check CARD_ENC_KEY",
+    paymentsTitle:"Payments", totalPayments:"Total payments", noRequests:"No requests", noCard:"No card details provided",
     newsTitle:"News", lblNewsTitle:"Title", lblNewsText:"Text", btnPublish:"Publish", publishedNews:"Published news", noNews:"No news",
     settingsTitle:"Settings", btnLogout:"Log out",
     sendCoinsTitle:"Send coins", sendCoinsSub:"Gift coins to a user", sendCoinsShort:"Coins",
@@ -819,7 +815,7 @@ const ADMIN_I18N = {
     promoMaxLbl:"Макс. использований (пусто = без лимита)", promoBtn:"Создать код", promoListTitle:"Созданные коды",
     promoUsed:"раз использован", promoEmpty:"Нет кодов", promoBadCode:"Код: 3-30 букв/цифр (A-Z, 0-9)", promoBadReward:"Введите награду",
     promoExists:"Такой код уже существует", promoCreated:"Промокод создан!", promoOn:"Код включён", promoOff:"Код выключен", promoDeleted:"Код удалён", promoConfirmDelete:"Удалить код?",
-    paymentsTitle:"Платежи", totalPayments:"Всего платежей", noRequests:"Нет запросов", noCard:"Данные карты не указаны", btnRevealCard:"Показать", btnHideCard:"Скрыть", cardDecryptFail:"Не удалось расшифровать — проверьте CARD_ENC_KEY",
+    paymentsTitle:"Платежи", totalPayments:"Всего платежей", noRequests:"Нет запросов", noCard:"Данные карты не указаны",
     newsTitle:"Новости", lblNewsTitle:"Заголовок", lblNewsText:"Текст", btnPublish:"Опубликовать", publishedNews:"Опубликованные новости", noNews:"Нет новостей",
     settingsTitle:"Настройки", btnLogout:"Выйти",
     sendCoinsTitle:"Отправить монеты", sendCoinsSub:"Подарить монеты пользователю", sendCoinsShort:"Монеты",
@@ -1161,18 +1157,8 @@ function renderPayments(){
   document.getElementById('paymentsTotalVal').textContent = fmt(payments.length);
   const filtered = payments.filter(p => paymentFilter==='all' || p.status===paymentFilter);
   document.getElementById('paymentsList').innerHTML = filtered.length ? filtered.map((p) => {
-    /* Karta raqami shifrlangan — ro'yxatda faqat oxirgi 4 raqam ko'rsatiladi.
-       To'liq raqamni ko'rish uchun "Ko'rsatish" bosiladi (server tomonda
-       admin huquqi tekshiriladi va har bir ochish audit uchun yoziladi).
-       p.cardNumber — shifrlash joriy qilinishidan oldingi eski yozuvlar. */
-    const last4 = p.cardLast4 || (p.cardNumber ? String(p.cardNumber).slice(-4) : '');
-    const hasCard = !!(p.cardEnc || p.cardNumber);
-    const cardLine = hasCard
-      ? `<div class="list-meta" style="color:var(--text);margin-top:3px">💳 •••• ${escHtml(last4)}
-           <span onclick="revealCard('${p.id}', this)" style="color:var(--purple,#8B5CF6);cursor:pointer;margin-left:8px">${t('btnRevealCard')}</span>
-           <span id="card-${p.id}" style="display:block;color:var(--green);font-family:monospace;margin-top:3px"></span>
-         </div>${p.cardHolder ? `<div class="list-meta">${escHtml(p.cardHolder)}</div>` : ''}`
-      : `<div class="list-meta" style="color:var(--amber)">${t('noCard')}</div>`;
+    const cardNum = (p.cardNumber || '').replace(/(\d{4})(?=\d)/g, '$1 ');
+    const cardLine = p.cardNumber ? `<div class="list-meta" style="color:var(--text);margin-top:3px">💳 ${escHtml(cardNum)}${p.cardExpiry ? ' • ' + escHtml(p.cardExpiry) : ''}</div>${p.cardHolder ? `<div class="list-meta">${escHtml(p.cardHolder)}</div>` : ''}` : `<div class="list-meta" style="color:var(--amber)">${t('noCard')}</div>`;
     return `
     <div class="list-row">
       <div class="row-avatar">${initials(p.email)}</div>
@@ -1184,34 +1170,6 @@ function renderPayments(){
     </div>`;
   }).join('') : `<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">${t('noRequests')}</div>`;
 }
-/* To'liq karta raqamini ochish — faqat to'lovni amalga oshirish paytida.
-   Deshifrlash serverda bo'ladi, kalit hech qachon brauzerga tushmaydi. */
-function revealCard(id, linkEl){
-  const out = document.getElementById('card-' + id);
-  if(!out) return;
-  if(out.dataset.shown === '1'){   // qayta bosilsa — yashiramiz
-    out.textContent = ''; out.dataset.shown = '0';
-    if(linkEl) linkEl.textContent = t('btnRevealCard');
-    return;
-  }
-  if(linkEl) linkEl.textContent = '...';
-  adminFns.httpsCallable('revealCashoutCard')({ requestId: id }).then((res) => {
-    const d = (res && res.data) || {};
-    const num = String(d.cardNumber || '').replace(/(\d{4})(?=\d)/g, '$1 ');
-    out.textContent = num + (d.cardExpiry ? '  •  ' + d.cardExpiry : '');
-    out.dataset.shown = '1';
-    if(linkEl) linkEl.textContent = t('btnHideCard');
-  }).catch((err) => {
-    console.error(err);
-    const m = (err && err.message) || '';
-    out.style.color = 'var(--red)';
-    out.textContent = m === 'decrypt-failed' ? t('cardDecryptFail')
-      : m === 'admin-only' ? t('errGeneric') + ' (admin-only)'
-      : t('errGeneric') + (err && err.code ? ' (' + err.code + ')' : '');
-    if(linkEl) linkEl.textContent = t('btnRevealCard');
-  });
-}
-
 function approvePayment(id){
   if(!confirm(t('confirmApprove'))) return;
   db.collection('cashout_requests').doc(id).update({ status: 'paid' }).then(()=>showToast(t('paymentApproved'))).catch(err=>{ console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); });
