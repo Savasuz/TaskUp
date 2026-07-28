@@ -7,7 +7,30 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>TaskUp</title>
+
+<title>TaskUp — Vazifa bajarib pul ishlang</title>
+<meta name="description" content="Oddiy vazifalarni bajaring, coin yig'ing va ularni UzCard, Humo, Payme yoki Click orqali pulga aylantiring.">
+<meta name="application-name" content="TaskUp">
+<meta name="theme-color" content="#6C5CE7">
+<meta name="color-scheme" content="dark">
+<!-- WebView/PWA wrapper ilova nomi va ikonkasini shu yerdan oladi -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/branding/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/branding/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/branding/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TaskUp">
+<meta name="mobile-web-app-capable" content="yes">
+<!-- Ulashishda ko'rinadigan kartochka -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TaskUp">
+<meta property="og:title" content="TaskUp — Vazifa bajarib pul ishlang">
+<meta property="og:description" content="Oddiy vazifalarni bajaring, coin yig'ing va ularni pulga aylantiring.">
+<meta property="og:image" content="https://savasuz.github.io/TaskUp/assets/branding/icon-512.png">
+<meta property="og:url" content="https://savasuz.github.io/TaskUp/">
+<meta name="twitter:card" content="summary">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <!-- Splash fon va illyustratsiyasi birinchi ko'rinadigan narsa — ular shriftdan
      ham oldin, yuqori ustuvorlik bilan yuklansin -->
@@ -370,6 +393,17 @@
   .cashout-step{ padding:0 18px 22px; }
   .cashout-step .section-label{ margin:16px 2px 8px; }
   .cashout-limits{ display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:2px; }
+  /* Coin qanday hisoblanishini tushuntiruvchi blok (Google Play moliyaviy
+     siyosatiga moslik uchun — coin virtual valyuta ekani aniq ko'rsatiladi) */
+  /* DIQQAT: .cashout-panel foni OQ, shuning uchun bu blokda to'q matn ishlatiladi */
+  .cashout-explain{ background:#F3F0FF; border:1px solid #DDD5FF;
+    border-radius:12px; padding:12px 14px; margin:14px 0 4px; font-size:12px; line-height:1.55;
+    color:#4A4560; }
+  .cashout-explain b{ color:#15161F; }
+  .cashout-rate{ display:flex; align-items:center; justify-content:center; gap:8px; font-family:'Space Grotesk',sans-serif;
+    font-weight:700; font-size:14px; color:#15161F; margin-bottom:8px; }
+  .cashout-rate .eq{ color:#8B8FA3; font-weight:400; }
+  .cashout-explain a{ color:#5B3FD6; font-weight:600; white-space:nowrap; }
   .cashout-panel input[type=text]{ background:#F5F6FA; border:1.5px solid #E4E6EF; color:#15161F; }
   .cashout-panel input[type=text]:focus{ border-color:var(--purple); }
   .cashout-panel .progress-track{ background:#EFEFF4; border-color:#E4E6EF; }
@@ -1309,9 +1343,15 @@
         <input type="text" id="cardHolder" placeholder="Karta egasi (Ism Familiya)" autocomplete="cc-name" style="margin-bottom:10px; flex:1">
       </div>
 
+      <div class="cashout-explain">
+        <div class="cashout-rate"><span data-i18n="rateCoins">10 000 coin</span><span class="eq">=</span><span data-i18n="rateSom">12 000 so'm</span></div>
+        <span data-i18n="cashoutExplain">Coin — ilova ichidagi virtual hisob birligi. U sotib olinmaydi: faqat siz bajargan vazifalar, kunlik bonus va do'st taklif qilish evaziga beriladi. Pul yechish — bajarilgan ish uchun mukofot to'lovi.</span>
+        <a href="terms-of-service.html" target="_blank" rel="noopener" data-i18n="cashoutTermsLink">Batafsil shartlar →</a>
+      </div>
+
       <div class="section-label" data-i18n="enterAmount">Summani kiriting</div>
       <input type="text" id="cashoutAmount" placeholder="10000" value="10000" inputmode="numeric" style="margin-bottom:6px">
-      <div class="cashout-limits"><span data-i18n="minAmount">Minimal: 10 000 so'm</span><span id="cashoutMaxLbl"></span></div>
+      <div class="cashout-limits"><span data-i18n="minAmount">Minimal: 10 000 coin</span><span id="cashoutMaxLbl"></span></div>
       <div class="progress-track"><div class="progress-fill" id="cashoutProgress"></div></div>
       <button class="cashout-btn" id="cashoutBtn" onclick="tryCashout(this)" style="margin-top:6px">Yuklanmoqda...</button>
     </div>
@@ -1660,8 +1700,10 @@ const I18N = {
     inviteHeroTitle:"Do'stlaringizni taklif qiling", inviteHeroSub:"Har bir do'stingiz uchun 20% bonus oling",
     yourRefLink:"Sizning taklif kodingiz", btnCopy:"Nusxalash", orShare:"Bizni kuzating",
     invitedCount:"Taklif qilinganlar", invitedBonus:"Ulardan olingan bonus",
-    cashoutBalanceLbl:"YECHISH UCHUN BALANS", walletEyebrow:"YECHISH UCHUN", walletBalanceTitle:"BALANS", choosePayMethod:"To'lov usulini tanlang", minAmount:"Minimal: 10 000 so'm",
-    payUzcardLbl:"UzCard", payHumoLbl:"Humo karta", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Maksimal: {n}",
+    cashoutBalanceLbl:"YECHISH UCHUN BALANS", walletEyebrow:"YECHISH UCHUN", walletBalanceTitle:"BALANS", choosePayMethod:"To'lov usulini tanlang", minAmount:"Minimal: 10 000 coin",
+    rateCoins:"10 000 coin", rateSom:"12 000 so'm", cashoutTermsLink:"Batafsil shartlar →",
+    cashoutExplain:"Coin — ilova ichidagi virtual hisob birligi. U sotib olinmaydi: faqat siz bajargan vazifalar, kunlik bonus va do'st taklif qilish evaziga beriladi. Pul yechish — bajarilgan ish uchun mukofot to'lovi.",
+    payUzcardLbl:"UzCard", payHumoLbl:"Humo karta", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Maksimal: {n} coin",
     enterAmount:"Summani kiriting", recentActivity:"So'nggi harakatlar", paymentHistoryLink:"To'lov tarixi ›",
     noActivity:"Hali harakat yo'q", noPaymentHistory:"Hali to'lov tarixi yo'q", paymentHistoryTitle:"To'lov tarixim", backBtn:"‹ Orqaga",
     filterAllHist:"Barchasi", filterPending:"Kutilmoqda", filterPaid:"Muvaffaqiyatli", filterCancelled:"Bekor qilingan",
@@ -1730,8 +1772,10 @@ const I18N = {
     inviteHeroTitle:"Invite your friends", inviteHeroSub:"Get a 20% bonus for every friend",
     yourRefLink:"Your invite code", btnCopy:"Copy", orShare:"Follow us",
     invitedCount:"Friends invited", invitedBonus:"Bonus earned from them",
-    cashoutBalanceLbl:"BALANCE TO WITHDRAW", walletEyebrow:"BALANCE TO", walletBalanceTitle:"WITHDRAW", choosePayMethod:"Choose payment method", minAmount:"Minimum: 10,000 UZS",
-    payUzcardLbl:"UzCard", payHumoLbl:"Humo card", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Maximum: {n}",
+    cashoutBalanceLbl:"BALANCE TO WITHDRAW", walletEyebrow:"BALANCE TO", walletBalanceTitle:"WITHDRAW", choosePayMethod:"Choose payment method", minAmount:"Minimum: 10,000 coins",
+    rateCoins:"10,000 coins", rateSom:"12,000 UZS", cashoutTermsLink:"Full terms →",
+    cashoutExplain:"Coins are an in-app virtual unit. They cannot be purchased — you earn them only by completing tasks, daily bonuses and referrals. A withdrawal is a reward payment for work you have done.",
+    payUzcardLbl:"UzCard", payHumoLbl:"Humo card", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Maximum: {n} coins",
     enterAmount:"Enter amount", recentActivity:"Recent activity", paymentHistoryLink:"Payment history ›",
     noActivity:"No activity yet", noPaymentHistory:"No payment history yet", paymentHistoryTitle:"Payment history", backBtn:"‹ Back",
     filterAllHist:"All", filterPending:"Pending", filterPaid:"Successful", filterCancelled:"Cancelled",
@@ -1800,8 +1844,10 @@ const I18N = {
     inviteHeroTitle:"Пригласите друзей", inviteHeroSub:"Получайте 20% бонус за каждого друга",
     yourRefLink:"Ваш пригласительный код", btnCopy:"Копировать", orShare:"Мы в соцсетях",
     invitedCount:"Приглашено друзей", invitedBonus:"Полученный от них бонус",
-    cashoutBalanceLbl:"БАЛАНС ДЛЯ ВЫВОДА", walletEyebrow:"БАЛАНС ДЛЯ", walletBalanceTitle:"ВЫВОДА", choosePayMethod:"Выберите способ оплаты", minAmount:"Минимум: 10 000 сум",
-    payUzcardLbl:"UzCard", payHumoLbl:"Humo карта", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Максимум: {n}",
+    cashoutBalanceLbl:"БАЛАНС ДЛЯ ВЫВОДА", walletEyebrow:"БАЛАНС ДЛЯ", walletBalanceTitle:"ВЫВОДА", choosePayMethod:"Выберите способ оплаты", minAmount:"Минимум: 10 000 коинов",
+    rateCoins:"10 000 коинов", rateSom:"12 000 сум", cashoutTermsLink:"Подробные условия →",
+    cashoutExplain:"Коины — внутренняя виртуальная единица приложения. Их нельзя купить: они начисляются только за выполненные задания, ежедневный бонус и приглашение друзей. Вывод — это выплата вознаграждения за выполненную работу.",
+    payUzcardLbl:"UzCard", payHumoLbl:"Humo карта", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Максимум: {n} коинов",
     enterAmount:"Введите сумму", recentActivity:"Последние операции", paymentHistoryLink:"История платежей ›",
     noActivity:"Пока нет операций", noPaymentHistory:"Пока нет истории платежей", paymentHistoryTitle:"История платежей", backBtn:"‹ Назад",
     filterAllHist:"Все", filterPending:"В ожидании", filterPaid:"Успешно", filterCancelled:"Отменено",
@@ -1841,6 +1887,8 @@ function applyStaticTranslations(){
     const key = el.getAttribute('data-i18n-aria');
     el.setAttribute('aria-label', t(key));
   });
+  // {n} o'rnini almashtirish talab qiladigan matnlar data-i18n orqali yangilanmaydi
+  if(typeof updateCashoutMaxLbl === 'function') updateCashoutMaxLbl();
 }
 
 function selectLanguage(lang, el){
