@@ -1169,7 +1169,7 @@ function renderPayments(){
     const hasCard = !!(p.cardEnc || p.cardNumber);
     const cardLine = hasCard
       ? `<div class="list-meta" style="color:var(--text);margin-top:3px">💳 •••• ${escHtml(last4)}
-           <span onclick="revealCard('${p.id}', this)" style="color:var(--purple,#8B5CF6);cursor:pointer;margin-left:8px">${t('btnRevealCard')}</span>
+           <span id="cardbtn-${p.id}" onclick="revealCard('${p.id}')" style="color:var(--purple,#8B5CF6);cursor:pointer;margin-left:8px">${t('btnRevealCard')}</span>
            <span id="card-${p.id}" style="display:block;color:var(--green);font-family:monospace;margin-top:3px"></span>
          </div>${p.cardHolder ? `<div class="list-meta">${escHtml(p.cardHolder)}</div>` : ''}`
       : `<div class="list-meta" style="color:var(--amber)">${t('noCard')}</div>`;
@@ -1183,33 +1183,82 @@ function renderPayments(){
       </div>
     </div>`;
   }).join('') : `<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">${t('noRequests')}</div>`;
+  /* Ro'yxat qayta chizilgach, ochilgan/yuklanayotgan kartalar holatini qaytaramiz */
+  paintAllCardStates();
 }
 /* To'liq karta raqamini ochish — faqat to'lovni amalga oshirish paytida.
    Deshifrlash serverda bo'ladi, kalit hech qachon brauzerga tushmaydi. */
-function revealCard(id, linkEl){
+/* Ochilgan karta ma'lumotlari — DOM'da emas, XOTIRADA saqlanadi.
+   Sabab: cashout_requests onSnapshot har qanday yozuvda butun ro'yxatni
+   qayta chizadi. revealCashoutCard esa audit uchun aynan shu hujjatga
+   yozadi (revealCount++, lastRevealedBy). Natijada chaqiruv javobi kelguncha
+   ro'yxat qayta chizilib, eski element DOM'dan uzilib qolardi va karta
+   raqami hech qayerda ko'rinmasdi (xato ham chiqmasdi).
+   Endi holat shu obyektlarda turadi va har chizishdan keyin qayta joylanadi. */
+const revealedCards = {};   // id -> "8600 1234 5678 9012  •  12/28"
+const revealingCards = {};  // id -> true (chaqiruv ketmoqda)
+const revealErrors = {};    // id -> xato matni
+
+function paintCardState(id){
   const out = document.getElementById('card-' + id);
-  if(!out) return;
-  if(out.dataset.shown === '1'){   // qayta bosilsa — yashiramiz
-    out.textContent = ''; out.dataset.shown = '0';
-    if(linkEl) linkEl.textContent = t('btnRevealCard');
-    return;
-  }
-  if(linkEl) linkEl.textContent = '...';
-  adminFns.httpsCallable('revealCashoutCard')({ requestId: id }).then((res) => {
-    const d = (res && res.data) || {};
-    const num = String(d.cardNumber || '').replace(/(\d{4})(?=\d)/g, '$1 ');
-    out.textContent = num + (d.cardExpiry ? '  •  ' + d.cardExpiry : '');
-    out.dataset.shown = '1';
-    if(linkEl) linkEl.textContent = t('btnHideCard');
-  }).catch((err) => {
-    console.error(err);
-    const m = (err && err.message) || '';
+  const link = document.getElementById('cardbtn-' + id);
+  if(!out || !link) return;   // bu qator hozir ro'yxatda yo'q (filtr/sahifa)
+  if(revealErrors[id]){
     out.style.color = 'var(--red)';
-    out.textContent = m === 'decrypt-failed' ? t('cardDecryptFail')
-      : m === 'admin-only' ? t('errGeneric') + ' (admin-only)'
-      : t('errGeneric') + (err && err.code ? ' (' + err.code + ')' : '');
-    if(linkEl) linkEl.textContent = t('btnRevealCard');
-  });
+    out.textContent = revealErrors[id];
+    link.textContent = t('btnRevealCard');
+  } else if(revealedCards[id]){
+    out.style.color = 'var(--green)';
+    out.textContent = revealedCards[id];
+    link.textContent = t('btnHideCard');
+  } else if(revealingCards[id]){
+    out.textContent = '';
+    link.textContent = '...';
+  } else {
+    out.textContent = '';
+    link.textContent = t('btnRevealCard');
+  }
+}
+/* Ro'yxat qayta chizilgandan keyin chaqiriladi */
+function paintAllCardStates(){
+  const ids = new Set([].concat(
+    Object.keys(revealedCards), Object.keys(revealingCards), Object.keys(revealErrors)));
+  ids.forEach(paintCardState);
+}
+
+function revealCard(id){
+  try {
+    if(revealedCards[id]){        // qayta bosilsa — yashiramiz
+      delete revealedCards[id];
+      paintCardState(id);
+      return;
+    }
+    if(revealingCards[id]) return; // chaqiruv allaqachon ketmoqda
+    delete revealErrors[id];
+    revealingCards[id] = true;
+    paintCardState(id);
+
+    adminFns.httpsCallable('revealCashoutCard')({ requestId: id }).then((res) => {
+      const d = (res && res.data) || {};
+      const num = String(d.cardNumber || '').replace(/(\d{4})(?=\d)/g, '$1 ');
+      revealedCards[id] = num + (d.cardExpiry ? '  •  ' + d.cardExpiry : '');
+    }).catch((err) => {
+      console.error('revealCashoutCard:', err);
+      const m = (err && err.message) || '';
+      revealErrors[id] = m === 'decrypt-failed' ? t('cardDecryptFail')
+        : m === 'admin-only' ? t('errGeneric') + ' (admin-only)'
+        : t('errGeneric') + (err && err.code ? ' (' + err.code + ')' : (m ? ' (' + m + ')' : ''));
+    }).then(() => {
+      delete revealingCards[id];
+      paintCardState(id);
+    });
+  } catch(e){
+    // Sinxron xato ham jimgina yo'qolmasin
+    console.error('revealCard:', e);
+    delete revealingCards[id];
+    revealErrors[id] = t('errGeneric') + ' (' + (e && e.message ? e.message : 'js') + ')';
+    paintCardState(id);
+  }
 }
 
 function approvePayment(id){
