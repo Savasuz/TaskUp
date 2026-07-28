@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index, follow">
 <title>Maxfiylik siyosati — TaskUp</title>
+<meta name="description" content="TaskUp ilovasi qanday ma'lumot yig'ishi, ulardan qanday foydalanishi va foydalanuvchi huquqlari haqida.">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  :root{ --bg:#0B0E14; --bg-alt:#10141D; --line:#1E2530; --text:#EDEFF3; --muted:#7C8494; --green:#12D48C; }
+  :root{ --bg:#0B0E14; --bg-alt:#10141D; --line:#1E2530; --text:#EDEFF3; --muted:#7C8494; --green:#12D48C; --amber:#FFB020; }
   *{ box-sizing:border-box; }
   body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; margin:0; line-height:1.65; }
   .wrap{ max-width:640px; margin:0 auto; padding:40px 20px 80px; }
@@ -18,57 +20,103 @@
   li{ margin-bottom:6px; }
   a{ color:var(--green); }
   .box{ background:var(--bg-alt); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin:16px 0; font-size:13px; color:var(--muted); }
+  .warn{ background:rgba(255,176,32,0.08); border:1px solid rgba(255,176,32,0.35); border-radius:12px; padding:16px 18px; margin:16px 0; font-size:13.5px; color:#F0DFC0; }
+  table{ width:100%; border-collapse:collapse; margin:14px 0; font-size:13px; }
+  th, td{ text-align:left; padding:8px 10px; border:1px solid var(--line); vertical-align:top; }
+  th{ background:var(--bg-alt); color:var(--text); font-weight:600; }
+  td{ color:#D7DAE1; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Maxfiylik siyosati</h1>
-  <div class="updated">Oxirgi yangilanish: 2026-yil 9-iyul</div>
+  <div class="updated">Oxirgi yangilanish: 2026-yil 27-iyul</div>
 
-  <p>Ushbu Maxfiylik siyosati "TaskUp" mobil ilovasi (bundan buyon — "Ilova") foydalanuvchilarining shaxsiy ma'lumotlari qanday yig'ilishi, ishlatilishi va himoya qilinishini tushuntiradi. Ilovadan foydalanish orqali siz ushbu siyosat shartlariga rozilik bildirasiz.</p>
+  <p>Ushbu Maxfiylik siyosati "TaskUp" ilovasi (bundan buyon — "Ilova") foydalanuvchilarining ma'lumotlari qanday yig'ilishi, ishlatilishi va himoya qilinishini tushuntiradi. Ilovadan foydalanish orqali siz ushbu siyosat shartlariga rozilik bildirasiz.</p>
 
   <h2>1. Biz yig'adigan ma'lumotlar</h2>
-  <ul>
-    <li><b>Telefon raqami</b> — ro'yxatdan o'tish va hisobingizni tasdiqlash uchun (SMS orqali)</li>
-    <li><b>Foydalanish statistikasi</b> — bajarilgan vazifalar, coin balansi, kirish faolligi</li>
-    <li><b>Qurilma ma'lumotlari</b> — firibgarlikning oldini olish uchun qurilma identifikatori</li>
-    <li><b>To'lov ma'lumotlari</b> — pulga aylantirish so'rovlari uchun Payme/Click orqali berilgan ma'lumotlar (karta raqamini biz saqlamaymiz, faqat to'lov tizimi orqali uzatiladi)</li>
-  </ul>
+  <p>Ilova quyidagi ma'lumotlarni yig'adi va Google Firebase xizmatlarida saqlaydi:</p>
+
+  <table>
+    <tr><th>Ma'lumot</th><th>Maqsad</th></tr>
+    <tr><td><b>Elektron pochta manzili va parol</b><br>(Firebase Authentication)</td><td>Hisob yaratish va tizimga kirish. Parol shifrlangan holda Firebase tomonidan saqlanadi, bizga ochiq ko'rinishda uzatilmaydi.</td></tr>
+    <tr><td><b>Profil rasmi</b> (ixtiyoriy)</td><td>Siz yuklasangiz, Firebase Storage'da saqlanadi. Yuklamasangiz, standart belgi ko'rsatiladi.</td></tr>
+    <tr><td><b>Hisob faoliyati</b>: coin balansi, jami ishlab topilgan coin, bajarilgan vazifalar soni, kunlik daromad, kunlik bonus (streak), yechib olingan summa, tranzaksiya tarixi</td><td>Coin tizimini yuritish, kunlik limitlarni hisoblash va sizga tarixni ko'rsatish.</td></tr>
+    <tr><td><b>Referral ma'lumotlari</b>: shaxsiy taklif kodingiz, sizni taklif qilgan foydalanuvchi, taklif qilganlaringiz soni va ulardan olingan bonus</td><td>Do'stlarni taklif qilish dasturini yuritish va bonuslarni hisoblash.</td></tr>
+    <tr><td><b>Qurilma identifikatori</b></td><td>Faqat firibgarlikning oldini olish uchun: bitta qurilmada bir nechta hisob ochilishini aniqlash.</td></tr>
+    <tr><td><b>To'lov kartasi ma'lumotlari</b>: karta raqami, amal qilish muddati, karta egasining ismi, tanlangan to'lov usuli</td><td>Faqat siz pul yechish so'rovi yuborganingizda. Batafsil ma'lumot 3-bo'limda.</td></tr>
+  </table>
+
+  <p>Ilova <b>joylashuv (GPS), kontaktlar, SMS, qo'ng'iroqlar tarixi yoki mikrofon</b> ma'lumotlarini yig'maydi.</p>
 
   <h2>2. Ma'lumotlardan qanday foydalanamiz</h2>
   <ul>
-    <li>Hisobingizni yaratish va boshqarish</li>
+    <li>Hisobingizni yaratish, boshqarish va himoyalash</li>
     <li>Coin balansini hisoblash va saqlash</li>
-    <li>Pulga aylantirish so'rovlarini qayta ishlash</li>
-    <li>Firibgarlik va noto'g'ri foydalanishning oldini olish</li>
+    <li>Pul yechish so'rovlarini qayta ishlash</li>
+    <li>Firibgarlik, bot va bir nechta hisob orqali suiiste'molning oldini olish</li>
     <li>Ilova sifatini yaxshilash uchun umumiy statistik tahlil</li>
   </ul>
+  <p>Biz ma'lumotlaringizni reklama maqsadida uchinchi tomonlarga <b>sotmaymiz</b> va ijaraga bermaymiz.</p>
 
-  <h2>3. Uchinchi tomon xizmatlari</h2>
-  <p>Ilova quyidagi xizmatlardan foydalanadi, ular o'zlarining maxfiylik siyosatiga ega:</p>
+  <h2>3. To'lov kartasi ma'lumotlari — muhim ogohlantirish</h2>
+  <div class="warn">
+    Pul yechish so'rovini yuborganingizda siz kiritgan <b>karta raqami, amal qilish muddati va karta egasining ismi</b> to'lovni qo'lda amalga oshirish uchun bizning ma'lumotlar bazamizda (Firebase Firestore) saqlanadi.
+    <br><br>
+    Bu ma'lumotlarga faqat <b>siz</b> va <b>to'lovni amalga oshiruvchi administrator</b> kira oladi — bu Firebase xavfsizlik qoidalari bilan cheklangan. Boshqa foydalanuvchilar ularni ko'ra olmaydi.
+    <br><br>
+    Ilova karta ma'lumotlarini avtomatik to'lov tizimiga uzatmaydi va ulardan sizning ruxsatingizsiz hech qanday pul yechmaydi. Karta ma'lumotlari faqat sizga pul o'tkazish uchun ishlatiladi.
+  </div>
+  <p>Agar siz karta ma'lumotlaringiz saqlanishini istamasangiz, pul yechish so'rovini yubormang yoki to'lov amalga oshirilgandan so'ng ularni o'chirishni so'rang (7-bo'limga qarang).</p>
+
+  <h2>4. Uchinchi tomon xizmatlari</h2>
+  <p>Ilova quyidagi xizmatlardan foydalanadi. Ular o'z maxfiylik siyosatiga ega:</p>
   <ul>
-    <li><b>Google Firebase</b> (autentifikatsiya va ma'lumotlar bazasi)</li>
-    <li><b>Google AdMob</b> (reklama ko'rsatish)</li>
-    <li><b>Payme / Click</b> (to'lovlarni qayta ishlash)</li>
+    <li><b>Google Firebase</b> — autentifikatsiya, ma'lumotlar bazasi (Firestore), fayl saqlash (Storage) va server funksiyalari. Firebase maxfiylik siyosati: <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">firebase.google.com/support/privacy</a></li>
+    <li><b>Google Fonts</b> — shriftlarni yuklash uchun</li>
   </ul>
+  <p>Vazifa sifatida tashqi havola berilgan bo'lsa (masalan, Telegram kanaliga obuna bo'lish), havolani ochganingizda o'sha xizmatning o'z maxfiylik siyosati amal qiladi. Biz o'sha saytlardagi faoliyatingizni kuzatmaymiz.</p>
+  <div class="box">
+    Hozircha Ilovada reklama tarmog'i (AdMob va shunga o'xshash) ulanmagan va reklama identifikatorlari yig'ilmaydi. Kelajakda reklama qo'shilsa, ushbu siyosat yangilanadi va bu haqda oldindan xabar beriladi.
+  </div>
 
-  <h2>4. Ma'lumotlarni saqlash va himoya</h2>
-  <p>Ma'lumotlaringiz shifrlangan serverlarda saqlanadi va faqat vakolatli xodimlar kirish huquqiga ega. Biz ma'lumotlaringizni uchinchi tomonlarga sotmaymiz.</p>
-
-  <h2>5. Foydalanuvchi huquqlari</h2>
+  <h2>5. Ma'lumotlarni saqlash va himoya</h2>
   <ul>
-    <li>O'z ma'lumotlaringizni ko'rish va o'chirishni so'rash huquqi</li>
-    <li>Hisobingizni istalgan vaqtda o'chirish huquqi</li>
-    <li>Ma'lumotlar yig'ilishiga oid savol-javob uchun biz bilan bog'lanish huquqi</li>
+    <li>Ma'lumotlar Google Firebase serverlarida, uzatishda TLS shifrlash bilan saqlanadi</li>
+    <li>Coin balansi kabi moliyaviy maydonlarni foydalanuvchi to'g'ridan-to'g'ri o'zgartira olmaydi — barcha o'zgarishlar server tomonida tekshiriladi</li>
+    <li>Har bir foydalanuvchi faqat o'z ma'lumotlarini o'qiy oladi; boshqalarning balansi, kartasi yoki pochtasiga kira olmaydi</li>
+    <li>Ma'lumotlaringiz hisobingiz mavjud bo'lgunicha saqlanadi</li>
   </ul>
 
   <h2>6. Yosh chegarasi</h2>
-  <p>Ilova 18 yoshdan katta foydalanuvchilar uchun mo'ljallangan, chunki u real pul bilan bog'liq operatsiyalarni o'z ichiga oladi.</p>
+  <p>Ilova <b>18 yoshdan katta</b> foydalanuvchilar uchun mo'ljallangan, chunki u pul o'tkazish operatsiyalarini o'z ichiga oladi. Biz bilib turib 18 yoshdan kichik shaxslardan ma'lumot yig'maymiz. Agar bunday holat aniqlansa, ma'lumotlar o'chiriladi.</p>
 
-  <h2>7. Bog'lanish</h2>
+  <h2>7. Sizning huquqlaringiz va ma'lumotni o'chirish</h2>
+  <p>Sizda quyidagi huquqlar mavjud:</p>
+  <ul>
+    <li>O'zingiz haqingizda saqlanayotgan ma'lumotlarning nusxasini so'rash</li>
+    <li>Noto'g'ri ma'lumotlarni to'g'rilashni so'rash</li>
+    <li><b>Hisobingizni va u bilan bog'liq barcha ma'lumotlarni o'chirishni so'rash</b></li>
+  </ul>
   <div class="box">
-    Savollar bo'lsa: <a href="https://t.me/Taskupuz">@Taskupuz</a> (Telegram) orqali murojaat qiling.
+    <b>Hisobni o'chirish uchun:</b> <a href="https://t.me/Taskupuz">@Taskupuz</a> (Telegram) manziliga hisobingiz elektron pochtasini yozib, o'chirish so'rovini yuboring.
+    So'rov <b>7 ish kuni</b> ichida bajariladi. O'chirilganda quyidagilar butunlay olib tashlanadi: elektron pochta, profil rasmi, coin balansi va tarixi, referral ma'lumotlari, qurilma identifikatori va saqlangan karta ma'lumotlari.
+    <br><br>
+    Qonun talab qilgan hollarda (masalan, amalga oshirilgan to'lov hisoboti) ayrim tranzaksiya yozuvlari shaxsni aniqlab bo'lmaydigan shaklda saqlanib qolishi mumkin.
+    <br><br>
+    <b>Diqqat:</b> hisob o'chirilganda yechib olinmagan coinlar bekor qilinadi va tiklanmaydi.
   </div>
+
+  <h2>8. Siyosatdagi o'zgarishlar</h2>
+  <p>Ushbu siyosat vaqti-vaqti bilan yangilanishi mumkin. Muhim o'zgarishlar haqida Ilova ichida yoki Telegram kanal orqali xabar beriladi. Yuqoridagi "Oxirgi yangilanish" sanasi joriy versiyani bildiradi.</p>
+
+  <h2>9. Bog'lanish</h2>
+  <div class="box">
+    Maxfiylik bo'yicha savollar, ma'lumot nusxasi yoki o'chirish so'rovlari uchun:
+    <a href="https://t.me/Taskupuz">@Taskupuz</a> (Telegram).
+  </div>
+
+  <p style="margin-top:28px"><a href="terms-of-service.html">Foydalanish shartlari →</a></p>
 </div>
 </body>
 </html>
