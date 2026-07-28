@@ -403,6 +403,9 @@
   .cashout-rate{ display:flex; align-items:center; justify-content:center; gap:8px; font-family:'Space Grotesk',sans-serif;
     font-weight:700; font-size:14px; color:#15161F; margin-bottom:8px; }
   .cashout-rate .eq{ color:#8B8FA3; font-weight:400; }
+  /* Taxminiy dollar ekvivalenti — faqat ma'lumot uchun.
+     To'lov so'mda amalga oshiriladi, shuning uchun "≈" belgisi majburiy. */
+  .cashout-rate .usd{ color:#8B8FA3; font-weight:400; font-size:12.5px; }
   .cashout-explain a{ color:#5B3FD6; font-weight:600; white-space:nowrap; }
   .cashout-panel input[type=text]{ background:#F5F6FA; border:1.5px solid #E4E6EF; color:#15161F; }
   .cashout-panel input[type=text]:focus{ border-color:var(--purple); }
@@ -1392,7 +1395,7 @@
       </div>
 
       <div class="cashout-explain">
-        <div class="cashout-rate"><span data-i18n="rateCoins">10 000 coin</span><span class="eq">=</span><span data-i18n="rateSom">12 000 so'm</span></div>
+        <div class="cashout-rate"><span data-i18n="rateCoins">10 000 coin</span><span class="eq">=</span><span data-i18n="rateSom">12 000 so'm</span><span class="usd" data-i18n="rateUsd">≈$1</span></div>
         <span data-i18n="cashoutExplain">Coin — ilova ichidagi virtual hisob birligi. U sotib olinmaydi: faqat siz bajargan vazifalar, kunlik bonus va do'st taklif qilish evaziga beriladi. Pul yechish — bajarilgan ish uchun mukofot to'lovi.</span>
         <div style="margin-top:6px"><b data-i18n="cashoutReview">Ko'rib chiqish muddati: odatda 1–3 ish kuni. To'lov tasdiqlangach kartangizga o'tkaziladi.</b></div>
         <a href="terms-of-service.html" target="_blank" rel="noopener" data-i18n="cashoutTermsLink">Batafsil shartlar →</a>
@@ -1750,7 +1753,7 @@ const I18N = {
     yourRefLink:"Sizning taklif kodingiz", btnCopy:"Nusxalash", orShare:"Bizni kuzating",
     invitedCount:"Taklif qilinganlar", invitedBonus:"Ulardan olingan bonus",
     cashoutBalanceLbl:"YECHISH UCHUN BALANS", walletEyebrow:"YECHISH UCHUN", walletBalanceTitle:"BALANS", choosePayMethod:"To'lov usulini tanlang", minAmount:"Minimal: 10 000 coin",
-    rateCoins:"10 000 coin", rateSom:"12 000 so'm", cashoutTermsLink:"Batafsil shartlar →",
+    rateCoins:"10 000 coin", rateSom:"12 000 so'm", rateUsd:"≈$1", cashoutTermsLink:"Batafsil shartlar →",
     cashoutExplain:"Coin — ilova ichidagi virtual hisob birligi. U sotib olinmaydi: faqat siz bajargan vazifalar, kunlik bonus va do'st taklif qilish evaziga beriladi. Pul yechish — bajarilgan ish uchun mukofot to'lovi.",
     cashoutReview:"Ko'rib chiqish muddati: odatda 1–3 ish kuni. To'lov tasdiqlangach kartangizga o'tkaziladi.",
     payUzcardLbl:"UzCard", payHumoLbl:"Humo karta", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Maksimal: {n} coin",
@@ -1828,7 +1831,7 @@ const I18N = {
     yourRefLink:"Your invite code", btnCopy:"Copy", orShare:"Follow us",
     invitedCount:"Friends invited", invitedBonus:"Bonus earned from them",
     cashoutBalanceLbl:"BALANCE TO WITHDRAW", walletEyebrow:"BALANCE TO", walletBalanceTitle:"WITHDRAW", choosePayMethod:"Choose payment method", minAmount:"Minimum: 10,000 coins",
-    rateCoins:"10,000 coins", rateSom:"12,000 UZS", cashoutTermsLink:"Full terms →",
+    rateCoins:"10,000 coins", rateSom:"12,000 UZS", rateUsd:"≈$1", cashoutTermsLink:"Full terms →",
     cashoutExplain:"Coins are an in-app virtual unit. They cannot be purchased — you earn them only by completing tasks, daily bonuses and referrals. A withdrawal is a reward payment for work you have done.",
     cashoutReview:"Review time: usually 1–3 business days. Once approved, the payment is sent to your card.",
     payUzcardLbl:"UzCard", payHumoLbl:"Humo card", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Maximum: {n} coins",
@@ -1906,7 +1909,7 @@ const I18N = {
     yourRefLink:"Ваш пригласительный код", btnCopy:"Копировать", orShare:"Мы в соцсетях",
     invitedCount:"Приглашено друзей", invitedBonus:"Полученный от них бонус",
     cashoutBalanceLbl:"БАЛАНС ДЛЯ ВЫВОДА", walletEyebrow:"БАЛАНС ДЛЯ", walletBalanceTitle:"ВЫВОДА", choosePayMethod:"Выберите способ оплаты", minAmount:"Минимум: 10 000 коинов",
-    rateCoins:"10 000 коинов", rateSom:"12 000 сум", cashoutTermsLink:"Подробные условия →",
+    rateCoins:"10 000 коинов", rateSom:"12 000 сум", rateUsd:"≈$1", cashoutTermsLink:"Подробные условия →",
     cashoutExplain:"Коины — внутренняя виртуальная единица приложения. Их нельзя купить: они начисляются только за выполненные задания, ежедневный бонус и приглашение друзей. Вывод — это выплата вознаграждения за выполненную работу.",
     cashoutReview:"Срок рассмотрения: обычно 1–3 рабочих дня. После одобрения выплата поступает на вашу карту.",
     payUzcardLbl:"UzCard", payHumoLbl:"Humo карта", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Максимум: {n} коинов",
