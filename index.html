@@ -1161,6 +1161,9 @@
         </div>
       </div>
       <button class="signout-btn" onclick="signOutUser()" data-i18n="logoutBtn">Chiqish</button>
+      <!-- Google Play: hisobni o'chirish ilova ICHIDA ham mavjud bo'lishi shart -->
+      <button class="signout-btn" onclick="confirmDeleteAccount()" data-i18n="deleteNowBtn"
+        style="margin-top:10px; border-color:rgba(255,92,108,0.45); color:rgba(255,92,108,0.85); font-size:12.5px">Hisobni butunlay o'chirish</button>
     </div>
 
     <!-- ---- LEVEL TAB ---- -->
@@ -1755,7 +1758,12 @@ const I18N = {
     totalEarned:"Umumiy top ilgan", currentLevel:"Joriy daraja", dailyStreakLbl:"Kunlik seriya",
     langMenuItem:"Til / Language", leaderboardMenuItem:"Reyting", levelMenuItem:"Level",
     paymentHistoryMenuItem:"To'lov tarixi", taskHistoryMenuItem:"Vazifalar tarixi", myFriendsMenuItem:"Do'stlarim",
-    helpMenuItem:"Yordam / Qo'llab-quvvatlash", privacyMenuItem:"Maxfiylik siyosati", termsMenuItem:"Foydalanish shartlari", deleteAccountMenuItem:"Hisobni o'chirish",
+    helpMenuItem:"Yordam / Qo'llab-quvvatlash", privacyMenuItem:"Maxfiylik siyosati", termsMenuItem:"Foydalanish shartlari", deleteAccountMenuItem:"Hisobni o'chirish", deleteNowBtn:"Hisobni butunlay o'chirish",
+    deleteConfirmPrompt:"Bu amalni QAYTARIB BO'LMAYDI. Tasdiqlash uchun pochtangizni yozing:\n{email}",
+    deleteEmailMismatch:"Pochta mos kelmadi — o'chirish bekor qilindi",
+    deleteFinalConfirm:"Oxirgi tasdiq: hisobingiz, coinlaringiz va barcha ma'lumotlaringiz butunlay o'chiriladi. Davom etamizmi?",
+    deleteInProgress:"O'chirilmoqda...", deleteDone:"Hisobingiz o'chirildi.",
+    deletePendingCashout:"Kutilayotgan to'lov so'rovi bor. U yakunlangach qayta urinib ko'ring.",
     logoutBtn:"Chiqish", levelPageTitle:"Level", yourLevelLbl:"Sizning levelingiz", levelRewardsTitle:"Level mukofotlari",
     leaderboardTitle:"Reyting",
     cashoutReady:"Pulga aylantirish", cashoutNeed:"Yana", cashoutNeedSuffix:"coin kerak",
@@ -1827,7 +1835,12 @@ const I18N = {
     totalEarned:"Total earned", currentLevel:"Current level", dailyStreakLbl:"Daily streak",
     langMenuItem:"Language", leaderboardMenuItem:"Leaderboard", levelMenuItem:"Level",
     paymentHistoryMenuItem:"Payment history", taskHistoryMenuItem:"Task history", myFriendsMenuItem:"My friends",
-    helpMenuItem:"Help / Support", privacyMenuItem:"Privacy policy", termsMenuItem:"Terms of service", deleteAccountMenuItem:"Delete account",
+    helpMenuItem:"Help / Support", privacyMenuItem:"Privacy policy", termsMenuItem:"Terms of service", deleteAccountMenuItem:"Delete account", deleteNowBtn:"Permanently delete account",
+    deleteConfirmPrompt:"This CANNOT be undone. Type your email to confirm:\n{email}",
+    deleteEmailMismatch:"Email did not match — deletion cancelled",
+    deleteFinalConfirm:"Final confirmation: your account, coins and all data will be permanently deleted. Continue?",
+    deleteInProgress:"Deleting...", deleteDone:"Your account has been deleted.",
+    deletePendingCashout:"You have a pending withdrawal. Please try again once it is completed.",
     logoutBtn:"Log out", levelPageTitle:"Level", yourLevelLbl:"Your level", levelRewardsTitle:"Level rewards",
     leaderboardTitle:"Leaderboard",
     cashoutReady:"Withdraw", cashoutNeed:"Need", cashoutNeedSuffix:"more coins",
@@ -1899,7 +1912,12 @@ const I18N = {
     totalEarned:"Всего заработано", currentLevel:"Текущий уровень", dailyStreakLbl:"Дней подряд",
     langMenuItem:"Язык", leaderboardMenuItem:"Рейтинг", levelMenuItem:"Уровень",
     paymentHistoryMenuItem:"История платежей", taskHistoryMenuItem:"История заданий", myFriendsMenuItem:"Мои друзья",
-    helpMenuItem:"Помощь / Поддержка", privacyMenuItem:"Политика конфиденциальности", termsMenuItem:"Условия использования", deleteAccountMenuItem:"Удалить аккаунт",
+    helpMenuItem:"Помощь / Поддержка", privacyMenuItem:"Политика конфиденциальности", termsMenuItem:"Условия использования", deleteAccountMenuItem:"Удалить аккаунт", deleteNowBtn:"Удалить аккаунт навсегда",
+    deleteConfirmPrompt:"Это действие НЕОБРАТИМО. Введите вашу почту для подтверждения:\n{email}",
+    deleteEmailMismatch:"Почта не совпала — удаление отменено",
+    deleteFinalConfirm:"Финальное подтверждение: аккаунт, коины и все данные будут удалены навсегда. Продолжить?",
+    deleteInProgress:"Удаление...", deleteDone:"Ваш аккаунт удалён.",
+    deletePendingCashout:"Есть незавершённая заявка на вывод. Повторите попытку после её завершения.",
     logoutBtn:"Выйти", levelPageTitle:"Уровень", yourLevelLbl:"Ваш уровень", levelRewardsTitle:"Награды за уровень",
     leaderboardTitle:"Рейтинг",
     cashoutReady:"Вывести", cashoutNeed:"Нужно ещё", cashoutNeedSuffix:"монет",
@@ -2259,6 +2277,35 @@ function enterApp(){
   applyStaticTranslations();
   startDailyTimer();
 }
+/* Hisobni butunlay o'chirish (Google Play "Data deletion" talabi).
+   Qaytarib bo'lmaydigan amal — shuning uchun ikki bosqichli tasdiq:
+   foydalanuvchi o'z pochtasini aynan yozishi kerak. */
+function confirmDeleteAccount(){
+  if(!currentUid) return;
+  const typed = prompt(t('deleteConfirmPrompt').replace('{email}', state.email || ''));
+  if(typed === null) return;
+  if((typed || '').trim().toLowerCase() !== String(state.email || '').trim().toLowerCase()){
+    showToast(t('deleteEmailMismatch'), true);
+    return;
+  }
+  if(!confirm(t('deleteFinalConfirm'))) return;
+
+  showToast(t('deleteInProgress'));
+  fns.httpsCallable('deleteAccount')({}).then(() => {
+    if(unsubscribeUser) unsubscribeUser();
+    if(unsubscribeTasks){ unsubscribeTasks(); unsubscribeTasks = null; }
+    if(unsubscribeNews){ unsubscribeNews(); unsubscribeNews = null; }
+    currentUid = null;
+    try { auth.signOut(); } catch(e){}
+    alert(t('deleteDone'));
+    location.reload();
+  }).catch((err) => {
+    const m = (err && err.message) || '';
+    if(m === 'pending-cashout') showToast(t('deletePendingCashout'), true);
+    else showToast(friendlyError(err), true);
+  });
+}
+
 function signOutUser(){
   if(unsubscribeUser) unsubscribeUser();
   if(unsubscribeTasks){ unsubscribeTasks(); unsubscribeTasks = null; }

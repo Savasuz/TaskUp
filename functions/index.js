@@ -5,13 +5,51 @@
  */
 process.env.TZ = 'Asia/Tashkent';
 
+const crypto = require('crypto');
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
+const { defineSecret } = require('firebase-functions/params');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const { getAuth } = require('firebase-admin/auth');
+const { getStorage } = require('firebase-admin/storage');
 
 initializeApp();
 const db = getFirestore();
+
+/* ---------- Karta ma'lumotlarini shifrlash (AES-256-GCM) ----------
+   Kalit Secret Manager'da saqlanadi va faqat unga muhtoj funksiyalarga
+   ulanadi (requestCashout — yozish, revealCashoutCard — o'qish).
+   Kalitni o'rnatish:  firebase functions:secrets:set CARD_ENC_KEY
+   Kalit istalgan uzunlikdagi matn bo'lishi mumkin — SHA-256 orqali
+   32 baytga keltiriladi. */
+const CARD_ENC_KEY = defineSecret('CARD_ENC_KEY');
+
+function encKey() {
+  const raw = CARD_ENC_KEY.value();
+  if (!raw) throw new HttpsError('failed-precondition', 'enc-key-missing');
+  return crypto.createHash('sha256').update(String(raw), 'utf8').digest();
+}
+/* Format: "v1:" + base64(iv[12] || authTag[16] || ciphertext) */
+function encryptCard(plainText) {
+  const iv = crypto.randomBytes(12);
+  const c = crypto.createCipheriv('aes-256-gcm', encKey(), iv);
+  const ct = Buffer.concat([c.update(String(plainText), 'utf8'), c.final()]);
+  return 'v1:' + Buffer.concat([iv, c.getAuthTag(), ct]).toString('base64');
+}
+function decryptCard(blob) {
+  if (typeof blob !== 'string' || blob.indexOf('v1:') !== 0) throw new Error('bad-cipher-format');
+  const buf = Buffer.from(blob.slice(3), 'base64');
+  if (buf.length < 29) throw new Error('bad-cipher-length');
+  const d = crypto.createDecipheriv('aes-256-gcm', encKey(), buf.subarray(0, 12));
+  d.setAuthTag(buf.subarray(12, 28));
+  return Buffer.concat([d.update(buf.subarray(28)), d.final()]).toString('utf8');
+}
+
+async function requireAdmin(uid) {
+  const doc = await db.collection('admins').doc(uid).get();
+  if (!doc.exists) throw new HttpsError('permission-denied', 'admin-only');
+}
 
 const XP_PER_LEVEL = 1000;
 const DAILY_CAP_BASE = 3000;
@@ -157,7 +195,7 @@ exports.claimStreak = onCall(async (req) => {
 });
 
 /* ---------- Pul yechish so'rovi ---------- */
-exports.requestCashout = onCall(async (req) => {
+exports.requestCashout = onCall({ secrets: [CARD_ENC_KEY] }, async (req) => {
   const uid = requireAuth(req);
   const data = req.data || {};
   const amount = Math.floor(Number(data.amount)) || 0;
@@ -170,6 +208,13 @@ exports.requestCashout = onCall(async (req) => {
   if (!/^\d{16}$/.test(cardNumber)) throw new HttpsError('invalid-argument', 'bad-card-number');
   if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardExpiry)) throw new HttpsError('invalid-argument', 'bad-card-expiry');
   if (cardHolder.length < 3) throw new HttpsError('invalid-argument', 'bad-card-holder');
+
+  /* Karta raqami va muddati OCHIQ saqlanmaydi — shifrlangan blob sifatida
+     yoziladi. Ochiq holda faqat oxirgi 4 raqam (ko'rsatish uchun) va karta
+     egasining ismi (o'tkazmani amalga oshirish uchun) qoladi.
+     Shifrni ochish faqat revealCashoutCard (admin) orqali mumkin. */
+  const cardLast4 = cardNumber.slice(-4);
+  const cardEnc = encryptCard(JSON.stringify({ number: cardNumber, expiry: cardExpiry }));
 
   const userRef = db.collection('users').doc(uid);
   await db.runTransaction(async (tx) => {
@@ -188,7 +233,7 @@ exports.requestCashout = onCall(async (req) => {
       email: d.email || '',
       amountCoins: amount,
       amountSom: Math.round(amount * COIN_TO_SOM),
-      payMethod, cardNumber, cardExpiry, cardHolder,
+      payMethod, cardHolder, cardLast4, cardEnc,
       status: 'pending',
       requestedAt: FieldValue.serverTimestamp()
     });
@@ -197,6 +242,125 @@ exports.requestCashout = onCall(async (req) => {
     });
   });
   return { ok: true, amount };
+});
+
+/* ---------- Karta ma'lumotini ochish (FAQAT ADMIN) ----------
+   To'lovni amalga oshirish paytida admin to'liq karta raqamini ko'rishi kerak.
+   Har bir ochish hujjatga yozib boriladi (audit izi). */
+exports.revealCashoutCard = onCall({ secrets: [CARD_ENC_KEY] }, async (req) => {
+  const uid = requireAuth(req);
+  await requireAdmin(uid);
+
+  const requestId = String((req.data && req.data.requestId) || '').trim();
+  if (!requestId || requestId.length > 200) throw new HttpsError('invalid-argument', 'bad-request-id');
+
+  const ref = db.collection('cashout_requests').doc(requestId);
+  const snap = await ref.get();
+  if (!snap.exists) throw new HttpsError('not-found', 'request-not-found');
+  const d = snap.data();
+
+  let cardNumber, cardExpiry, legacy = false;
+  if (d.cardEnc) {
+    let parsed;
+    try {
+      parsed = JSON.parse(decryptCard(d.cardEnc));
+    } catch (e) {
+      // Kalit noto'g'ri yoki ma'lumot buzilgan — sababini oshkor qilmaymiz
+      console.error('decrypt failed for', requestId, e && e.message);
+      throw new HttpsError('failed-precondition', 'decrypt-failed');
+    }
+    cardNumber = String(parsed.number || '');
+    cardExpiry = String(parsed.expiry || '');
+  } else {
+    // Shifrlash joriy qilinishidan OLDIN yaratilgan yozuvlar
+    cardNumber = String(d.cardNumber || '');
+    cardExpiry = String(d.cardExpiry || '');
+    legacy = true;
+  }
+
+  await ref.update({
+    lastRevealedBy: uid,
+    lastRevealedAt: FieldValue.serverTimestamp(),
+    revealCount: FieldValue.increment(1)
+  });
+
+  return { cardNumber, cardExpiry, cardHolder: d.cardHolder || '', legacy };
+});
+
+/* ---------- Hisobni butunlay o'chirish (foydalanuvchining o'z so'rovi bilan) ----------
+   Google Play "Data deletion" talabi. Tartib: avval ma'lumotlar, eng oxirida
+   Auth hisobi — agar oraliqda xato bo'lsa, foydalanuvchi qayta urinib ko'ra oladi. */
+async function deleteSubcollection(parentRef, name) {
+  let removed = 0;
+  for (;;) {
+    const snap = await parentRef.collection(name).limit(400).get();
+    if (snap.empty) break;
+    const batch = db.batch();
+    snap.docs.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+    removed += snap.size;
+    if (snap.size < 400) break;
+  }
+  return removed;
+}
+
+exports.deleteAccount = onCall(async (req) => {
+  const uid = requireAuth(req);
+
+  // Kutilayotgan to'lov bo'lsa o'chirmaymiz — aks holda pul yo'qoladi
+  const pending = await db.collection('cashout_requests')
+    .where('uid', '==', uid).where('status', '==', 'pending').limit(1).get();
+  if (!pending.empty) throw new HttpsError('failed-precondition', 'pending-cashout');
+
+  const userRef = db.collection('users').doc(uid);
+
+  // 1) Tranzaksiya tarixi (subkolleksiya)
+  const historyDeleted = await deleteSubcollection(userRef, 'history');
+
+  // 2) Yakunlangan to'lov so'rovlari — buxgalteriya uchun summa/sana qoladi,
+  //    lekin shaxsni aniqlaydigan va karta ma'lumotlari o'chiriladi
+  const oldReqs = await db.collection('cashout_requests').where('uid', '==', uid).get();
+  let anonymized = 0;
+  for (let i = 0; i < oldReqs.size; i += 400) {
+    const batch = db.batch();
+    oldReqs.docs.slice(i, i + 400).forEach(doc => {
+      batch.update(doc.ref, {
+        uid: FieldValue.delete(), email: FieldValue.delete(),
+        cardEnc: FieldValue.delete(), cardNumber: FieldValue.delete(),
+        cardExpiry: FieldValue.delete(), cardHolder: FieldValue.delete(),
+        cardLast4: FieldValue.delete(),
+        accountDeleted: true, accountDeletedAt: FieldValue.serverTimestamp()
+      });
+      anonymized++;
+    });
+    await batch.commit();
+  }
+
+  // 3) Qurilma reyestridan uid ni olib tashlaymiz
+  const devs = await db.collection('devices').where('uids', 'array-contains', uid).get();
+  if (!devs.empty) {
+    const batch = db.batch();
+    devs.docs.forEach(doc => batch.update(doc.ref, { uids: FieldValue.arrayRemove(uid) }));
+    await batch.commit();
+  }
+
+  // 4) Storage'dagi profil rasmlari
+  let storageDeleted = true;
+  try {
+    await getStorage().bucket().deleteFiles({ prefix: `avatars/${uid}/` });
+  } catch (e) {
+    storageDeleted = false;
+    console.error('storage delete failed for', uid, e && e.message);
+  }
+
+  // 5) Foydalanuvchi hujjati
+  await userRef.delete();
+
+  // 6) Auth hisobi — eng oxirida
+  await getAuth().deleteUser(uid);
+
+  console.log('account deleted', uid, { historyDeleted, anonymized, devices: devs.size, storageDeleted });
+  return { ok: true, historyDeleted, cashoutsAnonymized: anonymized, devicesCleaned: devs.size, storageDeleted };
 });
 
 /* ---------- Referral kodini ishlatish ---------- */
