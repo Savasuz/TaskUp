@@ -25,8 +25,39 @@ jobs:
 
       - name: Prepare web assets
         run: |
+          rm -rf www
           mkdir -p www
-          cp index.html privacy-policy.html terms-of-service.html www/
+          # DIQQAT: bu yerga ilova ichida ochiladigan HAR BIR fayl kirishi shart.
+          # Avval faqat 3 ta HTML ko'chirilardi va natijada APK ichida
+          # assets/ (splash, karta, to'lov logolari, onboarding rasmlari...)
+          # umuman bo'lmasdi, delete-account.html esa ochilmasdi.
+          cp index.html privacy-policy.html terms-of-service.html terms.html delete-account.html manifest.json www/
+          cp -r assets www/
+
+      - name: Verify web assets
+        run: |
+          set -e
+          for f in index.html privacy-policy.html terms-of-service.html terms.html delete-account.html manifest.json; do
+            test -s "www/$f" || { echo "YO'Q: www/$f"; exit 1; }
+          done
+          # index.html ichidagi barcha lokal havolalar www/ da mavjudligini tekshiramiz
+          python3 - <<'PY'
+          import re, os, sys
+          missing = []
+          for page in ['index.html','privacy-policy.html','terms-of-service.html','delete-account.html']:
+              s = open(os.path.join('www', page), encoding='utf-8').read()
+              for m in re.finditer(r'''(?:src|href)\s*=\s*["']([^"'#]+)["']|url\(\s*['"]?([^)'"]+?)['"]?\s*\)''', s):
+                  u = (m.group(1) or m.group(2) or '').strip()
+                  if not u or '${' in u: continue
+                  if u.startswith(('http://','https://','//','data:','about:','mailto:','tel:','javascript:','#')): continue
+                  if not os.path.exists(os.path.join('www', u)):
+                      missing.append(f'{page} -> {u}')
+          if missing:
+              print('www/ da yetishmayotgan fayllar:')
+              for x in missing: print('  -', x)
+              sys.exit(1)
+          print('www/ to\'liq — barcha lokal havolalar joyida')
+          PY
 
       - name: Sync Capacitor
         run: npx cap sync android
