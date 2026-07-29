@@ -771,7 +771,16 @@
   .wheel-pointer svg{ width:100%; height:auto; display:block; }
   .wheel-pointer.tick{ animation:pointerTick .12s ease; }
   @keyframes pointerTick{ 0%{ transform:translateX(-50%) translateY(0); } 45%{ transform:translateX(-50%) translateY(5px); } 100%{ transform:translateX(-50%) translateY(0); } }
-  .wheel-3d{ position:relative; z-index:1; width:100%; height:100%; }
+  /* G'ildirak .wheel-wrap dan bir oz kichikroq va TEPAGA tekislangan.
+     Sababi: pastdagi eslatma kartasi 76.2% dan boshlanishi SHART (fon
+     rasmidagi eski karta 76.92% da boshlanadi va u to'liq berkitilishi kerak),
+     wrap esa 78.57% gacha tushardi — natijada karta g'ildirakning pastini
+     ~12px yopib, unga yopishib turgandek ko'rinardi. Endi g'ildirak 74% da
+     tugaydi va karta bilan orasida aniq bo'shliq qoladi.
+     Tepaga tekislangani uchun ko'rsatkich (.wheel-pointer) bilan munosabati
+     o'zgarmaydi, .wheel-blot esa wrap o'lchamida qolib eski g'ildirakni
+     avvalgidek to'liq berkitaveradi. */
+  .wheel-3d{ position:absolute; z-index:1; top:0; left:3.5%; right:3.5%; aspect-ratio:1; }
   /* Disk (rim+LED+sektorlar) bitta butun sifatida aylanadi — haqiqiy prize
      g'ildiraklarga o'xshaydi (faqat tepadagi ko'rsatkich qo'zg'almaydi).
      Endi rasm emas — to'liq CSS: oltin gardish, binafsha/oltin gradient
