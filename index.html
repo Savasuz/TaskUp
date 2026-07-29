@@ -212,10 +212,8 @@
 
   /* ---------- Premium statistika kartalari (XP / kunlik limit / kunlik bonus) ----------
      Uchala karta bir xil o'lcham/bo'shliqda, teng kenglikda (flex) chiziladi.
-     Ikonkalar — assets/ui/icon-xp.png, icon-limit.png, icon-bonus.png —
-     mavjud premium rasmdan olingan aniq, shaffof fonli sprite'lar (fon
-     rasmning o'zi endi ishlatilmaydi, chunki uning ichidagi 3 karta teng
-     bo'lmagan enda edi va teng kenglikka moslab cho'zish tasvirni buzardi).
+     Ikonkalar — inline SVG, gradient to'ldirilgan, rangiga mos glow bilan
+     (rasm fayl emas, shuning uchun butunlay CSS/SVG darajasida boshqariladi).
      Karta foni — bir xil binafsha gradient (premium mavzu ranglari), matn
      to'liq dinamik HTML, 3 tilga tarjima bo'ladi. */
   .stat-cards{ display:flex; gap:8px; margin:2px 0 16px; }
@@ -226,8 +224,10 @@
       linear-gradient(160deg, #241246 0%, #170a30 55%, #0c0620 100%);
     box-shadow:0 8px 20px rgba(0,0,0,0.5), 0 0 16px rgba(139,92,246,0.24),
       inset 0 1px 0 rgba(255,255,255,0.07), inset 0 0 0 1px rgba(168,124,255,0.14); }
-  .sc-icon{ width:32px; height:32px; object-fit:contain; flex-shrink:0;
-    filter:drop-shadow(0 3px 6px rgba(0,0,0,0.55)) drop-shadow(0 0 7px rgba(139,92,246,0.45)); }
+  .sc-icon{ width:32px; height:32px; flex-shrink:0; }
+  .sc-icon-xp{ filter:drop-shadow(0 3px 5px rgba(0,0,0,0.5)) drop-shadow(0 0 7px rgba(120,224,80,0.75)); }
+  .sc-icon-limit{ filter:drop-shadow(0 3px 5px rgba(0,0,0,0.5)) drop-shadow(0 0 7px rgba(80,150,255,0.75)); }
+  .sc-icon-bonus{ filter:drop-shadow(0 3px 5px rgba(0,0,0,0.5)) drop-shadow(0 0 7px rgba(255,176,32,0.7)); }
   .sc-content{ min-width:0; flex:1; display:flex; flex-direction:column; justify-content:center; }
   .sc-label{ font-size:8.6px; line-height:1.1; font-weight:700; color:#E4DEFB; letter-spacing:0.1px;
     overflow-wrap:break-word; text-shadow:0 1px 2px rgba(0,0,0,0.5); }
@@ -637,22 +637,20 @@
   #tab-home .icon-btn{ background:transparent; border:none; width:34px; height:34px; }
   #tab-home .icon-btn svg{ width:21px; height:21px; }
 
-  /* Kunlik bonus banneri — fon assets/daily-bonus-banner.png, BUTUNLIGICHA
-     (kesilmagan). Rasmda panel canvasning kichik qismini egallaydi, shuning
-     uchun background-position/size bilan faqat shu panelga "oyna" ochamiz.
-     Sovg'a qutisi rasmning o'ng tomonida qoladi (dekorativ); sarlavha,
-     tavsif va tugma — rasmdagi statik matn ustiga qo'yilgan HAQIQIY HTML,
-     3 tilga tarjima bo'ladi. */
+  /* Kunlik bonus banneri — fon endi rasm emas, premium binafsha CSS gradient.
+     Sovg'a qutisi to'liq inline SVG (.daily-card-art), sarlavha/tavsif/tugma
+     HAQIQIY HTML, 3 tilga tarjima bo'ladi. */
   #tab-home .daily-card{ position:relative; overflow:hidden; display:block;
     aspect-ratio:1017/312; border-radius:16px; padding:0; margin:2px 0 20px;
-    background-color:#1a0033;
-    background-image:url('assets/daily-bonus-banner.png');
-    background-size:117.99% 256.41%; background-position:36.07% 47.34%; background-repeat:no-repeat;
+    background:
+      radial-gradient(120% 170% at 88% 50%, rgba(255,176,32,0.22), transparent 60%),
+      linear-gradient(160deg, #241246 0%, #170a30 55%, #0c0620 100%);
     box-shadow:0 8px 22px rgba(0,0,0,0.5), 0 0 18px rgba(124,92,255,0.18); }
   #tab-home .daily-content{ position:absolute; z-index:1; left:1%; top:4%; bottom:4%; width:62%;
     display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
-    border-radius:10px; padding:0 3%;
-    background:rgb(16,0,38); }
+    border-radius:10px; padding:0 3%; }
+  #tab-home .daily-card-art{ position:absolute; right:3%; top:50%; transform:translateY(-50%);
+    width:32%; aspect-ratio:1; filter:drop-shadow(0 8px 16px rgba(0,0,0,0.5)); }
   #tab-home .daily-content b{ color:var(--text); font-size:14.5px; margin-bottom:2px; }
   /* Sarlavha <b> ichidagi tarjima <span>'i umumiy `.daily-content span` qoidasidan
      kulrang rangni olib qolardi — sarlavhadan rangni meros qilib olsin. */
@@ -697,28 +695,33 @@
   .news-empty{ text-align:center; color:var(--muted); font-size:13px; padding:30px 0; }
 
   /* ---------- 🎡 Omadli g'ildirak ---------- */
-  /* Kunlik sovg'a banneri — fon assets/lucky-wheel-home-banner.png, BUTUNLIGICHA
-     (kesilmagan). Rasmda panel canvasning katta qismini egallaydi (checkerboard
-     chekka bilan), shuning uchun background-position/size bilan faqat panelga
-     "oyna" ochamiz. G'ildirak rasmning o'ng tomonida dekorativ qoladi (statik —
-     bu yerda aylanish shart emas, chunki bu faqat modalni ochish tugmasi).
-     Matn va tugma — rasmdagi statik matn ustiga qo'yilgan HAQIQIY HTML. */
+  /* Bosh sahifadagi banner — fon endi rasm emas, premium mavzuga mos to'q
+     binafsha-qora CSS gradient. O'ng tomondagi dekorativ mini g'ildirak
+     ham to'liq CSS/SVG (pastda .wheel-mini). */
   .wheel-card{ position:relative; overflow:hidden; display:block; cursor:pointer;
     aspect-ratio:1138/495; border-radius:16px; margin:2px 0 20px;
-    background-color:#0d0620;
-    background-image:url('assets/lucky-wheel-home-banner.png');
-    background-size:105.45% 133.33%; background-position:50% 47.88%; background-repeat:no-repeat;
+    background:
+      radial-gradient(120% 170% at 88% 50%, rgba(139,92,246,0.28), transparent 62%),
+      linear-gradient(160deg, #1E1040 0%, #150a30 55%, #0a0518 100%);
     box-shadow:0 8px 22px rgba(0,0,0,0.5), 0 0 18px rgba(124,92,255,0.18); }
   .wheel-card-body{ position:absolute; z-index:1; left:1%; top:5%; bottom:5%; width:58%;
     display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
-    border-radius:10px; padding:0 3%;
-    background:rgb(10,5,26); }
+    border-radius:10px; padding:0 3%; }
   .wheel-card-body b{ font-size:16px; font-family:'Space Grotesk',sans-serif; display:block; margin-bottom:4px; }
   .wheel-card-body span{ font-size:11.5px; color:#C9BFE8; line-height:1.35; }
   .wheel-card-body .task-btn{ margin-top:10px; padding:9px 20px; border-radius:999px;
     background:linear-gradient(135deg,#A970FF,#7B3FE4); color:#fff; border:none; font-size:13px;
     box-shadow:0 6px 18px rgba(124,92,255,0.45), inset 0 1px 0 rgba(255,255,255,0.3); }
   .wheel-card-body .task-btn:disabled{ background:var(--line); color:var(--muted); box-shadow:none; }
+  .wheel-mini{ position:absolute; right:4%; top:50%; transform:translateY(-50%);
+    width:33%; aspect-ratio:1; z-index:0;
+    filter:drop-shadow(0 6px 14px rgba(0,0,0,0.5)); }
+  .wheel-mini-hub{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:34%; aspect-ratio:1; border-radius:50%; z-index:2;
+    background:radial-gradient(circle at 34% 24%, #E4D2FF 0%, #B98BFF 22%, #7C3AED 58%, #4A1490 82%, #2E0A63 100%);
+    border:2px solid #FFB020;
+    box-shadow:0 4px 10px rgba(0,0,0,0.5), 0 0 12px rgba(139,92,246,0.6),
+      inset 0 2px 4px rgba(255,255,255,0.4), inset 0 -4px 8px rgba(0,0,0,0.4); }
   /* Modal — fon assets/lucky-wheel-modal.png, BUTUNLIGICHA (kesilmagan).
      Rasmda sarlavha, yopish tugmasi, g'ildirak (tinch holatda) va pastdagi
      ikkita eslatma qatori bor edi — hammasi shu bitta faylda. Statik matnlar
@@ -735,8 +738,13 @@
     background-image:url('assets/lucky-wheel-modal.png');
     background-size:100% 100%; background-repeat:no-repeat;
     box-shadow:0 20px 50px rgba(0,0,0,0.6); }
-  /* Sarlavha — rasmdagi statik matn o'rniga */
-  .wheel-modal-title{ position:absolute; z-index:2; left:10%; right:22%; top:3.6%; height:8.5%;
+  /* Sarlavha — rasmdagi statik "Kunlik sovg'a" matni o'rniga.
+     DIQQAT: chap/o'ng chetlar BIR XIL (15%/15%) bo'lishi shart — avval
+     left:10%, right:22% edi va quti markazi 44% ga tushib, sarlavha ko'zga
+     ko'rinarli darajada chapga surilib qolgandi. 15% da quti markazi aynan
+     50%, o'ng cheti esa 85% — yopish tugmasi 86% dan boshlangani uchun unga
+     tegmaydi, ayni paytda rasmdagi eski matnni (30%..70%) to'liq berkitadi. */
+  .wheel-modal-title{ position:absolute; z-index:2; left:15%; right:15%; top:3.6%; height:8.5%;
     display:flex; align-items:center; justify-content:center; text-align:center; border-radius:8px;
     background:rgb(3,1,15);
     font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; color:#fff; }
@@ -745,20 +753,59 @@
   .wheel-close-x{ position:absolute; z-index:3; top:2.8%; right:5%; width:9%; aspect-ratio:1;
     border-radius:50%; background:transparent; border:none; padding:0; cursor:pointer; }
   .wheel-wrap{ position:absolute; left:5.10%; top:12.75%; width:89.57%; height:65.83%; }
+  /* Panel foni (lucky-wheel-modal.png) ichida ESKI g'ildirak ham chizilgan
+     (gardish, LED, hub, ko'rsatkich). CSS g'ildirak uning ustiga tushgani uchun
+     ikkalasi bir-biriga aralashib ko'rinardi. Shu qopqoq eski g'ildirakni
+     (porlashi bilan birga) butunlay berkitadi — rangi panel fonidan olingan
+     rgb(2,1,17), shuning uchun sezilmaydi. */
+  .wheel-blot{ position:absolute; inset:-7%; border-radius:50%; z-index:0; background:rgb(2,1,17); }
   .wheel-pointer{ position:absolute; top:-6%; left:50%; transform:translateX(-50%); width:9%; z-index:6;
     filter:drop-shadow(0 3px 7px rgba(0,0,0,0.65)) drop-shadow(0 0 8px rgba(255,180,40,0.55)); }
   .wheel-pointer svg{ width:100%; height:auto; display:block; }
   .wheel-pointer.tick{ animation:pointerTick .12s ease; }
   @keyframes pointerTick{ 0%{ transform:translateX(-50%) translateY(0); } 45%{ transform:translateX(-50%) translateY(5px); } 100%{ transform:translateX(-50%) translateY(0); } }
-  .wheel-3d{ position:relative; width:100%; height:100%; }
-  /* Sektorlarda raqam yo'q, shuning uchun diskning o'zi (rim+LED+sektorlar)
-     bitta butun sifatida aylanadi — bu haqiqiy pruz g'ildiraklarga o'xshaydi
-     (faqat tepadagi ko'rsatkich qo'zg'almaydi). Sektor chegaralari 45° da —
+  .wheel-3d{ position:relative; z-index:1; width:100%; height:100%; }
+  /* Disk (rim+LED+sektorlar) bitta butun sifatida aylanadi — haqiqiy prize
+     g'ildiraklarga o'xshaydi (faqat tepadagi ko'rsatkich qo'zg'almaydi).
+     Endi rasm emas — to'liq CSS: oltin gardish, binafsha/oltin gradient
+     sektorlar, LED chiroqlar aylana bo'ylab. Sektor chegaralari 45° da —
      doSpin() burchak hisobiga ta'sir yo'q. */
   .wheel-disc{ position:absolute; inset:0; width:100%; height:100%; border-radius:50%; will-change:transform;
-    background-image:url('assets/lucky-wheel-modal.png');
-    background-size:111.65% 151.90%; background-position:48.91% 37.32%; background-repeat:no-repeat;
     filter:drop-shadow(0 6px 16px rgba(0,0,0,0.55)); }
+  /* DIQQAT: radial-gradient(circle, ...) uchun aniq "closest-side" kalit so'zi
+     shart — aks holda brauzer standart bo'yicha "farthest-corner" o'lchamdan
+     foydalanadi (diagonal masofa), va foizlar disk chekkasiga (border-radius:50%
+     bilan kesilgan joyga) mos kelmay qoladi. closest-side bilan 100% = diskning
+     haqiqiy radiusi, shuning uchun foizlar to'g'ridan-to'g'ri radius ulushi. */
+  .wheel-rim-gold{ position:absolute; inset:0; border-radius:50%; z-index:0;
+    background:radial-gradient(circle closest-side, transparent 0% 83%, #C9A6FF 85%, #8B5CF6 90%, #4C2499 96%, transparent 100%);
+    box-shadow:0 0 16px rgba(139,92,246,0.6); }
+  /* DIQQAT: sektorlar 0° dan boshlanadi (-22.5° dan emas). Raqamlar doSpin()
+     mantiqi bo'yicha idx*45+22.5° burchakda turadi (22.5°, 67.5°, 112.5°...).
+     -22.5° dan boshlanganda sektor CHEGARALARI aynan shu burchaklarga tushib,
+     har bir raqam ikki sektor orasidagi chiziq ustida qolardi — chalkash
+     ko'rinardi. 0° dan boshlanganda sektor markazlari 22.5°, 67.5°, ... bo'lib,
+     har bir raqam o'z sektorining aynan o'rtasida turadi va g'ildirak
+     to'xtaganda ko'rsatkich yutgan sektorning markaziga to'g'ri keladi. */
+  .wheel-sectors{ position:absolute; inset:8.5%; border-radius:50%; z-index:0; overflow:hidden;
+    background:conic-gradient(from 0deg,
+      #8B5CF6 0deg 45deg, #FFB020 45deg 90deg, #8B5CF6 90deg 135deg, #FFB020 135deg 180deg,
+      #8B5CF6 180deg 225deg, #FFB020 225deg 270deg, #8B5CF6 270deg 315deg, #FFB020 315deg 360deg);
+    box-shadow:inset 0 0 0 2.5px rgba(255,214,140,0.85), inset 0 0 0 1px rgba(0,0,0,0.3); }
+  .wheel-sectors::after{ content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle at 50% 8%, rgba(255,255,255,0.38), transparent 42%),
+      radial-gradient(circle at 50% 100%, rgba(0,0,0,0.38), transparent 55%); }
+  .wheel-leds{ position:absolute; inset:0; z-index:1; pointer-events:none; }
+  /* DIQQAT: spoke butun disk o'lchamida (inset:0) va o'z markazi atrofida
+     aylanadi. Avval `width:0` edi — o'shanda chiroqning `width:5.2%` qiymati
+     NOLGA aylanardi (foiz nol kenglikdan hisoblanadi), va ekranda faqat
+     box-shadow xiraligi ko'rinib, chiroqlar yo'qday tuyulardi. */
+  .led-spoke{ position:absolute; inset:0; }
+  .led-dot{ position:absolute; top:4%; left:50%; width:4.6%; aspect-ratio:1; transform:translate(-50%,-50%);
+    border-radius:50%; display:block;
+    background:radial-gradient(circle at 35% 30%, #FFFDF0, #FFD24A 45%, #E8A100 100%);
+    box-shadow:0 0 7px 2.5px rgba(255,205,70,0.95), 0 0 15px 6px rgba(255,176,32,0.5),
+      inset 0 -1px 2px rgba(150,90,0,0.5); }
   /* Uchayotgan 3D tangalar va yutuq matni */
   .fly-coin{ position:fixed; z-index:95; width:28px; height:28px; border-radius:50%; pointer-events:none;
     display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:#7A4B00;
@@ -776,7 +823,7 @@
     20%{ transform:translateX(-50%) translateY(0) scale(1.15); opacity:1; }
     45%{ transform:translateX(-50%) scale(1); }
     100%{ transform:translateX(-50%) translateY(-70px) scale(0.9); opacity:0; } }
-  .wheel-seg{ position:absolute; top:0; left:50%; width:0; height:50%; transform-origin:bottom center; z-index:1; }
+  .wheel-seg{ position:absolute; top:0; left:50%; width:0; height:50%; transform-origin:bottom center; z-index:2; }
   /* top:35% (16px emas) — sonni gardish bilan markaziy tugma orasidagi
      rangli halqaning o'rtasida markazlashtiradi, chekkaga yopishtirmaydi. */
   .wheel-seg span{ position:absolute; top:35%; left:50%; transform:translateX(-50%); color:#fff; font-weight:800;
@@ -821,22 +868,30 @@
   .wheel-note:empty{ display:none; }
 
   /* ---------- G'ildirak ostidagi eslatma qatorlari ----------
-     Ikonkalar, "1/1" badge va oltin tasdiqlash belgisi rasmning o'zida
-     qoladi (dekorativ, tilga bog'liq emas). Faqat matn ustiga HTML bilan
-     qo'yiladi, chunki 3 tilga tarjima bo'lishi kerak.
-     left:21% (15% emas): ikonka asl rasmda ~8.5%-19.8% oralig'ida joylashgan
-     edi — 15% dan boshlangan yamalik ikonkaning o'rtasidan kesib, ustma-ust
-     tushib qolgandi. Endi yamalik ikonkadan keyin boshlanadi, padding esa
-     matnning oldingi joyida qolishi uchun mos ravishda kamaytirilgan. */
-  .wheel-info{ position:absolute; inset:0; z-index:2; pointer-events:none; }
-  .wi-row{ position:absolute; left:21%; right:20%; display:flex; flex-direction:column; justify-content:center;
-    border-radius:6px; padding:0 2% 0 3%;
-    background:rgb(6,3,18); }
-  .wi-row:nth-child(1){ top:79.3%; height:10.3%; }
-  .wi-row:nth-child(2){ top:89.6%; height:10.1%; }
-  .wi-text{ display:flex; flex-direction:column; gap:0; }
+     Avval fon rasmidagi kartaning USTIGA to'g'ri to'rtburchak yamalik
+     qo'yilardi — yamaliqning chekkalari va ostidagi eski (faqat o'zbekcha)
+     matn bilinib turardi. Endi kartaning O'ZI ham CSS bilan qayta chizilgan
+     va fon rasmidagi kartani to'liq berkitadi (u rasmda x 54..826, y 923..1186
+     px oralig'ida — shuning uchun bu qutu biroz kattaroq qilib olingan).
+     Ikonkalar va "1/1" belgisi ham inline SVG/HTML, matn esa 3 tilga
+     tarjima bo'ladi. */
+  .wheel-info{ position:absolute; z-index:2; left:5.4%; right:5.4%; top:76.2%; bottom:0.6%;
+    display:flex; flex-direction:column; border-radius:14px; overflow:hidden;
+    background:linear-gradient(160deg,#171034 0%,#100a24 60%,#0b0719 100%);
+    box-shadow:inset 0 0 0 1px rgba(168,124,255,0.22), 0 6px 18px rgba(0,0,0,0.45); }
+  .wi-row{ flex:1; min-width:0; display:flex; align-items:center; gap:8px; padding:0 10px; }
+  .wi-row + .wi-row{ border-top:1px solid rgba(168,124,255,0.16); }
+  .wi-ico{ width:26px; height:26px; flex-shrink:0;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5)) drop-shadow(0 0 6px rgba(139,92,246,0.45)); }
+  .wi-text{ flex:1; min-width:0; display:flex; flex-direction:column; gap:0; }
   .wi-text b{ font-size:9.5px; font-weight:700; color:var(--text); line-height:1.15; }
   .wi-text i{ font-size:8.3px; font-style:normal; color:#9990B8; line-height:1.15; }
+  .wi-pill{ flex-shrink:0; padding:3px 9px; border-radius:999px;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:10px; color:#fff;
+    background:linear-gradient(135deg,#A970FF,#7B3FE4);
+    box-shadow:0 3px 9px rgba(124,92,255,0.45), inset 0 1px 0 rgba(255,255,255,0.3); }
+  .wi-badge{ width:24px; height:24px; flex-shrink:0;
+    filter:drop-shadow(0 2px 5px rgba(0,0,0,0.5)) drop-shadow(0 0 7px rgba(255,176,32,0.5)); }
 
   /* ---------- Level-up animatsiya ---------- */
   #levelUpOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.82); backdrop-filter:blur(5px);
@@ -1075,7 +1130,18 @@
            renderLevel()/renderBalance() shularni yangilaydi. -->
       <div class="stat-cards">
         <div class="sc-slot sc-xp" onclick="switchTab('level')">
-          <img class="sc-icon" src="assets/ui/icon-xp.png" alt="">
+          <svg class="sc-icon sc-icon-xp" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <radialGradient id="gXP" cx="38%" cy="30%" r="75%">
+                <stop offset="0%" stop-color="#DFFFA8"/><stop offset="45%" stop-color="#8BE04A"/>
+                <stop offset="100%" stop-color="#2E8F2A"/>
+              </radialGradient>
+            </defs>
+            <path fill="url(#gXP)" stroke="#1F6B1E" stroke-width="1.6" stroke-linejoin="round"
+              d="M32 4l7.2 16.3 17.8 1.9-13.4 12 3.9 17.6L32 42.9 16.5 51.8l3.9-17.6-13.4-12 17.8-1.9z"/>
+            <path d="M32 10.5l5.3 12 13 1.4-9.8 8.8 2.9 12.9L32 39l-11.4 6.6 2.9-12.9-9.8-8.8 13-1.4z"
+              fill="none" stroke="#EAFFC2" stroke-width="1.3" stroke-linejoin="round" opacity=".55"/>
+          </svg>
           <div class="sc-content">
             <span class="sc-label">XP</span>
             <div class="sc-value"><span id="xpCurrent">0</span><span class="sc-sep">/</span><span class="sc-sub" id="xpNeeded">1000</span></div>
@@ -1084,7 +1150,18 @@
         </div>
 
         <div class="sc-slot sc-limit" onclick="switchTab('tasks')">
-          <img class="sc-icon" src="assets/ui/icon-limit.png" alt="">
+          <svg class="sc-icon sc-icon-limit" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="gLimit" x1="0.2" y1="0" x2="0.85" y2="1">
+                <stop offset="0%" stop-color="#CDE6FF"/><stop offset="45%" stop-color="#5FA0FF"/>
+                <stop offset="100%" stop-color="#1E56C8"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#gLimit)" stroke="#123A8C" stroke-width="1.6" stroke-linejoin="round"
+              d="M32 6c-2.4 0-4.3 1.9-4.3 4.3v1.6C20.8 13.6 16 20 16 27.5v9.3l-4.4 6.7c-.9 1.4.1 3.2 1.8 3.2h37.2c1.7 0 2.7-1.8 1.8-3.2L48 36.8v-9.3c0-7.5-4.8-13.9-11.7-15.6v-1.6C36.3 7.9 34.4 6 32 6z"/>
+            <path d="M25 47c0 3.9 3.1 7 7 7s7-3.1 7-7" fill="none" stroke="#123A8C" stroke-width="2" stroke-linecap="round"/>
+            <ellipse cx="24" cy="20" rx="3.4" ry="5.2" transform="rotate(-25 24 20)" fill="#fff" opacity=".55"/>
+          </svg>
           <div class="sc-content">
             <span class="sc-label" data-i18n="dailyCapSuffix">kunlik limit</span>
             <div class="sc-value"><span id="dailyEarnedLabel">0</span><span class="sc-sep">/</span><span class="sc-sub" id="dailyCapLabel">3000</span></div>
@@ -1093,7 +1170,26 @@
         </div>
 
         <div class="sc-slot sc-bonus" onclick="document.getElementById('streakBtn').click()">
-          <img class="sc-icon" src="assets/ui/icon-bonus.png" alt="">
+          <svg class="sc-icon sc-icon-bonus" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="gBoxFace" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#C9A3FF"/><stop offset="100%" stop-color="#7C3AED"/>
+              </linearGradient>
+              <linearGradient id="gBoxSide" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#8B4FE8"/><stop offset="100%" stop-color="#5324B0"/>
+              </linearGradient>
+              <linearGradient id="gRibbon" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#FFEAAE"/><stop offset="100%" stop-color="#FFA412"/>
+              </linearGradient>
+            </defs>
+            <path d="M10 28h44v26a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2z" fill="url(#gBoxSide)" stroke="#3D1780" stroke-width="1.4"/>
+            <path d="M10 28h20v28H12a2 2 0 0 1-2-2z" fill="url(#gBoxFace)" stroke="#3D1780" stroke-width="1.4"/>
+            <rect x="27" y="28" width="10" height="28" fill="url(#gRibbon)" stroke="#8C5600" stroke-width="1"/>
+            <rect x="9" y="21" width="46" height="9" rx="2" fill="url(#gRibbon)" stroke="#8C5600" stroke-width="1.4"/>
+            <path d="M32 21C28 10 18 8 15 13c-2.4 4 2 8 9 8zM32 21c4-11 14-13 17-8 2.4 4-2 8-9 8z"
+              fill="url(#gRibbon)" stroke="#8C5600" stroke-width="1.4" stroke-linejoin="round"/>
+            <circle cx="32" cy="21" r="3.2" fill="#FFE9AE" stroke="#8C5600" stroke-width="1"/>
+          </svg>
           <div class="sc-content">
             <span class="sc-label" data-i18n="dailyBonusTitle">Kunlik bonus</span>
             <div class="daily-reward" id="dailyRewardTxt"><span class="mini-coin">$</span> +500</div>
@@ -1101,9 +1197,9 @@
         </div>
       </div>
 
-      <!-- Kunlik bonus banneri. Fon: assets/daily-bonus-banner.png, butunligicha
-           (pastdagi CSS izohiga qarang). Sovg'a qutisi rasmning o'ng tomonida
-           qoladi (dekorativ). Bonus summasi yuqoridagi statistika kartasida. -->
+      <!-- Kunlik bonus banneri — fon CSS gradient, sovg'a qutisi inline SVG
+           (pastdagi CSS izohiga qarang). Bonus summasi yuqoridagi statistika
+           kartasida. -->
       <div class="daily-card">
         <div class="daily-content">
           <b><span data-i18n="dailyBonusTitle">Kunlik bonus</span></b>
@@ -1111,16 +1207,56 @@
           <div class="daily-timer" id="dailyTimer">23:59:59</div>
           <button class="daily-btn" id="streakBtn" onclick="claimStreak()">Olish</button>
         </div>
+        <svg class="daily-card-art" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="dcaFace" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#C9A3FF"/><stop offset="100%" stop-color="#7C3AED"/>
+            </linearGradient>
+            <linearGradient id="dcaSide" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#8B4FE8"/><stop offset="100%" stop-color="#5324B0"/>
+            </linearGradient>
+            <linearGradient id="dcaRibbon" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#FFEAAE"/><stop offset="100%" stop-color="#FFA412"/>
+            </linearGradient>
+          </defs>
+          <path d="M10 28h44v26a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2z" fill="url(#dcaSide)" stroke="#3D1780" stroke-width="1.4"/>
+          <path d="M10 28h20v28H12a2 2 0 0 1-2-2z" fill="url(#dcaFace)" stroke="#3D1780" stroke-width="1.4"/>
+          <rect x="27" y="28" width="10" height="28" fill="url(#dcaRibbon)" stroke="#8C5600" stroke-width="1"/>
+          <rect x="9" y="21" width="46" height="9" rx="2" fill="url(#dcaRibbon)" stroke="#8C5600" stroke-width="1.4"/>
+          <path d="M32 21C28 10 18 8 15 13c-2.4 4 2 8 9 8zM32 21c4-11 14-13 17-8 2.4 4-2 8-9 8z"
+            fill="url(#dcaRibbon)" stroke="#8C5600" stroke-width="1.4" stroke-linejoin="round"/>
+          <circle cx="32" cy="21" r="3.2" fill="#FFE9AE" stroke="#8C5600" stroke-width="1"/>
+          <g opacity=".85">
+            <path d="M53 14l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#FFE9AE"/>
+            <path d="M12 12l1.4 3.4 3.4 1.4-3.4 1.4-1.4 3.4-1.4-3.4-3.4-1.4 3.4-1.4z" fill="#C9A6FF"/>
+          </g>
+        </svg>
       </div>
 
-      <!-- Kunlik sovg'a — bosh sahifadagi banner. Fon: assets/lucky-wheel-home-banner.png,
-           butunligicha. Matn va tugma rasm ustiga qo'yilgan HTML — funksiya
-           o'zgarmagan: openWheel(). -->
+      <!-- Kunlik sovg'a — bosh sahifadagi banner. Fon CSS gradient, mini g'ildirak
+           inline SVG (.wheel-mini). Funksiya o'zgarmagan: openWheel(). -->
       <div class="wheel-card" onclick="openWheel()">
         <div class="wheel-card-body">
           <b data-i18n="wheelTitle">Omadli g'ildirak</b>
           <span data-i18n="wheelSub">Kuniga 1 marta bepul — 500 tangagacha yutib oling!</span>
           <button class="task-btn" id="wheelCardBtn" onclick="event.stopPropagation(); openWheel()" data-i18n="btnSpin">Aylantirish</button>
+        </div>
+        <!-- Dekorativ mini g'ildirak — modal bilan bir xil CSS komponentlar
+             (rasm emas), statik holatda, faqat modalni ochish tugmasi. -->
+        <div class="wheel-mini" aria-hidden="true">
+          <div class="wheel-rim-gold"></div>
+          <div class="wheel-sectors"></div>
+          <div class="wheel-leds">
+            <div class="led-spoke" style="transform:rotate(0deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(45deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(90deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(135deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(180deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(225deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(270deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(315deg)"><i class="led-dot"></i></div>
+          </div>
+          <div class="wheel-mini-hub"></div>
         </div>
       </div>
 
@@ -1473,6 +1609,8 @@
     <div class="wheel-modal-title" data-i18n="wheelTitle">Omadli g'ildirak</div>
     <button class="wheel-close-x" onclick="closeWheel()" data-i18n-aria="btnClose" aria-label="Yopish"></button>
     <div class="wheel-wrap">
+      <!-- Fon rasmidagi eski g'ildirakni berkitadi (CSS izohiga qarang) -->
+      <div class="wheel-blot" aria-hidden="true"></div>
       <div class="wheel-pointer" id="wheelPointer">
         <svg viewBox="0 0 24 34" aria-hidden="true">
           <defs>
@@ -1492,6 +1630,26 @@
       </div>
       <div class="wheel-3d">
         <div class="wheel-disc" id="wheelDisc">
+          <div class="wheel-rim-gold"></div>
+          <div class="wheel-sectors"></div>
+          <div class="wheel-leds">
+            <div class="led-spoke" style="transform:rotate(0deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(22.5deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(45deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(67.5deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(90deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(112.5deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(135deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(157.5deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(180deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(202.5deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(225deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(247.5deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(270deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(292.5deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(315deg)"><i class="led-dot"></i></div>
+            <div class="led-spoke" style="transform:rotate(337.5deg)"><i class="led-dot"></i></div>
+          </div>
           <div class="wheel-seg" style="transform:rotate(22.5deg)"><span>10</span></div>
           <div class="wheel-seg" style="transform:rotate(67.5deg)"><span>20</span></div>
           <div class="wheel-seg seg-flip" style="transform:rotate(112.5deg)"><span>30</span></div>
@@ -1508,19 +1666,52 @@
     </div>
     <div class="wheel-note" id="wheelNote"></div>
 
-    <!-- Eslatma qatorlari — ikonka/badge rasmda qoladi, matn HTML'da -->
+    <!-- Eslatma kartasi — karta, ikonkalar va belgilar to'liq CSS/SVG
+         (fon rasmidagi eski kartani berkitadi), matn 3 tilga tarjima bo'ladi -->
     <div class="wheel-info">
       <div class="wi-row">
+        <svg class="wi-ico" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="wiGiftBox" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#C9A3FF"/><stop offset="100%" stop-color="#7C3AED"/>
+            </linearGradient>
+            <linearGradient id="wiGiftRib" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#FFEAAE"/><stop offset="100%" stop-color="#FFA412"/>
+            </linearGradient>
+          </defs>
+          <path d="M10 28h44v26a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2z" fill="url(#wiGiftBox)" stroke="#3D1780" stroke-width="2"/>
+          <rect x="27" y="28" width="10" height="28" fill="url(#wiGiftRib)"/>
+          <rect x="9" y="21" width="46" height="9" rx="2" fill="url(#wiGiftRib)" stroke="#8C5600" stroke-width="1.6"/>
+          <path d="M32 21C28 10 18 8 15 13c-2.4 4 2 8 9 8zM32 21c4-11 14-13 17-8 2.4 4-2 8-9 8z"
+            fill="url(#wiGiftRib)" stroke="#8C5600" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
         <span class="wi-text">
           <b data-i18n="wheelInfo1T">Kuniga 1 marta bepul aylantirasiz</b>
           <i data-i18n="wheelInfo1S">Har kuni qayta urinib ko'ring</i>
         </span>
+        <span class="wi-pill">1/1</span>
       </div>
       <div class="wi-row">
+        <svg class="wi-ico" viewBox="0 0 64 64" aria-hidden="true">
+          <defs><linearGradient id="wiShieldP" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#C9A3FF"/><stop offset="55%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#5B21B6"/>
+          </linearGradient></defs>
+          <path d="M32 5l22 9v18c0 14-9.5 23.5-22 27C19.5 55.5 10 46 10 32V14z"
+            fill="url(#wiShieldP)" stroke="#3D1780" stroke-width="2.4" stroke-linejoin="round"/>
+          <path d="M21 32l8 8 15-15" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
         <span class="wi-text">
           <b data-i18n="wheelInfo2T">Haqiqiy pul tikilmaydi</b>
           <i data-i18n="wheelInfo2S">100% bepul va xavfsiz</i>
         </span>
+        <svg class="wi-badge" viewBox="0 0 64 64" aria-hidden="true">
+          <defs><linearGradient id="wiShieldG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FFE9AE"/><stop offset="55%" stop-color="#FFB020"/><stop offset="100%" stop-color="#B87800"/>
+          </linearGradient></defs>
+          <path d="M32 5l22 9v18c0 14-9.5 23.5-22 27C19.5 55.5 10 46 10 32V14z"
+            fill="url(#wiShieldG)" stroke="#8C5600" stroke-width="2.4" stroke-linejoin="round"/>
+          <path d="M21 32l8 8 15-15" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </div>
     </div>
   </div>
