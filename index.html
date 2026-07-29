@@ -738,8 +738,13 @@
     background-image:url('assets/lucky-wheel-modal.png');
     background-size:100% 100%; background-repeat:no-repeat;
     box-shadow:0 20px 50px rgba(0,0,0,0.6); }
-  /* Sarlavha — rasmdagi statik matn o'rniga */
-  .wheel-modal-title{ position:absolute; z-index:2; left:10%; right:22%; top:3.6%; height:8.5%;
+  /* Sarlavha — rasmdagi statik "Kunlik sovg'a" matni o'rniga.
+     DIQQAT: chap/o'ng chetlar BIR XIL (15%/15%) bo'lishi shart — avval
+     left:10%, right:22% edi va quti markazi 44% ga tushib, sarlavha ko'zga
+     ko'rinarli darajada chapga surilib qolgandi. 15% da quti markazi aynan
+     50%, o'ng cheti esa 85% — yopish tugmasi 86% dan boshlangani uchun unga
+     tegmaydi, ayni paytda rasmdagi eski matnni (30%..70%) to'liq berkitadi. */
+  .wheel-modal-title{ position:absolute; z-index:2; left:15%; right:15%; top:3.6%; height:8.5%;
     display:flex; align-items:center; justify-content:center; text-align:center; border-radius:8px;
     background:rgb(3,1,15);
     font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; color:#fff; }
@@ -863,22 +868,30 @@
   .wheel-note:empty{ display:none; }
 
   /* ---------- G'ildirak ostidagi eslatma qatorlari ----------
-     Ikonkalar, "1/1" badge va oltin tasdiqlash belgisi rasmning o'zida
-     qoladi (dekorativ, tilga bog'liq emas). Faqat matn ustiga HTML bilan
-     qo'yiladi, chunki 3 tilga tarjima bo'lishi kerak.
-     left:21% (15% emas): ikonka asl rasmda ~8.5%-19.8% oralig'ida joylashgan
-     edi — 15% dan boshlangan yamalik ikonkaning o'rtasidan kesib, ustma-ust
-     tushib qolgandi. Endi yamalik ikonkadan keyin boshlanadi, padding esa
-     matnning oldingi joyida qolishi uchun mos ravishda kamaytirilgan. */
-  .wheel-info{ position:absolute; inset:0; z-index:2; pointer-events:none; }
-  .wi-row{ position:absolute; left:21%; right:20%; display:flex; flex-direction:column; justify-content:center;
-    border-radius:6px; padding:0 2% 0 3%;
-    background:rgb(6,3,18); }
-  .wi-row:nth-child(1){ top:79.3%; height:10.3%; }
-  .wi-row:nth-child(2){ top:89.6%; height:10.1%; }
-  .wi-text{ display:flex; flex-direction:column; gap:0; }
+     Avval fon rasmidagi kartaning USTIGA to'g'ri to'rtburchak yamalik
+     qo'yilardi — yamaliqning chekkalari va ostidagi eski (faqat o'zbekcha)
+     matn bilinib turardi. Endi kartaning O'ZI ham CSS bilan qayta chizilgan
+     va fon rasmidagi kartani to'liq berkitadi (u rasmda x 54..826, y 923..1186
+     px oralig'ida — shuning uchun bu qutu biroz kattaroq qilib olingan).
+     Ikonkalar va "1/1" belgisi ham inline SVG/HTML, matn esa 3 tilga
+     tarjima bo'ladi. */
+  .wheel-info{ position:absolute; z-index:2; left:5.4%; right:5.4%; top:76.2%; bottom:0.6%;
+    display:flex; flex-direction:column; border-radius:14px; overflow:hidden;
+    background:linear-gradient(160deg,#171034 0%,#100a24 60%,#0b0719 100%);
+    box-shadow:inset 0 0 0 1px rgba(168,124,255,0.22), 0 6px 18px rgba(0,0,0,0.45); }
+  .wi-row{ flex:1; min-width:0; display:flex; align-items:center; gap:8px; padding:0 10px; }
+  .wi-row + .wi-row{ border-top:1px solid rgba(168,124,255,0.16); }
+  .wi-ico{ width:26px; height:26px; flex-shrink:0;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5)) drop-shadow(0 0 6px rgba(139,92,246,0.45)); }
+  .wi-text{ flex:1; min-width:0; display:flex; flex-direction:column; gap:0; }
   .wi-text b{ font-size:9.5px; font-weight:700; color:var(--text); line-height:1.15; }
   .wi-text i{ font-size:8.3px; font-style:normal; color:#9990B8; line-height:1.15; }
+  .wi-pill{ flex-shrink:0; padding:3px 9px; border-radius:999px;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:10px; color:#fff;
+    background:linear-gradient(135deg,#A970FF,#7B3FE4);
+    box-shadow:0 3px 9px rgba(124,92,255,0.45), inset 0 1px 0 rgba(255,255,255,0.3); }
+  .wi-badge{ width:24px; height:24px; flex-shrink:0;
+    filter:drop-shadow(0 2px 5px rgba(0,0,0,0.5)) drop-shadow(0 0 7px rgba(255,176,32,0.5)); }
 
   /* ---------- Level-up animatsiya ---------- */
   #levelUpOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.82); backdrop-filter:blur(5px);
@@ -1653,19 +1666,52 @@
     </div>
     <div class="wheel-note" id="wheelNote"></div>
 
-    <!-- Eslatma qatorlari — ikonka/badge rasmda qoladi, matn HTML'da -->
+    <!-- Eslatma kartasi — karta, ikonkalar va belgilar to'liq CSS/SVG
+         (fon rasmidagi eski kartani berkitadi), matn 3 tilga tarjima bo'ladi -->
     <div class="wheel-info">
       <div class="wi-row">
+        <svg class="wi-ico" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="wiGiftBox" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#C9A3FF"/><stop offset="100%" stop-color="#7C3AED"/>
+            </linearGradient>
+            <linearGradient id="wiGiftRib" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#FFEAAE"/><stop offset="100%" stop-color="#FFA412"/>
+            </linearGradient>
+          </defs>
+          <path d="M10 28h44v26a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2z" fill="url(#wiGiftBox)" stroke="#3D1780" stroke-width="2"/>
+          <rect x="27" y="28" width="10" height="28" fill="url(#wiGiftRib)"/>
+          <rect x="9" y="21" width="46" height="9" rx="2" fill="url(#wiGiftRib)" stroke="#8C5600" stroke-width="1.6"/>
+          <path d="M32 21C28 10 18 8 15 13c-2.4 4 2 8 9 8zM32 21c4-11 14-13 17-8 2.4 4-2 8-9 8z"
+            fill="url(#wiGiftRib)" stroke="#8C5600" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
         <span class="wi-text">
           <b data-i18n="wheelInfo1T">Kuniga 1 marta bepul aylantirasiz</b>
           <i data-i18n="wheelInfo1S">Har kuni qayta urinib ko'ring</i>
         </span>
+        <span class="wi-pill">1/1</span>
       </div>
       <div class="wi-row">
+        <svg class="wi-ico" viewBox="0 0 64 64" aria-hidden="true">
+          <defs><linearGradient id="wiShieldP" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#C9A3FF"/><stop offset="55%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#5B21B6"/>
+          </linearGradient></defs>
+          <path d="M32 5l22 9v18c0 14-9.5 23.5-22 27C19.5 55.5 10 46 10 32V14z"
+            fill="url(#wiShieldP)" stroke="#3D1780" stroke-width="2.4" stroke-linejoin="round"/>
+          <path d="M21 32l8 8 15-15" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
         <span class="wi-text">
           <b data-i18n="wheelInfo2T">Haqiqiy pul tikilmaydi</b>
           <i data-i18n="wheelInfo2S">100% bepul va xavfsiz</i>
         </span>
+        <svg class="wi-badge" viewBox="0 0 64 64" aria-hidden="true">
+          <defs><linearGradient id="wiShieldG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FFE9AE"/><stop offset="55%" stop-color="#FFB020"/><stop offset="100%" stop-color="#B87800"/>
+          </linearGradient></defs>
+          <path d="M32 5l22 9v18c0 14-9.5 23.5-22 27C19.5 55.5 10 46 10 32V14z"
+            fill="url(#wiShieldG)" stroke="#8C5600" stroke-width="2.4" stroke-linejoin="round"/>
+          <path d="M21 32l8 8 15-15" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </div>
     </div>
   </div>
