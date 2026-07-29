@@ -237,7 +237,10 @@
        bir xil to'q fon bo'lgani uchun kattaroq yamalik sezilmaydi. */
     background:rgb(11,5,28); }
   .sc-xp .sc-content{ left:33%; right:0%; }
-  .sc-limit .sc-content{ left:33%; right:0%; }
+  /* 40% (33% emas): asl rasmdagi qo'ng'iroq ikonkasi ustidagi "50" belgisi
+     (baked badge) shu chegaragacha to'liq berkitiladi — aks holda ikonka
+     bilan matn ustma-ust tushib, badge yarim ko'rinib qolardi. */
+  .sc-limit .sc-content{ left:40%; right:0%; }
   .sc-bonus .sc-content{ left:41%; right:0%; bottom:16%; }
   .sc-label{ font-size:8.1px; line-height:1.08; font-weight:600; color:#CFC8EC; letter-spacing:0; overflow-wrap:break-word; }
   .sc-value{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:11px; color:#FFD54A;
@@ -788,6 +791,10 @@
   .wheel-seg{ position:absolute; top:0; left:50%; width:0; height:50%; transform-origin:bottom center; z-index:1; }
   .wheel-seg span{ position:absolute; top:16px; left:50%; transform:translateX(-50%); color:#fff; font-weight:800;
     font-size:15px; font-family:'Space Grotesk',sans-serif; text-shadow:0 1px 3px rgba(0,0,0,0.55); white-space:nowrap; }
+  /* Doiraning pastki yarmiga (90°-270°) tushgan raqamlar aks holda
+     boshi-oyoq teskari chiqadi — shu segmentlarga qo'shimcha 180° burash
+     bilan tik holatga qaytariladi. */
+  .wheel-seg.seg-flip span{ transform:translateX(-50%) rotate(180deg); }
   /* Markazdagi aylantirish tugmasi — porloq binafsha gradient dumaloq.
      O'chirilgan holatda uzunroq matn ("Bugun aylantirib bo'lgansiz") chiqadi,
      shuning uchun matn o'raladi va tugma ichida kesilmaydi. */
@@ -825,10 +832,14 @@
   /* ---------- G'ildirak ostidagi eslatma qatorlari ----------
      Ikonkalar, "1/1" badge va oltin tasdiqlash belgisi rasmning o'zida
      qoladi (dekorativ, tilga bog'liq emas). Faqat matn ustiga HTML bilan
-     qo'yiladi, chunki 3 tilga tarjima bo'lishi kerak. */
+     qo'yiladi, chunki 3 tilga tarjima bo'lishi kerak.
+     left:21% (15% emas): ikonka asl rasmda ~8.5%-19.8% oralig'ida joylashgan
+     edi — 15% dan boshlangan yamalik ikonkaning o'rtasidan kesib, ustma-ust
+     tushib qolgandi. Endi yamalik ikonkadan keyin boshlanadi, padding esa
+     matnning oldingi joyida qolishi uchun mos ravishda kamaytirilgan. */
   .wheel-info{ position:absolute; inset:0; z-index:2; pointer-events:none; }
-  .wi-row{ position:absolute; left:15%; right:20%; display:flex; flex-direction:column; justify-content:center;
-    border-radius:6px; padding:0 2% 0 9%;
+  .wi-row{ position:absolute; left:21%; right:20%; display:flex; flex-direction:column; justify-content:center;
+    border-radius:6px; padding:0 2% 0 3%;
     background:rgb(6,3,18); }
   .wi-row:nth-child(1){ top:79.3%; height:10.3%; }
   .wi-row:nth-child(2){ top:89.6%; height:10.1%; }
@@ -1491,10 +1502,10 @@
         <div class="wheel-disc" id="wheelDisc">
           <div class="wheel-seg" style="transform:rotate(22.5deg)"><span>10</span></div>
           <div class="wheel-seg" style="transform:rotate(67.5deg)"><span>20</span></div>
-          <div class="wheel-seg" style="transform:rotate(112.5deg)"><span>30</span></div>
-          <div class="wheel-seg" style="transform:rotate(157.5deg)"><span>50</span></div>
-          <div class="wheel-seg" style="transform:rotate(202.5deg)"><span>70</span></div>
-          <div class="wheel-seg" style="transform:rotate(247.5deg)"><span>100</span></div>
+          <div class="wheel-seg seg-flip" style="transform:rotate(112.5deg)"><span>30</span></div>
+          <div class="wheel-seg seg-flip" style="transform:rotate(157.5deg)"><span>50</span></div>
+          <div class="wheel-seg seg-flip" style="transform:rotate(202.5deg)"><span>70</span></div>
+          <div class="wheel-seg seg-flip" style="transform:rotate(247.5deg)"><span>100</span></div>
           <div class="wheel-seg" style="transform:rotate(292.5deg)"><span>200</span></div>
           <div class="wheel-seg" style="transform:rotate(337.5deg)"><span>500</span></div>
         </div>
