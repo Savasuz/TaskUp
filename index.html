@@ -113,6 +113,11 @@
     background-color:#02000E;
     background-image:url('assets/splash-background.png');
     background-size:cover; background-position:center; background-repeat:no-repeat; }
+  /* Ambient binafsha porlash — illyustratsiya ortida, premium chuqurlik uchun */
+  #loadingScreen::before{ content:''; position:absolute; left:50%; top:40%; width:min(78vw,360px); aspect-ratio:1;
+    transform:translate(-50%,-50%); border-radius:50%; pointer-events:none; z-index:0;
+    background:radial-gradient(circle, rgba(139,92,246,0.3), transparent 70%); }
+  #loadingScreen > *{ position:relative; z-index:1; }
   /* Rasmdan FAQAT illyustratsiya qismi olinadi — undagi tayyor "TaskUp", tavsif,
      "72%" va binafsha progress bar kesib tashlanadi (ular quyida HTML/CSS bilan
      qayta yasalgan, shunda progress bar haqiqatan animatsiyalanadi va yashil bo'ladi).
@@ -131,15 +136,22 @@
     animation:loadFloat 3.2s ease-in-out infinite; }
   @keyframes loadFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
   .loading-title{ font-family:'Space Grotesk',sans-serif,Arial; font-size:clamp(24px,7vw,30px);
-    font-weight:700; color:#fff; margin-top:6px; }
+    font-weight:700; margin-top:6px;
+    background:linear-gradient(135deg,#fff 15%,#E4D2FF 55%,#B98BFF 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 24px rgba(139,92,246,0.55); }
   .loading-sub{ font-size:clamp(11.5px,3.4vw,14px); color:rgba(255,255,255,0.55); margin-top:6px;
     text-align:center; }
-  .loading-bar{ width:min(62vw, 235px); height:8px; border-radius:99px; margin-top:26px;
-    background:rgba(255,255,255,0.09); overflow:hidden; }
+  .loading-bar{ position:relative; width:min(62vw, 235px); height:8px; border-radius:99px; margin-top:26px;
+    background:rgba(255,255,255,0.09); overflow:hidden; box-shadow:inset 0 1px 3px rgba(0,0,0,0.4); }
   /* Kenglik JS orqali 0% -> 100% ga o'zgaradi (requestAnimationFrame) */
-  .loading-bar-fill{ width:0%; height:100%; border-radius:99px;
+  .loading-bar-fill{ position:relative; overflow:hidden; width:0%; height:100%; border-radius:99px;
     background:linear-gradient(90deg,#16A34A,#22C55E 55%,#4ADE80);
     box-shadow:0 0 12px rgba(34,197,94,0.55); }
+  .loading-bar-fill::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+    animation:shimmerSweep 1.5s linear infinite; }
+  @keyframes shimmerSweep{ 0%{ transform:translateX(-100%); } 100%{ transform:translateX(220%); } }
   .loading-text{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:rgba(74,222,128,0.8);
     letter-spacing:2px; margin-top:14px; }
   #loadPct{ color:#4ADE80; font-weight:700; }
@@ -249,13 +261,19 @@
 
   /* ---------- Referral banner ---------- */
   .banner{ position:relative; overflow:hidden; border-radius:18px; margin-bottom:20px; width:100%; aspect-ratio:1536/1024;
-    background-image:url('assets/invite-banner.png'); background-size:cover; background-position:center; }
-  .banner-text{ position:absolute; left:8%; top:12%; width:47%; display:flex; flex-direction:column; gap:10px; }
+    background-image:url('assets/invite-banner.png'); background-size:cover; background-position:center;
+    box-shadow:0 10px 24px rgba(0,0,0,0.45), 0 0 20px rgba(139,92,246,0.25),
+      inset 0 0 0 1px rgba(168,124,255,0.28); }
+  /* Premium shisha yaltirashi + pastki vinyet — mavjud illyustratsiya ustiga */
+  .banner::after{ content:''; position:absolute; inset:0; pointer-events:none; z-index:1;
+    background:linear-gradient(180deg, rgba(255,255,255,0.08), transparent 35%),
+      radial-gradient(90% 70% at 50% 120%, rgba(0,0,0,0.5), transparent 60%); }
+  .banner-text{ position:absolute; z-index:2; left:8%; top:12%; width:47%; display:flex; flex-direction:column; gap:10px; }
   .banner-title{ font-family:'Space Grotesk', sans-serif; font-weight:700;
     font-size:clamp(13px, 4.2vw, 19px); line-height:1.28; color:#fff; margin:0; }
   .banner-sub{ font-size:clamp(10px, 2.9vw, 13px); color:rgba(255,255,255,0.82); line-height:1.4; margin:0; }
   .banner-highlight{ color:#8FD3FF; font-weight:700; }
-  .banner-btn{ position:absolute; left:2.5%; top:57%; width:38%; height:20%; background:transparent; border:none;
+  .banner-btn{ position:absolute; z-index:2; left:2.5%; top:57%; width:38%; height:20%; background:transparent; border:none;
     cursor:pointer; padding:0; display:flex; align-items:center; justify-content:center; }
   .banner-btn:active{ transform:scale(0.96); }
   .banner-btn-label{ padding-left:33%; padding-right:19%; font-family:'Space Grotesk', sans-serif; font-weight:700;
@@ -342,7 +360,8 @@
 
   /* ---------- Vazifalar bo'sh holati ---------- */
   .tasks-empty{ display:none; flex-direction:column; align-items:center; text-align:center; padding:36px 24px 20px; }
-  .tasks-empty img{ width:190px; height:190px; object-fit:contain; margin-bottom:14px; }
+  .tasks-empty-art{ width:150px; height:150px; margin-bottom:14px;
+    filter:drop-shadow(0 8px 16px rgba(0,0,0,0.4)) drop-shadow(0 0 14px rgba(139,92,246,0.4)); }
   .tasks-empty-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; margin-bottom:6px; }
   .tasks-empty-sub{ font-size:12.5px; color:var(--muted); max-width:280px; line-height:1.5; }
   .section-label{ font-size:11.5px; color:var(--muted); margin:16px 2px 8px; font-family:'JetBrains Mono', monospace; letter-spacing:0.5px; }
@@ -356,17 +375,17 @@
   .share-item:active .share-icon{ transform:scale(0.9); }
 
   /* ---------- Wallet: "Yechish uchun balans" kartasi ----------
-     Fon sifatida assets/wallet-balance-card.png ning YUQORI (karta) qismi
-     ishlatiladi — rasmda hamyon + tangalar illyustratsiyasi o'ngda, chap tomoni
-     esa bo'sh, matn shu yerga HTML qatlam sifatida yoziladi (rasm ichida matn yo'q).
-     Rasm 1402x1122; karta bandi x:27..1376 (1349), y:44..856 (812). Shu kesimni
-     ko'rsatish uchun background-size/position foizlari quyidagicha hisoblangan:
-       size-x = imageW/cropW = 1402/1349 = 103.93%   size-y = 1122/812 = 138.18%
-       pos-x  = cropX/(imageW-cropW) = 27/53 = 50.94%
-       pos-y  = cropY/(imageH-cropH) = 44/310 = 14.19% */
+     Fon endi rasm emas — premium binafsha-oltin CSS gradient. O'ng tomondagi
+     hamyon+tangalar illyustratsiyasi to'liq inline SVG (.wallet-card-art). */
   .wallet-card{ position:relative; width:100%; aspect-ratio:1349/812; border-radius:18px; overflow:hidden;
-    margin-bottom:12px; background-image:url('assets/wallet-balance-card.png');
-    background-size:103.93% 138.18%; background-position:50.94% 14.19%; background-repeat:no-repeat; }
+    margin-bottom:12px;
+    background:
+      radial-gradient(115% 140% at 84% 22%, rgba(255,176,32,0.16), transparent 55%),
+      radial-gradient(120% 150% at 12% 105%, rgba(139,92,246,0.4), transparent 60%),
+      linear-gradient(160deg, #2A1550 0%, #170A30 55%, #0A0518 100%);
+    box-shadow:0 10px 26px rgba(0,0,0,0.5), 0 0 20px rgba(139,92,246,0.28), inset 0 1px 0 rgba(255,255,255,0.06); }
+  .wallet-card-art{ position:absolute; right:2%; bottom:-4%; width:46%; aspect-ratio:1;
+    filter:drop-shadow(0 10px 18px rgba(0,0,0,0.5)); }
   /* Matn qatlami. Vertikal joylashuv va o'lchamlar dizayn namunasidan o'lchab olingan
      (karta balandligiga nisbatan): eyebrow 21%, sarlavha 27%, summa 42%, so'm 67%.
      Karta balandligi aspect-ratio orqali kenglikdan kelib chiqadi, kenglik esa
@@ -391,14 +410,17 @@
     font-size:clamp(10.5px, 3.5vw, 17px); color:rgba(255,255,255,0.72); line-height:1.3;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-  /* ---------- Wallet: "Pul yechish" tugmasi (rasmdagi pastki panel CSS bilan) ---------- */
-  .wallet-withdraw-btn{ display:flex; align-items:stretch; width:100%; height:clamp(52px, 15.5vw, 64px);
+  /* ---------- Wallet: "Pul yechish" tugmasi ---------- */
+  .wallet-withdraw-btn{ position:relative; display:flex; align-items:stretch; width:100%; height:clamp(52px, 15.5vw, 64px);
     padding:0; border:none; border-radius:15px; overflow:hidden; cursor:pointer; margin-bottom:4px;
-    background:linear-gradient(180deg, #8D13F4 0%, #5A00C8 46%, #2E008B 100%);
-    box-shadow:0 8px 22px rgba(90,0,200,0.38); transition:transform .12s ease; }
+    background:linear-gradient(180deg, #A22CFF 0%, #6E10D6 46%, #33008F 100%);
+    box-shadow:0 10px 24px rgba(90,0,200,0.45), 0 0 16px rgba(139,92,246,0.3),
+      inset 0 1px 0 rgba(255,255,255,0.25); transition:transform .12s ease; }
+  .wallet-withdraw-btn::before{ content:''; position:absolute; left:0; right:0; top:0; height:46%;
+    background:linear-gradient(180deg, rgba(255,255,255,0.28), transparent); pointer-events:none; }
   .wallet-withdraw-btn:active{ transform:scale(0.98); }
-  .wwb-icon{ flex:0 0 31%; display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(180deg, #FBF4FC 0%, #DCC0FB 55%, #C49AFF 100%); }
+  .wwb-icon{ flex:0 0 31%; display:flex; align-items:center; justify-content:center; position:relative;
+    background:linear-gradient(180deg, #FFF9F0 0%, #E9D6FF 55%, #C49AFF 100%); }
   .wwb-icon svg{ width:clamp(38px, 11vw, 50px); height:auto; }
   .wwb-main{ flex:1; min-width:0; display:flex; align-items:center; justify-content:center; gap:8px;
     padding:0 10px; font-family:'Space Grotesk', sans-serif; font-weight:700; color:#fff;
@@ -505,7 +527,14 @@
 
   /* ---------- Profile ---------- */
   .profile-header{ position:relative; overflow:hidden; border-radius:24px; text-align:center; padding:26px 16px 24px;
-    background-image:url('assets/branding/profile-header-bg.jpg'); background-size:cover; background-position:center; }
+    background-image:url('assets/branding/profile-header-bg.jpg'); background-size:cover; background-position:center;
+    box-shadow:0 10px 26px rgba(0,0,0,0.45), 0 0 22px rgba(139,92,246,0.22),
+      inset 0 0 0 1px rgba(168,124,255,0.22), inset 0 1px 0 rgba(255,255,255,0.08); }
+  /* Premium chuqurlik: yuqoridan yumshoq shisha yaltirashi + pastdan vinyet soya */
+  .profile-header::before{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:linear-gradient(180deg, rgba(255,255,255,0.10), transparent 40%),
+      radial-gradient(120% 90% at 50% 115%, rgba(0,0,0,0.55), transparent 60%),
+      radial-gradient(70% 60% at 50% -10%, rgba(139,92,246,0.35), transparent 65%); }
   .profile-header > *{ position:relative; z-index:1; }
   .profile-avatar{ width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue)); color:#fff;
     display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:22px; }
@@ -609,19 +638,27 @@
   .avatar-frame-wrap-lb-podium.gold{ width:88px; height:88px; }
   .avatar-frame-wrap-lb-podium.gold .avatar-frame-img{ width:88px; height:88px; }
   .podium-avatar{ width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue));
-    color:#fff; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    color:#fff; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; overflow:hidden;
+    box-shadow:0 0 10px rgba(139,92,246,0.4); }
   .podium-avatar svg{ width:55%; height:55%; }
-  .podium-avatar.gold{ border-color:var(--amber); width:50px; height:50px; }
-  .podium-avatar.silver{ border-color:#C0C0C0; }
-  .podium-avatar.bronze{ border-color:#CD7F32; }
-  .podium-crown{ font-size:20px; margin-bottom:2px; }
+  .podium-avatar.gold{ border-color:var(--amber); width:50px; height:50px; box-shadow:0 0 16px rgba(255,176,32,0.65); }
+  .podium-avatar.silver{ border-color:#C0C0C0; box-shadow:0 0 13px rgba(200,200,210,0.55); }
+  .podium-avatar.bronze{ border-color:#CD7F32; box-shadow:0 0 13px rgba(205,127,50,0.55); }
+  .podium-crown{ font-size:20px; margin-bottom:2px; filter:drop-shadow(0 0 6px rgba(255,176,32,0.7)); }
   .podium-name{ font-size:11.5px; font-weight:700; text-align:center; }
   .podium-coin{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--amber); margin:2px 0 8px; }
-  .podium-bar{ width:100%; border-radius:10px 10px 0 0; display:flex; align-items:flex-start; justify-content:center;
+  /* Glossy 3D taglik: yuqori yorug' urg'u + pastki ichki soya bilan hajm hissi */
+  .podium-bar{ position:relative; overflow:hidden; width:100%; border-radius:10px 10px 0 0;
+    display:flex; align-items:flex-start; justify-content:center;
     padding-top:8px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; color:rgba(255,255,255,0.6); }
-  .podium-slot.first .podium-bar{ background:linear-gradient(180deg, #FFC94A, #FFB020); color:#2A1800; }
-  .podium-slot.second .podium-bar{ background:linear-gradient(180deg, #3A3D4A, #2A2C36); }
-  .podium-slot.third .podium-bar{ background:linear-gradient(180deg, #4A3323, #3A2818); }
+  .podium-bar::before{ content:''; position:absolute; left:0; right:0; top:0; height:38%;
+    background:linear-gradient(180deg, rgba(255,255,255,0.32), transparent); pointer-events:none; }
+  .podium-slot.first .podium-bar{ background:linear-gradient(180deg, #FFDD7A, #FFB020 55%, #C9861A); color:#2A1800;
+    box-shadow:inset 0 -10px 16px rgba(0,0,0,0.22), 0 0 18px rgba(255,176,32,0.4); }
+  .podium-slot.second .podium-bar{ background:linear-gradient(180deg, #757A88, #3A3D4A 55%, #22242C);
+    box-shadow:inset 0 -10px 16px rgba(0,0,0,0.3), 0 0 14px rgba(180,180,190,0.25); }
+  .podium-slot.third .podium-bar{ background:linear-gradient(180deg, #D68C4E, #7A4423 55%, #46250f);
+    box-shadow:inset 0 -10px 16px rgba(0,0,0,0.3), 0 0 14px rgba(205,127,50,0.3); }
   .toast{ position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
     background:var(--purple); color:#fff; padding:10px 20px; border-radius:30px;
     font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:13px;
@@ -637,22 +674,20 @@
   #tab-home .icon-btn{ background:transparent; border:none; width:34px; height:34px; }
   #tab-home .icon-btn svg{ width:21px; height:21px; }
 
-  /* Kunlik bonus banneri — fon assets/daily-bonus-banner.png, BUTUNLIGICHA
-     (kesilmagan). Rasmda panel canvasning kichik qismini egallaydi, shuning
-     uchun background-position/size bilan faqat shu panelga "oyna" ochamiz.
-     Sovg'a qutisi rasmning o'ng tomonida qoladi (dekorativ); sarlavha,
-     tavsif va tugma — rasmdagi statik matn ustiga qo'yilgan HAQIQIY HTML,
-     3 tilga tarjima bo'ladi. */
+  /* Kunlik bonus banneri — fon endi rasm emas, premium binafsha CSS gradient.
+     Sovg'a qutisi to'liq inline SVG (.daily-card-art), sarlavha/tavsif/tugma
+     HAQIQIY HTML, 3 tilga tarjima bo'ladi. */
   #tab-home .daily-card{ position:relative; overflow:hidden; display:block;
     aspect-ratio:1017/312; border-radius:16px; padding:0; margin:2px 0 20px;
-    background-color:#1a0033;
-    background-image:url('assets/daily-bonus-banner.png');
-    background-size:117.99% 256.41%; background-position:36.07% 47.34%; background-repeat:no-repeat;
+    background:
+      radial-gradient(120% 170% at 88% 50%, rgba(255,176,32,0.22), transparent 60%),
+      linear-gradient(160deg, #241246 0%, #170a30 55%, #0c0620 100%);
     box-shadow:0 8px 22px rgba(0,0,0,0.5), 0 0 18px rgba(124,92,255,0.18); }
   #tab-home .daily-content{ position:absolute; z-index:1; left:1%; top:4%; bottom:4%; width:62%;
     display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
-    border-radius:10px; padding:0 3%;
-    background:rgb(16,0,38); }
+    border-radius:10px; padding:0 3%; }
+  #tab-home .daily-card-art{ position:absolute; right:3%; top:50%; transform:translateY(-50%);
+    width:32%; aspect-ratio:1; filter:drop-shadow(0 8px 16px rgba(0,0,0,0.5)); }
   #tab-home .daily-content b{ color:var(--text); font-size:14.5px; margin-bottom:2px; }
   /* Sarlavha <b> ichidagi tarjima <span>'i umumiy `.daily-content span` qoidasidan
      kulrang rangni olib qolardi — sarlavhadan rangni meros qilib olsin. */
@@ -1168,9 +1203,9 @@
         </div>
       </div>
 
-      <!-- Kunlik bonus banneri. Fon: assets/daily-bonus-banner.png, butunligicha
-           (pastdagi CSS izohiga qarang). Sovg'a qutisi rasmning o'ng tomonida
-           qoladi (dekorativ). Bonus summasi yuqoridagi statistika kartasida. -->
+      <!-- Kunlik bonus banneri — fon CSS gradient, sovg'a qutisi inline SVG
+           (pastdagi CSS izohiga qarang). Bonus summasi yuqoridagi statistika
+           kartasida. -->
       <div class="daily-card">
         <div class="daily-content">
           <b><span data-i18n="dailyBonusTitle">Kunlik bonus</span></b>
@@ -1178,11 +1213,34 @@
           <div class="daily-timer" id="dailyTimer">23:59:59</div>
           <button class="daily-btn" id="streakBtn" onclick="claimStreak()">Olish</button>
         </div>
+        <svg class="daily-card-art" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="dcaFace" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#C9A3FF"/><stop offset="100%" stop-color="#7C3AED"/>
+            </linearGradient>
+            <linearGradient id="dcaSide" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#8B4FE8"/><stop offset="100%" stop-color="#5324B0"/>
+            </linearGradient>
+            <linearGradient id="dcaRibbon" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#FFEAAE"/><stop offset="100%" stop-color="#FFA412"/>
+            </linearGradient>
+          </defs>
+          <path d="M10 28h44v26a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2z" fill="url(#dcaSide)" stroke="#3D1780" stroke-width="1.4"/>
+          <path d="M10 28h20v28H12a2 2 0 0 1-2-2z" fill="url(#dcaFace)" stroke="#3D1780" stroke-width="1.4"/>
+          <rect x="27" y="28" width="10" height="28" fill="url(#dcaRibbon)" stroke="#8C5600" stroke-width="1"/>
+          <rect x="9" y="21" width="46" height="9" rx="2" fill="url(#dcaRibbon)" stroke="#8C5600" stroke-width="1.4"/>
+          <path d="M32 21C28 10 18 8 15 13c-2.4 4 2 8 9 8zM32 21c4-11 14-13 17-8 2.4 4-2 8-9 8z"
+            fill="url(#dcaRibbon)" stroke="#8C5600" stroke-width="1.4" stroke-linejoin="round"/>
+          <circle cx="32" cy="21" r="3.2" fill="#FFE9AE" stroke="#8C5600" stroke-width="1"/>
+          <g opacity=".85">
+            <path d="M53 14l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#FFE9AE"/>
+            <path d="M12 12l1.4 3.4 3.4 1.4-3.4 1.4-1.4 3.4-1.4-3.4-3.4-1.4 3.4-1.4z" fill="#C9A6FF"/>
+          </g>
+        </svg>
       </div>
 
-      <!-- Kunlik sovg'a — bosh sahifadagi banner. Fon: assets/lucky-wheel-home-banner.png,
-           butunligicha. Matn va tugma rasm ustiga qo'yilgan HTML — funksiya
-           o'zgarmagan: openWheel(). -->
+      <!-- Kunlik sovg'a — bosh sahifadagi banner. Fon CSS gradient, mini g'ildirak
+           inline SVG (.wheel-mini). Funksiya o'zgarmagan: openWheel(). -->
       <div class="wheel-card" onclick="openWheel()">
         <div class="wheel-card-body">
           <b data-i18n="wheelTitle">Omadli g'ildirak</b>
@@ -1246,7 +1304,32 @@
 
       <div id="allTaskList"></div>
       <div id="tasksEmptyState" class="tasks-empty">
-        <img src="assets/menu/no-tasks.png" alt="">
+        <svg class="tasks-empty-art" viewBox="0 0 160 160" aria-hidden="true">
+          <defs>
+            <radialGradient id="teGlow" cx="50%" cy="45%" r="55%">
+              <stop offset="0%" stop-color="#7C3AED" stop-opacity=".35"/><stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="teBoard" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#B98BFF"/><stop offset="55%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#5B21B6"/>
+            </linearGradient>
+            <linearGradient id="teClip" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#FFE9AE"/><stop offset="100%" stop-color="#FFB020"/>
+            </linearGradient>
+          </defs>
+          <circle cx="80" cy="80" r="66" fill="url(#teGlow)"/>
+          <rect x="42" y="30" width="76" height="98" rx="12" fill="url(#teBoard)" stroke="#3D1780" stroke-width="2.5"/>
+          <rect x="52" y="42" width="56" height="6" rx="3" fill="rgba(255,255,255,0.35)" stroke-dasharray="1 6" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+          <rect x="52" y="58" width="56" height="6" rx="3" fill="rgba(255,255,255,0.22)"/>
+          <rect x="52" y="74" width="40" height="6" rx="3" fill="rgba(255,255,255,0.22)"/>
+          <rect x="52" y="90" width="48" height="6" rx="3" fill="rgba(255,255,255,0.16)"/>
+          <rect x="62" y="20" width="36" height="18" rx="6" fill="url(#teClip)" stroke="#8C5600" stroke-width="2"/>
+          <circle cx="118" cy="112" r="19" fill="#0c0620" stroke="#3D1780" stroke-width="2.5"/>
+          <path d="M111 112h14M118 105v14" stroke="#C9A6FF" stroke-width="3" stroke-linecap="round"/>
+          <g opacity=".85">
+            <path d="M30 100l2.4 5.9 5.9 2.4-5.9 2.4-2.4 5.9-2.4-5.9-5.9-2.4 5.9-2.4z" fill="#FFE9AE"/>
+            <path d="M124 34l1.8 4.4 4.4 1.8-4.4 1.8-1.8 4.4-1.8-4.4-4.4-1.8 4.4-1.8z" fill="#C9A6FF"/>
+          </g>
+        </svg>
         <div class="tasks-empty-title" data-i18n="noTasksTitle">Hali vazifa yo'q</div>
         <div class="tasks-empty-sub" data-i18n="noTasksSub">Yangi vazifalar tez orada paydo bo'ladi. Bildirishnomalarni yoqib qo'ying va hech narsani o'tkazib yubormang!</div>
       </div>
@@ -1298,6 +1381,37 @@
           </div>
           <div class="wallet-card-som">= <span id="somEst">0</span> so'm</div>
         </div>
+        <svg class="wallet-card-art" viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <linearGradient id="wcaBody" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#B98BFF"/><stop offset="55%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#5B21B6"/>
+            </linearGradient>
+            <linearGradient id="wcaFlap" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#7C3AED"/><stop offset="100%" stop-color="#4C1D95"/>
+            </linearGradient>
+            <radialGradient id="wcaCoin" cx="35%" cy="28%" r="75%">
+              <stop offset="0%" stop-color="#FFF3B0"/><stop offset="55%" stop-color="#FFC93C"/><stop offset="100%" stop-color="#C9861A"/>
+            </radialGradient>
+            <linearGradient id="wcaClasp" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#FFE9AE"/><stop offset="100%" stop-color="#FFB020"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="100" cy="176" rx="70" ry="10" fill="#000" opacity=".28"/>
+          <circle cx="146" cy="70" r="26" fill="url(#wcaCoin)" stroke="#A8720F" stroke-width="2"/>
+          <text x="146" y="79" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="24" fill="#7A4B00">$</text>
+          <circle cx="118" cy="52" r="15" fill="url(#wcaCoin)" stroke="#A8720F" stroke-width="1.6"/>
+          <text x="118" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="14" fill="#7A4B00">$</text>
+          <path d="M28 78c0-9 7-16 16-16h104c11 0 20 9 20 20v72c0 11-9 20-20 20H44c-9 0-16-7-16-16z"
+            fill="url(#wcaBody)" stroke="#3D1780" stroke-width="2.5"/>
+          <path d="M28 90c0-9 7-16 16-16h104c11 0 20 9 20 20v18H28z" fill="url(#wcaFlap)" opacity=".9"/>
+          <rect x="120" y="100" width="46" height="30" rx="7" fill="url(#wcaClasp)" stroke="#8C5600" stroke-width="2"/>
+          <circle cx="143" cy="115" r="6" fill="#6B4200"/>
+          <ellipse cx="55" cy="88" rx="18" ry="6" fill="#fff" opacity=".18"/>
+          <g opacity=".85">
+            <path d="M170 30l2.6 6.4 6.4 2.6-6.4 2.6-2.6 6.4-2.6-6.4-6.4-2.6 6.4-2.6z" fill="#FFE9AE"/>
+            <path d="M34 40l1.8 4.4 4.4 1.8-4.4 1.8-1.8 4.4-1.8-4.4-4.4-1.8 4.4-1.8z" fill="#C9A6FF"/>
+          </g>
+        </svg>
       </div>
 
       <button class="wallet-withdraw-btn" onclick="openCashout()">
@@ -1462,7 +1576,12 @@
           <div class="podium-bar" style="height:70px">2</div>
         </div>
         <div class="podium-slot first">
-          <div class="podium-crown"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:var(--amber)"><path d="M2 18h20l-2-9-5 4-3-7-3 7-5-4z"/></svg></div>
+          <div class="podium-crown"><svg viewBox="0 0 24 24" width="22" height="22">
+            <defs><linearGradient id="crownG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#FFE9AE"/><stop offset="55%" stop-color="#FFB020"/><stop offset="100%" stop-color="#B87800"/>
+            </linearGradient></defs>
+            <path fill="url(#crownG)" stroke="#8C5600" stroke-width="0.6" stroke-linejoin="round" d="M2 18h20l-2-9-5 4-3-7-3 7-5-4z"/>
+          </svg></div>
           <div class="avatar-frame-wrap avatar-frame-wrap-lb-podium gold">
             <div class="podium-avatar gold" id="p1Avatar">--</div>
             <img class="avatar-frame-img" id="p1Frame" src="assets/avatars/frame-oddiy.png" alt="">
