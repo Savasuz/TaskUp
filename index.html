@@ -748,12 +748,18 @@
   .wheel-close-x{ position:absolute; z-index:3; top:2.8%; right:5%; width:9%; aspect-ratio:1;
     border-radius:50%; background:transparent; border:none; padding:0; cursor:pointer; }
   .wheel-wrap{ position:absolute; left:5.10%; top:12.75%; width:89.57%; height:65.83%; }
+  /* Panel foni (lucky-wheel-modal.png) ichida ESKI g'ildirak ham chizilgan
+     (gardish, LED, hub, ko'rsatkich). CSS g'ildirak uning ustiga tushgani uchun
+     ikkalasi bir-biriga aralashib ko'rinardi. Shu qopqoq eski g'ildirakni
+     (porlashi bilan birga) butunlay berkitadi — rangi panel fonidan olingan
+     rgb(2,1,17), shuning uchun sezilmaydi. */
+  .wheel-blot{ position:absolute; inset:-7%; border-radius:50%; z-index:0; background:rgb(2,1,17); }
   .wheel-pointer{ position:absolute; top:-6%; left:50%; transform:translateX(-50%); width:9%; z-index:6;
     filter:drop-shadow(0 3px 7px rgba(0,0,0,0.65)) drop-shadow(0 0 8px rgba(255,180,40,0.55)); }
   .wheel-pointer svg{ width:100%; height:auto; display:block; }
   .wheel-pointer.tick{ animation:pointerTick .12s ease; }
   @keyframes pointerTick{ 0%{ transform:translateX(-50%) translateY(0); } 45%{ transform:translateX(-50%) translateY(5px); } 100%{ transform:translateX(-50%) translateY(0); } }
-  .wheel-3d{ position:relative; width:100%; height:100%; }
+  .wheel-3d{ position:relative; z-index:1; width:100%; height:100%; }
   /* Disk (rim+LED+sektorlar) bitta butun sifatida aylanadi — haqiqiy prize
      g'ildiraklarga o'xshaydi (faqat tepadagi ko'rsatkich qo'zg'almaydi).
      Endi rasm emas — to'liq CSS: oltin gardish, binafsha/oltin gradient
@@ -769,8 +775,15 @@
   .wheel-rim-gold{ position:absolute; inset:0; border-radius:50%; z-index:0;
     background:radial-gradient(circle closest-side, transparent 0% 83%, #C9A6FF 85%, #8B5CF6 90%, #4C2499 96%, transparent 100%);
     box-shadow:0 0 16px rgba(139,92,246,0.6); }
+  /* DIQQAT: sektorlar 0° dan boshlanadi (-22.5° dan emas). Raqamlar doSpin()
+     mantiqi bo'yicha idx*45+22.5° burchakda turadi (22.5°, 67.5°, 112.5°...).
+     -22.5° dan boshlanganda sektor CHEGARALARI aynan shu burchaklarga tushib,
+     har bir raqam ikki sektor orasidagi chiziq ustida qolardi — chalkash
+     ko'rinardi. 0° dan boshlanganda sektor markazlari 22.5°, 67.5°, ... bo'lib,
+     har bir raqam o'z sektorining aynan o'rtasida turadi va g'ildirak
+     to'xtaganda ko'rsatkich yutgan sektorning markaziga to'g'ri keladi. */
   .wheel-sectors{ position:absolute; inset:8.5%; border-radius:50%; z-index:0; overflow:hidden;
-    background:conic-gradient(from -22.5deg,
+    background:conic-gradient(from 0deg,
       #8B5CF6 0deg 45deg, #FFB020 45deg 90deg, #8B5CF6 90deg 135deg, #FFB020 135deg 180deg,
       #8B5CF6 180deg 225deg, #FFB020 225deg 270deg, #8B5CF6 270deg 315deg, #FFB020 315deg 360deg);
     box-shadow:inset 0 0 0 2.5px rgba(255,214,140,0.85), inset 0 0 0 1px rgba(0,0,0,0.3); }
@@ -778,11 +791,16 @@
     background:radial-gradient(circle at 50% 8%, rgba(255,255,255,0.38), transparent 42%),
       radial-gradient(circle at 50% 100%, rgba(0,0,0,0.38), transparent 55%); }
   .wheel-leds{ position:absolute; inset:0; z-index:1; pointer-events:none; }
-  .led-spoke{ position:absolute; top:0; left:50%; width:0; height:50%; transform-origin:bottom center; }
-  .led-dot{ position:absolute; top:8%; left:50%; width:5.2%; aspect-ratio:1; transform:translate(-50%,-50%);
+  /* DIQQAT: spoke butun disk o'lchamida (inset:0) va o'z markazi atrofida
+     aylanadi. Avval `width:0` edi — o'shanda chiroqning `width:5.2%` qiymati
+     NOLGA aylanardi (foiz nol kenglikdan hisoblanadi), va ekranda faqat
+     box-shadow xiraligi ko'rinib, chiroqlar yo'qday tuyulardi. */
+  .led-spoke{ position:absolute; inset:0; }
+  .led-dot{ position:absolute; top:4%; left:50%; width:4.6%; aspect-ratio:1; transform:translate(-50%,-50%);
     border-radius:50%; display:block;
-    background:radial-gradient(circle at 35% 30%, #FFF9E6, #FFC93C 55%, #B36E00);
-    box-shadow:0 0 6px 2.5px rgba(255,201,60,0.95), 0 0 1px rgba(0,0,0,0.5); }
+    background:radial-gradient(circle at 35% 30%, #FFFDF0, #FFD24A 45%, #E8A100 100%);
+    box-shadow:0 0 7px 2.5px rgba(255,205,70,0.95), 0 0 15px 6px rgba(255,176,32,0.5),
+      inset 0 -1px 2px rgba(150,90,0,0.5); }
   /* Uchayotgan 3D tangalar va yutuq matni */
   .fly-coin{ position:fixed; z-index:95; width:28px; height:28px; border-radius:50%; pointer-events:none;
     display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:#7A4B00;
@@ -1578,6 +1596,8 @@
     <div class="wheel-modal-title" data-i18n="wheelTitle">Omadli g'ildirak</div>
     <button class="wheel-close-x" onclick="closeWheel()" data-i18n-aria="btnClose" aria-label="Yopish"></button>
     <div class="wheel-wrap">
+      <!-- Fon rasmidagi eski g'ildirakni berkitadi (CSS izohiga qarang) -->
+      <div class="wheel-blot" aria-hidden="true"></div>
       <div class="wheel-pointer" id="wheelPointer">
         <svg viewBox="0 0 24 34" aria-hidden="true">
           <defs>
