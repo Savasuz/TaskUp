@@ -733,7 +733,14 @@
   #wheelOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.82); backdrop-filter:blur(5px);
     z-index:85; align-items:center; justify-content:center; }
   #wheelOverlay.show{ display:flex; }
-  .wheel-panel{ position:relative; width:calc(100% - 48px); max-width:320px; aspect-ratio:882/1200;
+  /* Panel kengligi uchta chegaraning ENG KICHIGI:
+       1) ekran eni - 24px  (yon chetlarda joy qolishi uchun)
+       2) 400px            (katta ekranlarda haddan tashqari cho'zilmasligi uchun)
+       3) 86vh ga mos en   (aspect-ratio 882/1200 bo'lgani uchun balandlik = en*1.36;
+                            past ekranlarda panel ekranga sig'masdan qolmasligi uchun)
+     Shuning uchun max-width alohida kerak emas — min() hammasini qamrab oladi. */
+  .wheel-panel{ position:relative; aspect-ratio:882/1200;
+    width:min(calc(100% - 24px), 400px, calc(86vh * 882 / 1200));
     border-radius:24px; overflow:hidden; animation:sheetUp .25s ease; background-color:#0A0714;
     background-image:url('assets/lucky-wheel-modal.png');
     background-size:100% 100%; background-repeat:no-repeat;
