@@ -211,43 +211,31 @@
   .mini-coin{ width:14px; height:14px; border-radius:50%; background:var(--amber); display:inline-flex; align-items:center; justify-content:center; font-size:8px; color:#2A1800; font-weight:700; flex-shrink:0; }
 
   /* ---------- Premium statistika kartalari (XP / kunlik limit / kunlik bonus) ----------
-     Fon — siz yuborgan assets/stat-cards-premium.png, BUTUNLIGICHA, kesilmagan.
-     Rasmda 3 ta karta bitta tor chiziqda joylashgan (atrofida qora maydon bor);
-     shu tor chiziqni background-position/size bilan ko'rsatamiz — fayl o'zi
-     hech qanday alohida kichik rasmga bo'linmagan, faqat CSS orqali "oyna"
-     ochilgan (asl fayl diskda o'zgarishsiz turadi).
-     Rasmdagi statik (faqat o'zbekcha) "XP / 3 240" kabi matnlar ustiga
-     yumshoq qoraytirilgan yamalik qo'yilib, ustiga HAQIQIY, 3 tilga
-     tarjima bo'ladigan HTML matn chiziladi — sonlar ham shu yerdan dinamik. */
-  .stat-cards{ position:relative; aspect-ratio:1086/201; border-radius:16px; overflow:hidden;
-    margin:2px 0 16px; background-color:#0d0620;
-    background-image:url('assets/stat-cards-premium.png');
-    background-size:110.5% 398.01%; background-position:54.39% 43.57%; background-repeat:no-repeat;
-    box-shadow:0 8px 22px rgba(0,0,0,0.5), 0 0 18px rgba(139,92,246,0.22); }
-  .sc-slot{ position:absolute; top:0; height:100%; cursor:pointer; }
-  .sc-slot.sc-xp{ left:0%; width:28.73%; }
-  .sc-slot.sc-limit{ left:33.98%; width:31.12%; }
-  .sc-slot.sc-bonus{ left:70.35%; width:25.14%; }
-  /* Karta ichidagi matn bloki: eski baked matnni yashiruvchi yumshoq
-     (chekkasi so'nadigan) qora-binafsha yamalik + ustidagi HTML matn. */
-  .sc-content{ position:absolute; top:4%; bottom:2%; display:flex; flex-direction:column; justify-content:center;
-    border-radius:8px; padding:0 3%;
-    /* To'liq qopqoq (fade emas), generous chegara bilan — chekkada eski
-       baked matn "ko'rinib qolishi" oldini oladi. Karta ichi baribir
-       bir xil to'q fon bo'lgani uchun kattaroq yamalik sezilmaydi. */
-    background:rgb(11,5,28); }
-  .sc-xp .sc-content{ left:33%; right:0%; }
-  /* 40% (33% emas): asl rasmdagi qo'ng'iroq ikonkasi ustidagi "50" belgisi
-     (baked badge) shu chegaragacha to'liq berkitiladi — aks holda ikonka
-     bilan matn ustma-ust tushib, badge yarim ko'rinib qolardi. */
-  .sc-limit .sc-content{ left:40%; right:0%; }
-  .sc-bonus .sc-content{ left:41%; right:0%; bottom:16%; }
-  .sc-label{ font-size:8.1px; line-height:1.08; font-weight:600; color:#CFC8EC; letter-spacing:0; overflow-wrap:break-word; }
-  .sc-value{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:11px; color:#FFD54A;
+     Uchala karta bir xil o'lcham/bo'shliqda, teng kenglikda (flex) chiziladi.
+     Ikonkalar — assets/ui/icon-xp.png, icon-limit.png, icon-bonus.png —
+     mavjud premium rasmdan olingan aniq, shaffof fonli sprite'lar (fon
+     rasmning o'zi endi ishlatilmaydi, chunki uning ichidagi 3 karta teng
+     bo'lmagan enda edi va teng kenglikka moslab cho'zish tasvirni buzardi).
+     Karta foni — bir xil binafsha gradient (premium mavzu ranglari), matn
+     to'liq dinamik HTML, 3 tilga tarjima bo'ladi. */
+  .stat-cards{ display:flex; gap:8px; margin:2px 0 16px; }
+  .sc-slot{ flex:1 1 0; min-width:0; height:66px; border-radius:16px; cursor:pointer;
+    position:relative; overflow:hidden; display:flex; align-items:center; gap:7px; padding:0 8px;
+    background:
+      radial-gradient(140% 160% at 20% 0%, rgba(154,102,255,0.32), transparent 60%),
+      linear-gradient(160deg, #241246 0%, #170a30 55%, #0c0620 100%);
+    box-shadow:0 8px 20px rgba(0,0,0,0.5), 0 0 16px rgba(139,92,246,0.24),
+      inset 0 1px 0 rgba(255,255,255,0.07), inset 0 0 0 1px rgba(168,124,255,0.14); }
+  .sc-icon{ width:32px; height:32px; object-fit:contain; flex-shrink:0;
+    filter:drop-shadow(0 3px 6px rgba(0,0,0,0.55)) drop-shadow(0 0 7px rgba(139,92,246,0.45)); }
+  .sc-content{ min-width:0; flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .sc-label{ font-size:8.6px; line-height:1.1; font-weight:700; color:#E4DEFB; letter-spacing:0.1px;
+    overflow-wrap:break-word; text-shadow:0 1px 2px rgba(0,0,0,0.5); }
+  .sc-value{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:11px; color:#FFD866;
     margin-top:3px; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:clip;
-    letter-spacing:-0.2px; text-shadow:0 0 10px rgba(255,190,60,0.35); }
-  .sc-value .sc-sep{ color:rgba(255,255,255,0.4); font-weight:400; font-size:8.5px; margin:0 0.5px; }
-  .sc-value .sc-sub{ color:#EFEBFF; font-size:8.5px; font-weight:600; }
+    letter-spacing:-0.2px; text-shadow:0 0 10px rgba(255,190,60,0.45); }
+  .sc-value .sc-sep{ color:rgba(255,255,255,0.45); font-weight:400; font-size:8.5px; margin:0 0.5px; }
+  .sc-value .sc-sub{ color:#F3EFFF; font-size:8.5px; font-weight:600; }
   .sc-track{ height:5px; border-radius:4px; margin-top:5px; overflow:hidden;
     background:rgba(255,255,255,0.10); box-shadow:inset 0 1px 2px rgba(0,0,0,0.5); }
   .sc-fill{ height:100%; width:0%; border-radius:4px; transition:width .6s ease; }
@@ -789,8 +777,11 @@
     45%{ transform:translateX(-50%) scale(1); }
     100%{ transform:translateX(-50%) translateY(-70px) scale(0.9); opacity:0; } }
   .wheel-seg{ position:absolute; top:0; left:50%; width:0; height:50%; transform-origin:bottom center; z-index:1; }
-  .wheel-seg span{ position:absolute; top:16px; left:50%; transform:translateX(-50%); color:#fff; font-weight:800;
-    font-size:15px; font-family:'Space Grotesk',sans-serif; text-shadow:0 1px 3px rgba(0,0,0,0.55); white-space:nowrap; }
+  /* top:35% (16px emas) — sonni gardish bilan markaziy tugma orasidagi
+     rangli halqaning o'rtasida markazlashtiradi, chekkaga yopishtirmaydi. */
+  .wheel-seg span{ position:absolute; top:35%; left:50%; transform:translateX(-50%); color:#fff; font-weight:800;
+    font-size:15px; font-family:'Space Grotesk',sans-serif; white-space:nowrap;
+    text-shadow:0 0 5px rgba(255,255,255,0.85), 0 0 12px rgba(255,255,255,0.5), 0 2px 4px rgba(0,0,0,0.55); }
   /* Doiraning pastki yarmiga (90°-270°) tushgan raqamlar aks holda
      boshi-oyoq teskari chiqadi — shu segmentlarga qo'shimcha 180° burash
      bilan tik holatga qaytariladi. */
@@ -1078,14 +1069,13 @@
         </div>
       </div>
 
-      <!-- Premium statistika kartalari. Barcha matn HTML'da qoladi (tarjima
-           tizimi o'zgarmagan), ikonkalar SVG — rasm fon sifatida ishlatilmaydi.
-           ID'lar avvalgidek: renderLevel()/renderBalance() shularni yangilaydi. -->
-      <!-- Fon: assets/stat-cards-premium.png (butun, kesilmagan fayl — pastdagi
-           CSS izohiga qarang). Ikonkalar (yulduz/qo'ng'iroq/sovg'a) rasmning
-           o'zida qoladi; label, son va progress-bar HTML orqali chiziladi. -->
+      <!-- Premium statistika kartalari — uchtasi teng o'lcham/bo'shliqda (flex).
+           Ikonkalar assets/ui/*.png (shaffof fonli sprite), matn/son/progress-bar
+           to'liq HTML orqali, tarjima tizimiga bog'liq. ID'lar avvalgidek:
+           renderLevel()/renderBalance() shularni yangilaydi. -->
       <div class="stat-cards">
         <div class="sc-slot sc-xp" onclick="switchTab('level')">
+          <img class="sc-icon" src="assets/ui/icon-xp.png" alt="">
           <div class="sc-content">
             <span class="sc-label">XP</span>
             <div class="sc-value"><span id="xpCurrent">0</span><span class="sc-sep">/</span><span class="sc-sub" id="xpNeeded">1000</span></div>
@@ -1094,6 +1084,7 @@
         </div>
 
         <div class="sc-slot sc-limit" onclick="switchTab('tasks')">
+          <img class="sc-icon" src="assets/ui/icon-limit.png" alt="">
           <div class="sc-content">
             <span class="sc-label" data-i18n="dailyCapSuffix">kunlik limit</span>
             <div class="sc-value"><span id="dailyEarnedLabel">0</span><span class="sc-sep">/</span><span class="sc-sub" id="dailyCapLabel">3000</span></div>
@@ -1102,6 +1093,7 @@
         </div>
 
         <div class="sc-slot sc-bonus" onclick="document.getElementById('streakBtn').click()">
+          <img class="sc-icon" src="assets/ui/icon-bonus.png" alt="">
           <div class="sc-content">
             <span class="sc-label" data-i18n="dailyBonusTitle">Kunlik bonus</span>
             <div class="daily-reward" id="dailyRewardTxt"><span class="mini-coin">$</span> +500</div>
