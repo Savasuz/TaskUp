@@ -2147,6 +2147,7 @@ const I18N = {
     badgeEmerald:"Zumrad", badgeAmethyst:"Ametist", badgeSapphire:"Safir", badgeRuby:"Rubin", badgeMythic:"Afsonaviy",
     soundMenuItem:"Ovoz effektlari", soundOnLbl:"Yoqilgan ›", soundOffLbl:"O'chirilgan ›",
     helpTitle:"Yordam", helpText:"Savol yoki muammo bormi? Biz bilan bog'laning — odatda bir necha soat ichida javob beramiz.", helpTelegram:"Telegram orqali yozish", helpEmail:"Email yozish",
+    authErrEmail:"To'g'ri email kiriting", authErrPassword:"Parol kamida 6 belgidan iborat bo'lishi kerak", authErrEmailFirst:"Avval email kiriting, keyin havolani bosing", authErrGeneric:"Xatolik: qayta urinib ko'ring", authErrInUse:"Bu email allaqachon ro'yxatdan o'tgan. 'Kirish' ni tanlang", authErrInvalidEmail:"Email formati noto'g'ri", authErrWeakPass:"Parol juda oddiy, kuchliroq parol tanlang", authErrWrongCreds:"Email yoki parol noto'g'ri", authErrTooMany:"Juda ko'p urinish. Birozdan keyin qayta urinib ko'ring",
     errOffline:"Internet aloqasi yo'q. Ulanishni tekshirib, qayta urinib ko'ring", errNetwork:"Server bilan aloqa uzildi. Bir necha soniyadan keyin qayta urinib ko'ring", errAuth:"Sessiya muddati tugagan — ilovadan chiqib, qaytadan kiring", errPermission:"Ruxsat yo'q — sahifani yangilang yoki qaytadan kiring", errUnknown:"Kutilmagan xatolik. Qayta urinib ko'ring",
     offlineMsg:"Internet aloqasi yo'q — ulanish tiklanishini kutyapmiz", onlineMsg:"Internet aloqasi tiklandi ✅",
     shareTitle:"Do'stlaringga ko'rsat! 🎉", shareWheel:"🎡 Omadli g'ildirakda {n} tanga yutdim!", shareLevel:"🏆 TaskUp'da {n}-darajaga chiqdim!", shareCashout:"💸 TaskUp'da ishlagan pulimni yechdim!",
@@ -2227,6 +2228,7 @@ const I18N = {
     badgeEmerald:"Emerald", badgeAmethyst:"Amethyst", badgeSapphire:"Sapphire", badgeRuby:"Ruby", badgeMythic:"Mythic",
     soundMenuItem:"Sound effects", soundOnLbl:"On ›", soundOffLbl:"Off ›",
     helpTitle:"Help", helpText:"Questions or problems? Contact us — we usually reply within a few hours.", helpTelegram:"Message us on Telegram", helpEmail:"Write an email",
+    authErrEmail:"Enter a valid email", authErrPassword:"Password must be at least 6 characters", authErrEmailFirst:"Enter your email first, then tap the link", authErrGeneric:"Something went wrong — please try again", authErrInUse:"This email is already registered. Choose 'Log in'", authErrInvalidEmail:"Invalid email format", authErrWeakPass:"Password is too weak, choose a stronger one", authErrWrongCreds:"Wrong email or password", authErrTooMany:"Too many attempts. Please try again a bit later",
     errOffline:"No internet connection. Check your connection and try again", errNetwork:"Lost connection to the server. Try again in a few seconds", errAuth:"Session expired — sign out and log in again", errPermission:"No permission — refresh the page or log in again", errUnknown:"Unexpected error. Please try again",
     offlineMsg:"No internet connection — waiting to reconnect", onlineMsg:"Back online ✅",
     shareTitle:"Show your friends! 🎉", shareWheel:"🎡 I won {n} coins on the Lucky Wheel!", shareLevel:"🏆 I reached level {n} on TaskUp!", shareCashout:"💸 I cashed out my TaskUp earnings!",
@@ -2307,6 +2309,7 @@ const I18N = {
     badgeEmerald:"Изумруд", badgeAmethyst:"Аметист", badgeSapphire:"Сапфир", badgeRuby:"Рубин", badgeMythic:"Мифический",
     soundMenuItem:"Звуковые эффекты", soundOnLbl:"Вкл ›", soundOffLbl:"Выкл ›",
     helpTitle:"Помощь", helpText:"Вопросы или проблемы? Свяжитесь с нами — обычно отвечаем в течение нескольких часов.", helpTelegram:"Написать в Telegram", helpEmail:"Написать на email",
+    authErrEmail:"Введите корректный email", authErrPassword:"Пароль должен содержать не менее 6 символов", authErrEmailFirst:"Сначала введите email, затем нажмите ссылку", authErrGeneric:"Ошибка — попробуйте снова", authErrInUse:"Этот email уже зарегистрирован. Выберите «Вход»", authErrInvalidEmail:"Неверный формат email", authErrWeakPass:"Пароль слишком простой, выберите надёжнее", authErrWrongCreds:"Неверный email или пароль", authErrTooMany:"Слишком много попыток. Попробуйте позже",
     errOffline:"Нет интернет-соединения. Проверьте связь и попробуйте снова", errNetwork:"Потеряна связь с сервером. Попробуйте через несколько секунд", errAuth:"Сессия истекла — выйдите и войдите заново", errPermission:"Нет доступа — обновите страницу или войдите заново", errUnknown:"Непредвиденная ошибка. Попробуйте ещё раз",
     offlineMsg:"Нет интернет-соединения — ждём восстановления", onlineMsg:"Соединение восстановлено ✅",
     shareTitle:"Покажи друзьям! 🎉", shareWheel:"🎡 Я выиграл {n} монет в Колесе удачи!", shareLevel:"🏆 Я достиг {n}-го уровня в TaskUp!", shareCashout:"💸 Я вывел свой заработок в TaskUp!",
@@ -2416,7 +2419,7 @@ function switchAuthMode(mode){
 function sendPasswordReset(){
   const email = document.getElementById('emailInput').value.trim();
   const errorEl = document.getElementById('authError');
-  if(!email || !email.includes('@')){ errorEl.textContent = "Avval email kiriting, keyin havolani bosing"; return; }
+  if(!email || !email.includes('@')){ errorEl.textContent = t('authErrEmailFirst'); return; }
   auth.sendPasswordResetEmail(email)
     .then(() => { errorEl.style.color = 'var(--green)'; errorEl.textContent = "Havola emailingizga yuborildi"; })
     .catch((err) => {
@@ -2433,8 +2436,8 @@ function submitAuth(){
   const errorEl = document.getElementById('authError');
   errorEl.textContent = '';
 
-  if(!email || !email.includes('@')){ errorEl.textContent = "To'g'ri email kiriting"; return; }
-  if(password.length < 6){ errorEl.textContent = "Parol kamida 6 belgidan iborat bo'lishi kerak"; return; }
+  if(!email || !email.includes('@')){ errorEl.textContent = t('authErrEmail'); return; }
+  if(password.length < 6){ errorEl.textContent = t('authErrPassword'); return; }
 
   const btn = document.getElementById('authSubmitBtn');
   btn.disabled = true; btn.textContent = "...";
@@ -2449,12 +2452,12 @@ function submitAuth(){
     })
     .catch((err) => {
       console.error(err);
-      let msg = "Xatolik: qayta urinib ko'ring";
-      if(err.code === 'auth/email-already-in-use') msg = "Bu email allaqachon ro'yxatdan o'tgan. 'Kirish' ni tanlang";
-      else if(err.code === 'auth/invalid-email') msg = "Email formati noto'g'ri";
-      else if(err.code === 'auth/weak-password') msg = "Parol juda oddiy, kuchliroq parol tanlang";
-      else if(err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') msg = "Email yoki parol noto'g'ri";
-      else if(err.code === 'auth/too-many-requests') msg = "Juda ko'p urinish. Birozdan keyin qayta urinib ko'ring";
+      let msg = t('authErrGeneric');
+      if(err.code === 'auth/email-already-in-use') msg = t('authErrInUse');
+      else if(err.code === 'auth/invalid-email') msg = t('authErrInvalidEmail');
+      else if(err.code === 'auth/weak-password') msg = t('authErrWeakPass');
+      else if(err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') msg = t('authErrWrongCreds');
+      else if(err.code === 'auth/too-many-requests') msg = t('authErrTooMany');
       errorEl.textContent = msg;
       btn.disabled = false;
       btn.textContent = authMode === 'signup' ? t('btnSignup') : t('btnLoginSubmit');
