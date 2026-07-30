@@ -878,9 +878,23 @@
     box-shadow:0 4px 12px rgba(0,0,0,0.6), 0 0 14px rgba(139,92,246,0.5),
       inset 0 3px 8px rgba(255,255,255,0.3), inset 0 -8px 14px rgba(0,0,0,0.5); }
   .wheel-spin-hub:disabled{ cursor:default; filter:grayscale(0.45) brightness(0.65); }
-  .wheel-note{ position:absolute; z-index:2; left:8%; right:8%; top:75.5%; height:3.5%;
-    display:flex; align-items:center; justify-content:center; text-align:center;
-    font-size:10.5px; color:#C9BFE8; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
+  /* Aylantirgandan keyin chiqadigan "Ertaga yana keling!" xabari.
+     Avval top:75.5% da, eslatma kartasi bilan bir xil z-index'da turardi —
+     karta DOM'da keyin kelgani uchun uning ustiga chizilib, xabar umuman
+     ko'rinmasdi. Endi u alohida suzuvchi "pill": o'z foni bor, kartadan
+     yuqorida tugaydi va g'ildirakdan baland qatlamda (z-index:5) chiziladi,
+     shuning uchun har doim o'qiladi. Faqat matn bo'lganda ko'rinadi. */
+  /* Yuqoridan emas, PASTDAN o'lchanadi: karta 76.2% da (ya'ni pastdan 23.8%)
+     boshlanadi, shuning uchun 24.8% xabarning pastki chetini kartadan doim
+     1% yuqorida ushlab turadi. Xabar balandligi px'da bo'lgani uchun,
+     yuqoridan o'lchansa kichik panellarda (masalan yotiq 700x380) kartaning
+     ustiga chiqib ketardi. */
+  .wheel-note{ position:absolute; z-index:5; bottom:24.8%; left:50%; transform:translateX(-50%);
+    max-width:88%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    padding:3px 12px; border-radius:999px; text-align:center;
+    font-size:9.8px; font-weight:600; color:#F3EFFF;
+    background:rgba(12,6,32,0.94);
+    box-shadow:0 4px 12px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(168,124,255,0.3); }
   .wheel-note:empty{ display:none; }
 
   /* ---------- G'ildirak ostidagi eslatma qatorlari ----------
