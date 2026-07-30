@@ -437,6 +437,11 @@
     border-radius:12px; padding:12px 14px; margin:14px 0 4px; font-size:12px; line-height:1.55;
     color:#4A4560; }
   .cashout-explain b{ color:#15161F; }
+  /* Qo'lda tekshirish eslatmasi ko'zga tashlanib turishi kerak (Play Market
+     talabi: to'lov avtomatik emasligi aniq aytilsin) */
+  .cashout-review{ margin-top:8px; padding:8px 10px; border-radius:9px;
+    background:#FFF4D6; border:1px solid #F2C94C; }
+  .cashout-review b{ display:block; color:#5C4300; font-size:12px; line-height:1.45; }
   .cashout-rate{ display:flex; align-items:center; justify-content:center; gap:8px; font-family:'Space Grotesk',sans-serif;
     font-weight:700; font-size:14px; color:#15161F; margin-bottom:8px; }
   .cashout-rate .eq{ color:#8B8FA3; font-weight:400; }
@@ -467,7 +472,7 @@
   .ph-status{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; }
   .ph-status.paid{ background:rgba(46,204,143,0.15); color:var(--green); }
   .ph-status.pending{ background:rgba(255,176,32,0.15); color:var(--amber); }
-  .ph-status.cancelled{ background:rgba(255,92,108,0.15); color:var(--red); }
+  .ph-status.cancelled, .ph-status.rejected{ background:rgba(255,92,108,0.15); color:var(--red); }
   .ph-meta{ font-size:11.5px; color:var(--muted); margin-top:5px; }
 
   /* ---------- Activity (used in Wallet tab) ---------- */
@@ -1446,7 +1451,7 @@
         </div>
       </div>
       <div class="card">
-        <div class="profile-row"><span data-i18n="totalEarned">Umumiy top ilgan</span><b id="profLifetime">0 coin</b></div>
+        <div class="profile-row"><span data-i18n="totalEarned">Umumiy topilgan</span><b id="profLifetime">0 coin</b></div>
         <div class="profile-row"><span data-i18n="currentLevel">Joriy daraja</span><b id="profLevel">Bronze</b></div>
         <div class="profile-row"><span data-i18n="dailyStreakLbl">Kunlik seriya</span><b id="profStreak">0 kun</b></div>
       </div>
@@ -1814,7 +1819,7 @@
       <div class="cashout-explain">
         <div class="cashout-rate"><span data-i18n="rateCoins">10 000 coin</span><span class="eq">=</span><span data-i18n="rateSom">12 000 so'm</span><span class="usd" data-i18n="rateUsd">≈$1</span></div>
         <span data-i18n="cashoutExplain">Coin — ilova ichidagi virtual hisob birligi. U sotib olinmaydi: faqat siz bajargan vazifalar, kunlik bonus va do'st taklif qilish evaziga beriladi. Pul yechish — bajarilgan ish uchun mukofot to'lovi.</span>
-        <div style="margin-top:6px"><b data-i18n="cashoutReview">Ko'rib chiqish muddati: odatda 1–3 ish kuni. To'lov tasdiqlangach kartangizga o'tkaziladi.</b></div>
+        <div class="cashout-review"><b data-i18n="cashoutReview">So'rovingizni administrator QO'LDA tekshiradi — odatda 1–3 ish kuni. Tasdiqlangach to'lov kartangizga o'tkaziladi.</b></div>
         <a href="terms-of-service.html" target="_blank" rel="noopener" data-i18n="cashoutTermsLink">Batafsil shartlar →</a>
       </div>
 
@@ -2144,7 +2149,7 @@ const I18N = {
     helpTitle:"Yordam", helpText:"Savol yoki muammo bormi? Biz bilan bog'laning — odatda bir necha soat ichida javob beramiz.", helpTelegram:"Telegram orqali yozish", helpEmail:"Email yozish",
     errOffline:"Internet aloqasi yo'q. Ulanishni tekshirib, qayta urinib ko'ring", errNetwork:"Server bilan aloqa uzildi. Bir necha soniyadan keyin qayta urinib ko'ring", errAuth:"Sessiya muddati tugagan — ilovadan chiqib, qaytadan kiring", errPermission:"Ruxsat yo'q — sahifani yangilang yoki qaytadan kiring", errUnknown:"Kutilmagan xatolik. Qayta urinib ko'ring",
     offlineMsg:"Internet aloqasi yo'q — ulanish tiklanishini kutyapmiz", onlineMsg:"Internet aloqasi tiklandi ✅",
-    shareTitle:"Do'stlaringga ko'rsat! 🎉", shareWheel:"🎡 Omadli g'ildirakda {n} tanga yutdim!", shareLevel:"🏆 TaskUp'da {n}-levelga chiqdim!", shareCashout:"💸 TaskUp'da ishlagan pulimni yechdim!",
+    shareTitle:"Do'stlaringga ko'rsat! 🎉", shareWheel:"🎡 Omadli g'ildirakda {n} tanga yutdim!", shareLevel:"🏆 TaskUp'da {n}-darajaga chiqdim!", shareCashout:"💸 TaskUp'da ishlagan pulimni yechdim!",
     shareTg:"Telegram'da ulashish", shareIg:"Instagram Story'ga qo'shish", shareClose:"Yopish",
     shareInviteLine:"Siz ham vazifa bajarib pul ishlang:", shareCodeLine:"Taklif kodim:", shareImgSaved:"Rasm yuklab olindi — Instagram Story'ga qo'shing 📸",
     btnStart:"Boshlash", btnLogin:"Kirish", obNext:"Keyingi",
@@ -2174,12 +2179,12 @@ const I18N = {
     cashoutBalanceLbl:"YECHISH UCHUN BALANS", walletEyebrow:"YECHISH UCHUN", walletBalanceTitle:"BALANS", choosePayMethod:"To'lov usulini tanlang", minAmount:"Minimal: 10 000 coin",
     rateCoins:"10 000 coin", rateSom:"12 000 so'm", rateUsd:"≈$1", cashoutTermsLink:"Batafsil shartlar →",
     cashoutExplain:"Coin — ilova ichidagi virtual hisob birligi. U sotib olinmaydi: faqat siz bajargan vazifalar, kunlik bonus va do'st taklif qilish evaziga beriladi. Pul yechish — bajarilgan ish uchun mukofot to'lovi.",
-    cashoutReview:"Ko'rib chiqish muddati: odatda 1–3 ish kuni. To'lov tasdiqlangach kartangizga o'tkaziladi.",
+    cashoutReview:"So'rovingizni administrator QO'LDA tekshiradi — odatda 1–3 ish kuni. Tasdiqlangach to'lov kartangizga o'tkaziladi.",
     payUzcardLbl:"UzCard", payHumoLbl:"Humo karta", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Maksimal: {n} coin",
     enterAmount:"Summani kiriting", recentActivity:"So'nggi harakatlar", paymentHistoryLink:"To'lov tarixi ›",
     noActivity:"Hali harakat yo'q", noPaymentHistory:"Hali to'lov tarixi yo'q", paymentHistoryTitle:"To'lov tarixim", backBtn:"‹ Orqaga",
     filterAllHist:"Barchasi", filterPending:"Kutilmoqda", filterPaid:"Muvaffaqiyatli", filterCancelled:"Bekor qilingan",
-    totalEarned:"Umumiy top ilgan", currentLevel:"Joriy daraja", dailyStreakLbl:"Kunlik seriya",
+    totalEarned:"Umumiy topilgan", currentLevel:"Joriy daraja", dailyStreakLbl:"Kunlik seriya",
     langMenuItem:"Til / Language", leaderboardMenuItem:"Reyting", levelMenuItem:"Level",
     paymentHistoryMenuItem:"To'lov tarixi", taskHistoryMenuItem:"Vazifalar tarixi", myFriendsMenuItem:"Do'stlarim",
     helpMenuItem:"Yordam / Qo'llab-quvvatlash", privacyMenuItem:"Maxfiylik siyosati", termsMenuItem:"Foydalanish shartlari", deleteAccountMenuItem:"Hisobni o'chirish", deleteNowBtn:"Hisobni butunlay o'chirish",
@@ -2188,14 +2193,14 @@ const I18N = {
     deleteFinalConfirm:"Oxirgi tasdiq: hisobingiz, coinlaringiz va barcha ma'lumotlaringiz butunlay o'chiriladi. Davom etamizmi?",
     deleteInProgress:"O'chirilmoqda...", deleteDone:"Hisobingiz o'chirildi.",
     deletePendingCashout:"Kutilayotgan to'lov so'rovi bor. U yakunlangach qayta urinib ko'ring.",
-    logoutBtn:"Chiqish", levelPageTitle:"Level", yourLevelLbl:"Sizning levelingiz", levelRewardsTitle:"Level mukofotlari",
+    logoutBtn:"Chiqish", levelPageTitle:"Daraja", yourLevelLbl:"Sizning darajangiz", levelRewardsTitle:"Daraja mukofotlari", levelNum:"{n}-daraja", daysSuffix:"kun",
     leaderboardTitle:"Reyting",
     cashoutReady:"Pulga aylantirish", cashoutNeed:"Yana", cashoutNeedSuffix:"coin kerak",
     streakClaimed:"Olindi ✓", streakComeTomorrow:"Ertaga qayting", streakClaimToday:"Bugungi bonusni oling",
     toastTaskDone:"coin qo'shildi!", toastLimitReached:"Bugungi limit tugadi", toastDailyCapReached:"Kunlik ishlash limitiga yetdingiz", toastStreakBonus:"coin kunlik bonus!",
     toastCashoutSent:"So'rov yuborildi! Payme/Click orqali ko'rib chiqiladi", toastCashoutMin:"Kamida",
     toastCopied:"Havola nusxalandi!", toastCopyFail:"Nusxalab bo'lmadi", toastLangChanged:"Til o'zgartirildi",
-    statusPaid:"Muvaffaqiyatli", statusPending:"Kutilmoqda", statusCancelled:"Bekor qilingan",
+    statusPaid:"Muvaffaqiyatli", statusPending:"Kutilmoqda", statusCancelled:"Bekor qilingan", statusRejected:"Rad etilgan",
     dailyBonusLabel:"Kunlik bonus", cashoutRequestLabel:"Pulga aylantirish so'rovi",
     btnClaim:"Olish", dailyClaimSub:"Har kuni bonus oling!", taskDoneToday:"Bugun tugadi",
     taskBtnDone:"Bajarildi", taskBtnTomorrow:"Ertaga", taskBestReward:"ENG KO'P MUKOFOT",
@@ -2254,7 +2259,7 @@ const I18N = {
     cashoutBalanceLbl:"BALANCE TO WITHDRAW", walletEyebrow:"BALANCE TO", walletBalanceTitle:"WITHDRAW", choosePayMethod:"Choose payment method", minAmount:"Minimum: 10,000 coins",
     rateCoins:"10,000 coins", rateSom:"12,000 UZS", rateUsd:"≈$1", cashoutTermsLink:"Full terms →",
     cashoutExplain:"Coins are an in-app virtual unit. They cannot be purchased — you earn them only by completing tasks, daily bonuses and referrals. A withdrawal is a reward payment for work you have done.",
-    cashoutReview:"Review time: usually 1–3 business days. Once approved, the payment is sent to your card.",
+    cashoutReview:"Your request is reviewed MANUALLY by an administrator — usually 1–3 business days. Once approved, the payment is sent to your card.",
     payUzcardLbl:"UzCard", payHumoLbl:"Humo card", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Maximum: {n} coins",
     enterAmount:"Enter amount", recentActivity:"Recent activity", paymentHistoryLink:"Payment history ›",
     noActivity:"No activity yet", noPaymentHistory:"No payment history yet", paymentHistoryTitle:"Payment history", backBtn:"‹ Back",
@@ -2268,14 +2273,14 @@ const I18N = {
     deleteFinalConfirm:"Final confirmation: your account, coins and all data will be permanently deleted. Continue?",
     deleteInProgress:"Deleting...", deleteDone:"Your account has been deleted.",
     deletePendingCashout:"You have a pending withdrawal. Please try again once it is completed.",
-    logoutBtn:"Log out", levelPageTitle:"Level", yourLevelLbl:"Your level", levelRewardsTitle:"Level rewards",
+    logoutBtn:"Log out", levelPageTitle:"Level", yourLevelLbl:"Your level", levelRewardsTitle:"Level rewards", levelNum:"Level {n}", daysSuffix:"days",
     leaderboardTitle:"Leaderboard",
     cashoutReady:"Withdraw", cashoutNeed:"Need", cashoutNeedSuffix:"more coins",
     streakClaimed:"Claimed ✓", streakComeTomorrow:"Come back tomorrow", streakClaimToday:"Claim today's bonus",
     toastTaskDone:"coins added!", toastLimitReached:"Daily limit reached", toastDailyCapReached:"You've reached today's earning cap", toastStreakBonus:"coins daily bonus!",
     toastCashoutSent:"Request sent! Will be reviewed via Payme/Click", toastCashoutMin:"You need at least",
     toastCopied:"Link copied!", toastCopyFail:"Couldn't copy", toastLangChanged:"Language changed",
-    statusPaid:"Successful", statusPending:"Pending", statusCancelled:"Cancelled",
+    statusPaid:"Successful", statusPending:"Pending", statusCancelled:"Cancelled", statusRejected:"Rejected",
     dailyBonusLabel:"Daily bonus", cashoutRequestLabel:"Cashout request",
     btnClaim:"Claim", dailyClaimSub:"Claim your daily bonus!", taskDoneToday:"Done for today",
     taskBtnDone:"Done", taskBtnTomorrow:"Tomorrow", taskBestReward:"BEST REWARD",
@@ -2334,7 +2339,7 @@ const I18N = {
     cashoutBalanceLbl:"БАЛАНС ДЛЯ ВЫВОДА", walletEyebrow:"БАЛАНС ДЛЯ", walletBalanceTitle:"ВЫВОДА", choosePayMethod:"Выберите способ оплаты", minAmount:"Минимум: 10 000 коинов",
     rateCoins:"10 000 коинов", rateSom:"12 000 сум", rateUsd:"≈$1", cashoutTermsLink:"Подробные условия →",
     cashoutExplain:"Коины — внутренняя виртуальная единица приложения. Их нельзя купить: они начисляются только за выполненные задания, ежедневный бонус и приглашение друзей. Вывод — это выплата вознаграждения за выполненную работу.",
-    cashoutReview:"Срок рассмотрения: обычно 1–3 рабочих дня. После одобрения выплата поступает на вашу карту.",
+    cashoutReview:"Заявку проверяет администратор ВРУЧНУЮ — обычно 1–3 рабочих дня. После одобрения выплата поступает на вашу карту.",
     payUzcardLbl:"UzCard", payHumoLbl:"Humo карта", payPaymeLbl:"Payme", payClickLbl:"Click", maxAmountLbl:"Максимум: {n} коинов",
     enterAmount:"Введите сумму", recentActivity:"Последние операции", paymentHistoryLink:"История платежей ›",
     noActivity:"Пока нет операций", noPaymentHistory:"Пока нет истории платежей", paymentHistoryTitle:"История платежей", backBtn:"‹ Назад",
@@ -2348,14 +2353,14 @@ const I18N = {
     deleteFinalConfirm:"Финальное подтверждение: аккаунт, коины и все данные будут удалены навсегда. Продолжить?",
     deleteInProgress:"Удаление...", deleteDone:"Ваш аккаунт удалён.",
     deletePendingCashout:"Есть незавершённая заявка на вывод. Повторите попытку после её завершения.",
-    logoutBtn:"Выйти", levelPageTitle:"Уровень", yourLevelLbl:"Ваш уровень", levelRewardsTitle:"Награды за уровень",
+    logoutBtn:"Выйти", levelPageTitle:"Уровень", yourLevelLbl:"Ваш уровень", levelRewardsTitle:"Награды за уровень", levelNum:"Уровень {n}", daysSuffix:"дн.",
     leaderboardTitle:"Рейтинг",
     cashoutReady:"Вывести", cashoutNeed:"Нужно ещё", cashoutNeedSuffix:"монет",
     streakClaimed:"Получено ✓", streakComeTomorrow:"Возвращайтесь завтра", streakClaimToday:"Заберите бонус сегодня",
     toastTaskDone:"монет начислено!", toastLimitReached:"Дневной лимит исчерпан", toastDailyCapReached:"Дневной лимит заработка исчерпан", toastStreakBonus:"монет ежедневный бонус!",
     toastCashoutSent:"Заявка отправлена! Будет рассмотрена через Payme/Click", toastCashoutMin:"Нужно минимум",
     toastCopied:"Ссылка скопирована!", toastCopyFail:"Не удалось скопировать", toastLangChanged:"Язык изменён",
-    statusPaid:"Успешно", statusPending:"В ожидании", statusCancelled:"Отменено",
+    statusPaid:"Успешно", statusPending:"В ожидании", statusCancelled:"Отменено", statusRejected:"Отклонено",
     dailyBonusLabel:"Ежедневный бонус", cashoutRequestLabel:"Заявка на вывод",
     btnClaim:"Забрать", dailyClaimSub:"Забирайте бонус каждый день!", taskDoneToday:"На сегодня выполнено",
     taskBtnDone:"Готово", taskBtnTomorrow:"Завтра", taskBestReward:"САМАЯ БОЛЬШАЯ НАГРАДА",
@@ -2812,6 +2817,58 @@ function updateOnlineState(){
 window.addEventListener('online', updateOnlineState);
 window.addEventListener('offline', updateOnlineState);
 
+/* ---------------- Telefonning "orqaga" tugmasi ----------------
+   Avval hech qanday ishlov yo'q edi: Android'da orqaga bosilganda
+   webview'da tarix bo'lmagani uchun ilova DARHOL yopilardi — modal ochiq
+   bo'lsa ham, boshqa bo'limda turgan bo'lsa ham.
+
+   Yechim: doim bitta "tutuvchi" tarix yozuvi turadi. Orqaga bosilganda
+   popstate keladi va biz navbati bilan: (1) ochiq modalni yopamiz,
+   (2) bosh sahifaga qaytamiz, (3) boshqa hech narsa qolmasa qayta
+   qurollantirmaymiz va ilova odatdagidek yopiladi.
+   Capacitor Android orqaga tugmasini avval webview tarixiga yuboradi,
+   shuning uchun native plugin kerak emas. */
+const BACK_MODALS = [
+  { id:'avatarCropOverlay', close:() => closeAvatarCrop() },
+  { id:'cashoutOverlay',    close:() => closeCashout() },
+  { id:'shareOverlay',      close:() => closeShareCard() },
+  { id:'levelUpOverlay',    close:() => document.getElementById('levelUpOverlay').classList.remove('show') },
+  { id:'newsOverlay',       close:() => closeNews() },
+  { id:'helpOverlay',       close:() => closeHelp() },
+  { id:'docOverlay',        close:() => closeDocViewer() },
+  { id:'wheelOverlay',      close:() => closeWheel() }
+];
+
+function topOpenModal(){
+  for(const m of BACK_MODALS){
+    const el = document.getElementById(m.id);
+    if(el && el.classList.contains('show')) return m;
+  }
+  return null;
+}
+
+function armBackGuard(){ history.pushState({ taskupGuard: true }, ''); }
+
+window.addEventListener('popstate', () => {
+  // 1) Ochiq modal bo'lsa — eng ustkisini yopamiz
+  const m = topOpenModal();
+  if(m){
+    m.close();
+    // G'ildirak aylanayotganda closeWheel() yopmaydi — modal ochiq qolsa
+    // qo'riqchini qayta qo'yamiz, aks holda keyingi bosishda ilova yopiladi
+    armBackGuard();
+    return;
+  }
+  // 2) Bosh sahifada emasmiz — bosh sahifaga qaytamiz
+  const active = document.querySelector('.tab-content.active');
+  if(active && active.id !== 'tab-home'){
+    switchTab('home');
+    armBackGuard();
+    return;
+  }
+  // 3) Bosh sahifadamiz va hech narsa ochiq emas — ilova yopilishiga ruxsat
+});
+
 /* rAF bilan silliq tezlanish/sekinlashish; ko'rsatkich segment chegarasidan o'tganda bounce */
 function animateWheelTo(targetDeg, duration, onDone){
   const disc = document.getElementById('wheelDisc');
@@ -3086,10 +3143,16 @@ function renderProfile(){
   document.getElementById('profLifetime').textContent = fmtNum(state.lifetimeCoins) + ' coin';
   const lnum = getLevelInfo(state.lifetimeCoins).num;
   const lb = levelBadge(lnum);
-  document.getElementById('profLevel').innerHTML = badgeIconHtml(lb, 16) + t(lb.key) + ' • ' + lnum + '-level';
-  document.getElementById('profStreak').textContent = state.streakCount + ' kun';
+  document.getElementById('profLevel').innerHTML = badgeIconHtml(lb, 16) + t(lb.key) + ' • ' + levelLabel(lnum);
+  document.getElementById('profStreak').textContent = state.streakCount + ' ' + t('daysSuffix');
   renderSoundState();
 }
+
+/* Daraja yozuvi bitta joydan chiqadi, shuning uchun hamma ekranda bir xil
+   ko'rinadi: uz "1061-daraja", en "Level 1061", ru "Уровень 1061".
+   Avval uch xil ko'rinardi: profilda "1061-level", daraja sahifasida
+   "1061-level", daraja oshgan oynada esa "Level 1062!". */
+function levelLabel(n){ return t('levelNum').replace('{n}', n); }
 
 /* ---------------- Level / XP system ---------------- */
 const XP_PER_LEVEL = 1000;
@@ -3164,7 +3227,7 @@ function spawnLevelParticles(color){
 }
 function showLevelUp(num){
   const b = levelBadge(num);
-  document.getElementById('lvlupNum').textContent = 'Level ' + num + '!';
+  document.getElementById('lvlupNum').textContent = levelLabel(num) + '!';
   const badgeEl = document.getElementById('lvlupBadge');
   badgeEl.innerHTML = badgeIconHtml(b, 18) + t(b.key);
   const shield = document.querySelector('#levelUpOverlay .lvlup-shield');
@@ -3202,7 +3265,7 @@ function renderLevel(){
   const fill2 = document.getElementById('xpBarFill2'); if(fill2) fill2.style.width = pct + '%';
   const xc = document.getElementById('xpCurrent'); if(xc) xc.textContent = info.current;
   const xn = document.getElementById('xpNeeded'); if(xn) xn.textContent = info.needed;
-  document.getElementById('levelHeroTitle').textContent = info.num + '-level';
+  document.getElementById('levelHeroTitle').textContent = levelLabel(info.num);
   document.getElementById('xpLabel2').textContent = `${info.current} / ${info.needed} XP`;
 
   const cap = getDailyCap(info.num);
@@ -3691,8 +3754,27 @@ function updateCashoutMaxLbl(){
 
 
 function getStatusLabel(status){
-  const map = { paid: 'statusPaid', pending: 'statusPending', cancelled: 'statusCancelled' };
-  return t(map[status] || status);
+  // DIQQAT: t() noma'lum kalit uchun KALITNING O'ZINI qaytaradi. Shuning uchun
+  // xaritada yo'q status (masalan eski yozuvlardagi 'rejected') to'g'ridan-to'g'ri
+  // ekranga inglizcha bo'lib chiqib ketardi. Endi barcha ma'lum statuslar
+  // xaritada, noma'lumi esa "Bekor qilingan" ga tushadi — hech qachon
+  // tarjimasiz matn ko'rinmaydi.
+  const map = {
+    paid: 'statusPaid', completed: 'statusPaid', approved: 'statusPaid', success: 'statusPaid',
+    pending: 'statusPending', processing: 'statusPending', review: 'statusPending',
+    rejected: 'statusRejected', declined: 'statusRejected',
+    cancelled: 'statusCancelled', canceled: 'statusCancelled', failed: 'statusCancelled'
+  };
+  return t(map[String(status || '').toLowerCase()] || 'statusCancelled');
+}
+
+// Status uchun CSS klassi (ranglar faqat paid/pending/cancelled/rejected uchun bor)
+function statusClass(status){
+  const s = String(status || '').toLowerCase();
+  if(['paid','completed','approved','success'].includes(s)) return 'paid';
+  if(['pending','processing','review'].includes(s)) return 'pending';
+  if(['rejected','declined'].includes(s)) return 'rejected';
+  return 'cancelled';
 }
 let currentHistoryFilter = 'all';
 
@@ -3726,7 +3808,7 @@ function renderPaymentHistory(filter){
     <div class="ph-item">
       <div class="ph-top">
         <div class="ph-amount">${fmtNum(p.amountSom)} so'm</div>
-        <div class="ph-status ${p.status}">${getStatusLabel(p.status)}</div>
+        <div class="ph-status ${statusClass(p.status)}">${getStatusLabel(p.status)}</div>
       </div>
       <div class="ph-meta">${methodLbl} • ${date}</div>
     </div>`;
@@ -3863,6 +3945,7 @@ function redeemReferralCode(btnEl){
 
 renderTaskLists();
 updateOnlineState();
+armBackGuard();
 // loadingScreen endi onAuthStateChanged'da (sessiya aniqlangach) yopiladi —
 // shunda qora ekran o'rniga brendlangan yuklanish ko'rinadi
 </script>
