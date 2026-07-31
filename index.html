@@ -34,6 +34,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <!-- Splash fon va illyustratsiyasi birinchi ko'rinadigan narsa — ular shriftdan
      ham oldin, yuqori ustuvorlik bilan yuklansin -->
+<script defer src="assets/vendor/lottie_light.min.js"></script>
 <link rel="preload" as="image" href="assets/splash-background.png" fetchpriority="high">
 <link rel="preload" as="image" href="assets/splash-screen.png" fetchpriority="high">
 <!-- Shrift birinchi chizishni bloklamasligi uchun asinxron yuklanadi -->
@@ -143,6 +144,37 @@
   .loading-text{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:rgba(74,222,128,0.8);
     letter-spacing:2px; margin-top:14px; }
   #loadPct{ color:#4ADE80; font-weight:700; }
+
+  /* ---------- Lottie animatsiya idishlari ----------
+     Har bir idish o'zi joylashgan elementning o'lchamini oladi; Lottie SVG
+     ichkarida 100%x100% bo'lib cho'ziladi. pointer-events yo'q — ustidagi
+     tugma/bosish hodisalari avvalgidek ishlaydi. */
+  .lot{ display:block; pointer-events:none; }
+  .lot svg{ display:block; width:100% !important; height:100% !important; }
+  /* Balansdagi tanga: mavjud dumaloq fon o'rnini egallaydi */
+  .balance-pill-coin .lot{ position:absolute; inset:0; }
+  .balance-pill-coin.has-lot{ background:none; box-shadow:none; }
+  /* Kunlik bonus sovg'asi — SVG bilan bir xil joyda */
+  #tab-home .daily-lot{ position:absolute; right:3%; top:50%; transform:translateY(-50%);
+    width:32%; aspect-ratio:1; }
+  /* G'ildirak modalidagi qatlam — diskning ustida, hub ostida */
+  /* Bosh sahifadagi banner g'ildiragi — Lottie CSS g'ildirak O'RNIGA
+     qo'yiladi (sovg'a qutisi bilan bir xil usul). Bu yerdagi g'ildirak
+     butunlay dekorativ: raqam ham, aylanish mantiqi ham yo'q, faqat
+     modalni ochish tugmasi. Modaldagi ISHLAYDIGAN g'ildirakka tegilmaydi. */
+  .wheel-mini-lot{ position:absolute; right:4%; top:50%; transform:translateY(-50%);
+    width:36%; aspect-ratio:1; }
+  /* Bir martalik "burst" animatsiyalari — ekran markazida, ustida */
+  .lot-burst{ position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+    z-index:97; pointer-events:none; }
+  .lot-burst.success{ width:min(46vw,190px); aspect-ratio:800/850; }
+  .lot-burst.confetti{ left:0; top:0; transform:none; width:100vw; height:100vh; }
+  /* Level-up modalidagi toj — nishon tepasida */
+  .lvlup-crown{ width:56px; height:56px; margin:0 auto -6px; }
+  /* Splash yuklovchi */
+  .loading-lot{ width:92px; height:92px; margin-top:2px; }
+  /* Bildirishnoma qo'ng'irog'i */
+  .notif-lot{ position:absolute; inset:0; }
 
   /* ---------- Bosh sahifa reklama karuseli (auto-slide) ---------- */
   .ad-carousel{ position:relative; border-radius:20px; overflow:hidden; margin-bottom:14px; }
@@ -1026,6 +1058,8 @@
     fillEl.style.width = '100%';
     pctEl.textContent = '100%';
     screenEl.style.display = 'none';
+    // Sahifa tayyor — yuklovchi animatsiyani to'xtatamiz va o'chiramiz
+    if(typeof stopLoadingLottie === 'function') stopLoadingLottie();
   }
   function render(){
     var t = Math.min(1, (now() - startedAt) / DURATION);
@@ -1058,6 +1092,7 @@
   function showLoadError(){
     if(hidden) return;
     if(rafId) cancelAnimationFrame(rafId);
+    if(typeof stopLoadingLottie === 'function') stopLoadingLottie();
     var art = document.querySelector('.loading-art');
     var bar = document.querySelector('.loading-bar');
     var sub = document.querySelector('.loading-sub');
@@ -2778,7 +2813,10 @@ function openWheel(){
   document.getElementById('wheelOverlay').classList.add('show');
   renderWheelState();
 }
-function closeWheel(){ if(!spinning) document.getElementById('wheelOverlay').classList.remove('show'); }
+function closeWheel(){
+  if(spinning) return;
+  document.getElementById('wheelOverlay').classList.remove('show');
+}
 function renderWheelState(){
   const spun = state.lastSpin === new Date().toDateString();
   const btn = document.getElementById('spinBtn');
@@ -2805,6 +2843,199 @@ function withBtnLoading(btn, promise){
   btn.disabled = true;
   btn.innerHTML = '<span class="btn-spinner"></span>';
   return promise.finally(() => { btn.disabled = false; btn.innerHTML = orig; });
+}
+
+/* ---------------- Lottie animatsiyalari ----------------
+   Qoidalar (talab bo'yicha):
+   - prefers-reduced-motion yoqilgan bo'lsa hech qanday animatsiya qurilmaydi;
+     o'rnida mavjud statik SVG/rasm ko'rinib turaveradi.
+   - Bir vaqtda ENG KO'PI 3 ta loop animatsiya ishlaydi. To'rtinchisi
+     so'ralsa, eng eski loop pauza qilinadi (LOOP_LIMIT).
+   - Sahifa ko'rinmay qolsa (boshqa ilovaga o'tilsa) hammasi pauza qilinadi —
+     batareya va CPU tejaladi.
+   - Bir martalik ("burst") animatsiyalar tugagach DOM'dan o'chiriladi.
+   Biznes-logikaga (balans, mukofot, withdrawal, Firebase) umuman tegmaydi:
+   bular faqat ko'rinish qatlami. */
+const LOTTIE_DIR = 'Animations/';
+const LOTTIE_FILES = {
+  coin:    'Fake 3D vector coin.json',
+  gift:    'gift box.json',
+  wheel:   'Fortune Wheel Animation.json',
+  success: 'success circle check.json',
+  confetti:'confetti.json',
+  crown:   'crown animation.json',
+  loading: 'loading purple.json',
+  notif:   'notification.json'
+};
+const LOOP_LIMIT = 3;
+const lottieLoops = [];      // faol loop animatsiyalar (eng eski birinchi)
+const lottieAll = new Set(); // barchasi (pauza/davom uchun)
+let lottieReady = null;
+
+function lottieAvailable(){ return typeof lottie !== 'undefined' && !reducedMotion; }
+
+/* JSON'ni bir marta yuklab keshlaymiz */
+const lottieCache = {};
+function loadLottieData(key){
+  if(lottieCache[key]) return lottieCache[key];
+  lottieCache[key] = fetch(LOTTIE_DIR + encodeURIComponent(LOTTIE_FILES[key]))
+    .then(r => { if(!r.ok) throw new Error('lottie ' + r.status); return r.json(); })
+    .catch(err => { console.warn('Lottie yuklanmadi:', key, err); lottieCache[key] = null; return null; });
+  return lottieCache[key];
+}
+
+/* Asosiy yordamchi. opts: { loop, speed, autoplay, onComplete } */
+function lottieMount(container, key, opts){
+  opts = opts || {};
+  if(!lottieAvailable() || !container) return null;
+  const data = loadLottieData(key);
+  if(!data) return null;
+  const holder = { anim: null, destroyed: false };
+  Promise.resolve(data).then(json => {
+    if(!json || holder.destroyed) return;
+    const anim = lottie.loadAnimation({
+      container, renderer: 'svg', loop: !!opts.loop,
+      autoplay: opts.autoplay !== false, animationData: json,
+      rendererSettings: { preserveAspectRatio: 'xMidYMid meet', progressiveLoad: true }
+    });
+    if(opts.speed) anim.setSpeed(opts.speed);
+    holder.anim = anim;
+    lottieAll.add(anim);
+    if(opts.loop){
+      lottieLoops.push(anim);
+      // 3 tadan oshsa — eng eskisini pauza qilamiz
+      while(lottieLoops.length > LOOP_LIMIT){ const old = lottieLoops.shift(); try{ old.pause(); }catch(e){} }
+    }
+    if(opts.onComplete) anim.addEventListener('complete', opts.onComplete);
+  });
+  return holder;
+}
+
+/* Bir martalik animatsiya: ekranga qo'yiladi, tugagach o'chadi */
+function lottiePlayOnce(key, className, ms, speed){
+  if(!lottieAvailable()) return;
+  const el = document.createElement('div');
+  el.className = 'lot lot-burst ' + (className || '');
+  document.body.appendChild(el);
+  const kill = () => { try{ el.remove(); }catch(e){} };
+  const h = lottieMount(el, key, { loop:false, speed: speed, onComplete: () => { try{ h && h.anim && h.anim.destroy(); lottieAll.delete(h.anim); }catch(e){} kill(); } });
+  if(!h){ kill(); return; }
+  // Zaxira: animatsiya "complete" bermasa ham tozalanadi
+  setTimeout(() => { try{ h.anim && h.anim.destroy(); lottieAll.delete(h.anim); }catch(e){} kill(); }, ms || 4000);
+}
+
+/* Sahifa ko'rinmasa — hammasini pauza qilamiz */
+document.addEventListener('visibilitychange', () => {
+  lottieAll.forEach(a => { try{ document.hidden ? a.pause() : a.play(); }catch(e){} });
+});
+
+/* ---- 1. Balans yonidagi tanga: juda sekin, doimiy loop ---- */
+function initCoinLottie(){
+  const box = document.querySelector('.balance-pill-coin');
+  if(!box || box.dataset.lot) return;
+  const el = document.createElement('div'); el.className = 'lot';
+  box.appendChild(el);
+  const h = lottieMount(el, 'coin', { loop:true, speed:0.25 }); // juda sekin
+  if(h){ box.dataset.lot = '1'; box.classList.add('has-lot'); const svg = box.querySelector('svg'); }
+}
+
+/* ---- 2. Kunlik bonus sovg'asi: har 5 soniyada bir marta ---- */
+let giftLot = null, giftTimer = null;
+function initGiftLottie(){
+  const art = document.querySelector('#tab-home .daily-card-art');
+  if(!art || art.dataset.lot) return;
+  const el = document.createElement('div'); el.className = 'lot daily-lot';
+  art.parentNode.insertBefore(el, art);
+  const h = lottieMount(el, 'gift', { loop:false, autoplay:false });
+  if(!h){ el.remove(); return; }
+  art.dataset.lot = '1'; art.style.display = 'none';
+  giftLot = h;
+  const tick = () => {
+    if(document.hidden) return;
+    const home = document.getElementById('tab-home');
+    if(!home || !home.classList.contains('active')) return; // ko'rinmasa o'ynatmaymiz
+    try{ h.anim && h.anim.goToAndPlay(0, true); }catch(e){}
+  };
+  giftTimer = setInterval(tick, 5000);
+  setTimeout(tick, 800);
+}
+/* Bonus bosilganda bir marta to'liq ijro */
+function playGiftOnce(){
+  if(giftLot && giftLot.anim){ try{ giftLot.anim.goToAndPlay(0, true); }catch(e){} }
+}
+
+/* ---- 3. Bosh sahifadagi banner g'ildiragi: har 10 soniyada bir marta ----
+   CSS g'ildirak O'RNIGA qo'yiladi (sovg'a qutisi bilan bir xil usul).
+   Modaldagi ishlaydigan g'ildirakka TEGILMAYDI — u avvalgidek CSS bilan
+   chiziladi va mukofotni doim mavjud JS/Firebase mantiqi belgilaydi. */
+let wheelMiniLot = null, wheelMiniTimer = null;
+function initWheelMiniLottie(){
+  const mini = document.querySelector('.wheel-card .wheel-mini');
+  if(!mini || mini.dataset.lot) return;
+  const el = document.createElement('div'); el.className = 'lot wheel-mini-lot';
+  mini.parentNode.insertBefore(el, mini);
+  const h = lottieMount(el, 'wheel', { loop:false, autoplay:false });
+  if(!h){ el.remove(); return; }
+  mini.dataset.lot = '1'; mini.style.display = 'none';   // CSS g'ildirak o'rnini beradi
+  wheelMiniLot = h;
+  const tick = () => {
+    if(document.hidden) return;
+    const home = document.getElementById('tab-home');
+    if(!home || !home.classList.contains('active')) return;
+    try{ h.anim && h.anim.goToAndPlay(0, true); }catch(e){}
+  };
+  wheelMiniTimer = setInterval(tick, 10000);   // har 10 soniyada
+  setTimeout(tick, 1200);
+}
+
+/* ---- 6. Toj: level-up modali ichida bir marta ---- */
+function showCrownLottie(){
+  const box = document.querySelector('#levelUpOverlay .lvlup-box');
+  if(!box || !lottieAvailable()) return;
+  const old = box.querySelector('.lvlup-crown'); if(old) old.remove();
+  const el = document.createElement('div'); el.className = 'lot lvlup-crown';
+  box.insertBefore(el, box.firstChild);
+  const h = lottieMount(el, 'crown', { loop:false, onComplete: () => {
+    try{ h.anim.destroy(); lottieAll.delete(h.anim); }catch(e){}
+  }});
+  if(!h) el.remove();
+  // Modal yopilganda tozalanadi
+  setTimeout(() => { try{ el.remove(); }catch(e){} }, 3200);
+}
+
+/* ---- 7. Splash yuklovchi: sahifa tayyor bo'lganda to'xtaydi ---- */
+let loadingLot = null;
+function initLoadingLottie(){
+  const scr = document.getElementById('loadingScreen');
+  if(!scr || !lottieAvailable()) return;
+  const bar = scr.querySelector('.loading-bar');
+  if(!bar) return;
+  const el = document.createElement('div'); el.className = 'lot loading-lot';
+  bar.parentNode.insertBefore(el, bar);
+  loadingLot = lottieMount(el, 'loading', { loop:true });
+}
+function stopLoadingLottie(){
+  if(loadingLot && loadingLot.anim){ try{ loadingLot.anim.destroy(); lottieAll.delete(loadingLot.anim); }catch(e){} }
+  loadingLot = null;
+  const el = document.querySelector('.loading-lot'); if(el) el.remove();
+}
+
+/* ---- 8. Bildirishnoma: 2 marta silkitadi (loop emas) ---- */
+let notifLot = null, lastNotifCount = -1;
+function shakeNotifLottie(){
+  const btn = document.querySelector('.icon-btn[onclick*="openNews"]');
+  if(!btn || !lottieAvailable()) return;
+  if(notifLot && notifLot.anim){ try{ notifLot.anim.destroy(); lottieAll.delete(notifLot.anim); }catch(e){} }
+  const old = btn.querySelector('.notif-lot'); if(old) old.remove();
+  const el = document.createElement('div'); el.className = 'lot notif-lot';
+  btn.appendChild(el);
+  let plays = 0;
+  notifLot = lottieMount(el, 'notif', { loop:false, speed:2.5, onComplete: () => {
+    plays++;
+    if(plays < 2){ try{ notifLot.anim.goToAndPlay(0, true); }catch(e){} }
+    else { try{ notifLot.anim.destroy(); lottieAll.delete(notifLot.anim); }catch(e){} el.remove(); notifLot = null; }
+  }});
+  if(!notifLot) el.remove();
 }
 
 /* ---------------- Internet holati ---------------- */
@@ -3243,6 +3474,8 @@ function showLevelUp(num){
   shield.classList.add('spin3d'); badgeEl.classList.add('shine');
   hapticFeedback([50, 50, 100]);
   spawnLevelParticles(b.color);
+  lottiePlayOnce('confetti', 'confetti', 3500);   // bir marta, loop emas
+  showCrownLottie();                              // modal ichida bir marta
   setTimeout(() => ov.classList.remove('show'), 3000);
 }
 let lastKnownLevel = null;
@@ -3444,6 +3677,9 @@ function renderNewsBadge(){
   const c = newsUnreadCount();
   el.textContent = c > 9 ? '9+' : c;
   el.style.display = c > 0 ? 'flex' : 'none';
+  // Yangi o'qilmagan xabar PAYDO BO'LGANDA 2 marta silkitadi (loop emas)
+  if(lastNotifCount >= 0 && c > lastNotifCount) shakeNotifLottie();
+  lastNotifCount = c;
 }
 function renderNewsList(){
   const el = document.getElementById('newsList');
@@ -3868,7 +4104,9 @@ function claimStreak(){
   // ANTI-CHEAT: bonus serverda hisoblanadi
   const btn = document.getElementById('streakBtn');
   if(btn) btn.disabled = true;
+  playGiftOnce();   // bosilganda sovg'a bir marta to'liq ijro etiladi
   fns.httpsCallable('claimStreak')({}).then((res) => {
+    lottiePlayOnce('success', 'success', 3500, 2);
     celebrateReward((res.data && res.data.bonus) || 0, document.getElementById('streakBtn'));
     showToast(`+${(res.data && res.data.bonus) || ''} ${t('toastStreakBonus')}`);
     loadHistory(currentUid);
@@ -3911,6 +4149,7 @@ function tryCashout(btnEl){
     payMethod: state.payMethod || 'uzcard'
   }).then(() => {
     sndSuccess();
+    lottiePlayOnce('success', 'success', 3500, 2);
     showToast(t('toastCashoutSent'));
     loadHistory(currentUid);
     loadPaymentHistory(currentUid);
@@ -3949,6 +4188,23 @@ function redeemReferralCode(btnEl){
 renderTaskLists();
 updateOnlineState();
 armBackGuard();
+
+/* Lottie: player yuklangach doimiy animatsiyalarni quramiz.
+   reducedMotion bo'lsa lottieMount hech narsa qurmaydi va mavjud
+   statik SVG'lar avvalgidek ko'rinib turaveradi. */
+function initLottieUI(){
+  if(!lottieAvailable()) return;
+  // Splash hali ko'rinib tursa — yuklovchi animatsiyani qo'shamiz
+  const scr = document.getElementById('loadingScreen');
+  if(scr && scr.style.display !== 'none') initLoadingLottie();
+  initCoinLottie();
+  initGiftLottie();
+  initWheelMiniLottie();
+}
+/* defer skript DOMContentLoaded'dan OLDIN bajariladi, shuning uchun
+   o'sha paytda `lottie` allaqachon mavjud bo'ladi. */
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLottieUI);
+else initLottieUI();
 // loadingScreen endi onAuthStateChanged'da (sessiya aniqlangach) yopiladi —
 // shunda qora ekran o'rniga brendlangan yuklanish ko'rinadi
 </script>
