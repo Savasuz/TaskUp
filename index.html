@@ -153,7 +153,10 @@
   .lot svg{ display:block; width:100% !important; height:100% !important; }
   /* Balansdagi tanga: mavjud dumaloq fon o'rnini egallaydi */
   .balance-pill-coin .lot{ position:absolute; inset:0; }
-  .balance-pill-coin.has-lot{ background:none; box-shadow:none; }
+  /* Lottie tanga o'z fonini chizadi — dumaloq gradient va qora soya olib
+     tashlanadi, lekin iliq nur QOLADI: shaffof pill ustida tangani ajratib
+     turadigan yagona narsa shu. */
+  .balance-pill-coin.has-lot{ background:none; box-shadow:0 0 12px rgba(255,176,32,0.26); }
   /* Kunlik bonus sovg'asi — SVG bilan bir xil joyda */
   #tab-home .daily-lot{ position:absolute; right:3%; top:50%; transform:translateY(-50%);
     width:32%; aspect-ratio:1; }
@@ -202,22 +205,32 @@
 
   /* ---------- Balans pill (header, sticky) ---------- */
   /* Pill kontent bo'yicha qisqaradi (cho'zilmaydi) — chapda, bell o'ngda qoladi. */
+  /* Shisha (glass) pill. Avval to'q binafsha gradient + kuchli yaltiroq bo'lgan —
+     ilovaning qolgan to'q, xotirjam kartalaridan ajralib, plastik ko'rinardi.
+     Endi fon SHAFFOF: qora header ustida nozik oq qatlam. Shu sababli tanga
+     asosiy urg'uga aylanadi, pill esa o'ngdagi qo'ng'iroq tugmasi bilan
+     bir uslubda turadi.
+     DIQQAT: backdrop-filter ATAYLAB ishlatilmagan — .top-icon-row foni to'liq
+     shaffofmas (var(--bg)), orqada xiralashtiradigan narsa yo'q; u faqat
+     bekorga GPU sarflardi. */
   .balance-pill{ position:relative; overflow:hidden; flex:0 1 auto; max-width:62%; height:36px; box-sizing:border-box;
-    display:flex; align-items:center; gap:8px;
-    background:linear-gradient(180deg, #8570F2 0%, #6C4FE0 38%, #4B33B0 72%, #382584 100%);
-    border:1px solid rgba(199,181,255,0.5); border-radius:999px; padding:3px 14px 3px 3px; cursor:pointer;
-    box-shadow:0 6px 16px rgba(45,20,110,0.45), inset 0 2px 0 rgba(255,255,255,0.22), inset 0 -4px 8px rgba(0,0,0,0.32); }
-  .balance-pill::before{ content:''; position:absolute; left:6%; right:6%; top:8%; height:34%; border-radius:999px;
-    background:linear-gradient(180deg, rgba(255,255,255,0.32), rgba(255,255,255,0)); pointer-events:none; }
-  .balance-pill:active{ transform:scale(0.97); }
+    display:flex; align-items:center; gap:9px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.085) 0%, rgba(255,255,255,0.032) 100%);
+    border:1px solid rgba(255,255,255,0.11); border-radius:999px; padding:3px 14px 3px 3px; cursor:pointer;
+    box-shadow:0 3px 12px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.12); }
+  /* Tanga ortidan yumshoq binafsha nur — brend rangi shaffoflikni yo'qotmasdan saqlanadi */
+  .balance-pill::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(62% 130% at 15% 50%, rgba(139,92,246,0.34), rgba(139,92,246,0) 72%); }
+  .balance-pill:active{ transform:scale(0.97); background:rgba(255,255,255,0.13); }
   .balance-pill-coin{ position:relative; flex-shrink:0; width:26px; height:26px; border-radius:50%;
     background:radial-gradient(circle at 35% 28%, #FFF3B0, #FFC93C 55%, #C9861A 100%);
-    display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.35); }
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,0.35), 0 0 12px rgba(255,176,32,0.30); }
   .balance-pill-coin svg{ width:15px; height:15px; }
   .balance-pill-amount{ position:relative; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; color:#fff;
-    text-shadow:0 1px 2px rgba(0,0,0,0.25); }
-  .balance-pill-wallet{ position:relative; flex-shrink:0; color:#fff; opacity:0.95; display:flex; }
+    letter-spacing:0.2px; }
+  .balance-pill-wallet{ position:relative; flex-shrink:0; color:#fff; opacity:0.5; display:flex; }
   .balance-pill-wallet svg{ width:17px; height:17px; }
   .avatar-frame-wrap{ position:relative; flex-shrink:0; }
   .avatar-frame-img{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; object-fit:contain; z-index:1; }
