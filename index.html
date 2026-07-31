@@ -592,6 +592,13 @@
   /* Lottie ikonka plitkani to'ldiradi. JSON ichidagi binafsha doira fon
      o'chirilgan — plitkaning o'z gradienti ko'rinib turadi, shunda ikonka
      qolgan uchtasi bilan bir xil shaklda bo'ladi. */
+  /* Promo kod tugmasi ustidagi kupon animatsiyasi (bir martalik, o'zi o'chadi).
+     Kupon tugma matnini uzoq to'sib turmasligi uchun ko'tarilib ketadi —
+     JSON'ning o'z so'nishi bilan birga "chiqib ketish" effekti hosil bo'ladi. */
+  .promo-lot{ position:absolute; z-index:3; pointer-events:none;
+    animation:promoLift 1s cubic-bezier(0.22,0.7,0.3,1) forwards; }
+  @keyframes promoLift{ from{ transform:translateY(6px) scale(0.86); } to{ transform:translateY(-20px) scale(1); } }
+  @media (prefers-reduced-motion: reduce){ .promo-lot{ animation:none; } }
   .info-ico > .lot{ position:absolute; inset:-3px; }
   .info-ico > .lot svg{ width:100% !important; height:100% !important; }
   .info-ico svg{ width:17px; height:17px; }
@@ -2973,7 +2980,8 @@ const LOTTIE_FILES = {
   loading: 'loading purple.json',
   notif:   'notification.json',
   profilebg:'profile-bg.json',
-  profileicon:'profile-icon.json'
+  profileicon:'profile-icon.json',
+  coupon:  'coupon.json'
 };
 const LOOP_LIMIT = 3;
 const lottieLoops = [];      // faol loop animatsiyalar (eng eski birinchi)
@@ -3096,6 +3104,32 @@ function initWheelMiniLottie(){
   };
   wheelMiniTimer = setInterval(tick, 10000);   // har 10 soniyada
   setTimeout(tick, 1200);
+}
+
+/* ---- Promo kod "Faollashtirish" tugmasi: kupon animatsiyasi ----
+   Tugmaning ICHIGA qo'yib bo'lmaydi: withBtnLoading() yuborish paytida
+   btn.innerHTML ni spinnerga almashtiradi va keyin tiklaydi, applyStaticTranslations()
+   esa data-i18n bo'yicha textContent ni qayta yozadi — ikkalasi ham ichidagi
+   elementni yo'q qilardi. Shuning uchun animatsiya tugmaning USTIDA, uning
+   ota-elementiga qo'yiladi va tugagach DOM'dan o'chadi. */
+function playCouponLottie(btn){
+  if(!lottieAvailable() || !btn) return;
+  const host = btn.parentElement;
+  if(!host) return;
+  if(getComputedStyle(host).position === 'static') host.style.position = 'relative';
+  const size = Math.max(44, Math.round(btn.offsetHeight * 1.7));
+  const el = document.createElement('div');
+  el.className = 'lot promo-lot';
+  el.style.width = size + 'px';
+  el.style.height = size + 'px';
+  el.style.left = Math.round(btn.offsetLeft + btn.offsetWidth / 2 - size / 2) + 'px';
+  el.style.top  = Math.round(btn.offsetTop + btn.offsetHeight / 2 - size / 2) + 'px';
+  host.appendChild(el);
+  const kill = () => { try{ el.remove(); }catch(e){} };
+  const done = () => { try{ h && h.anim && h.anim.destroy(); lottieAll.delete(h.anim); }catch(e){} kill(); };
+  const h = lottieMount(el, 'coupon', { loop:false, onComplete: done });
+  if(!h){ kill(); return; }
+  setTimeout(done, 1600);   // zaxira: 'complete' kelmasa ham tozalanadi
 }
 
 /* ---- "Shaxsiy ma'lumotlar" ikonkasi ----
@@ -3380,6 +3414,7 @@ function redeemPromoCode(btnEl){
   if(!currentUid) return;
   const code = (document.getElementById('promoInput').value || '').trim().toUpperCase();
   if(!code){ showToast(t('toastEnterCode'), true); return; }
+  if(typeof playCouponLottie === 'function') playCouponLottie(btnEl);
   withBtnLoading(btnEl, fns.httpsCallable('redeemPromo')({ code }).then((res) => {
     celebrateReward((res.data && res.data.reward) || 0, null);
     showToast(`+${(res.data && res.data.reward) || ''} ${t('toastTaskDone')}`);
