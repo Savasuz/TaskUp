@@ -541,8 +541,26 @@
   .lb-coins{ font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--amber); }
 
   /* ---------- Profile ---------- */
+  /* Fon endi rasm emas — Animations/profile-bg.json (Lottie).
+     background-color rasm/animatsiya yuklanguncha zaxira bo'lib turadi.
+     reduced-motion yoqilgan bo'lsa Lottie qurilmaydi va shu to'q binafsha
+     gradient fon o'zi qolaveradi. */
   .profile-header{ position:relative; overflow:hidden; border-radius:24px; text-align:center; padding:26px 16px 24px;
-    background-image:url('assets/branding/profile-header-bg.jpg'); background-size:cover; background-position:center; }
+    background:radial-gradient(120% 100% at 50% 0%, #2A1550 0%, #170A30 55%, #0A0518 100%); }
+  /* Lottie fon — butun kartani qoplaydi, ustidagi avatar/matnga tegmaydi.
+     DIQQAT: selektor `.profile-header > .profile-bg-lot` bo'lishi SHART.
+     Pastdagi `.profile-header > *{ position:relative }` qoidasi bir xil
+     aniqlikda (specificity) va keyinroq turgani uchun oddiy `.profile-bg-lot`
+     ni yengib, elementni absolyutdan oqimga qaytarib yuborardi — natijada
+     idish 326x183 ga qisqarib, animatsiya kartani to'ldirmasdan o'rtada
+     tasma bo'lib qolardi. */
+  .profile-header > .profile-bg-lot{ position:absolute; inset:0; z-index:0; pointer-events:none; }
+  .profile-bg-lot svg{ width:100% !important; height:100% !important; }
+  /* Animatsiyaning pastki qismi oq bulutlar bilan tugaydi va ustidagi
+     email matni o'qilmay qolardi. Shu yumshoq to'q parda matn ortida
+     kontrast beradi, animatsiyaning qolgan qismi esa ochiq ko'rinadi. */
+  .profile-header::after{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:linear-gradient(180deg, rgba(10,5,24,0) 45%, rgba(10,5,24,0.55) 72%, rgba(10,5,24,0.88) 100%); }
   .profile-header > *{ position:relative; z-index:1; }
   .profile-avatar{ width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue)); color:#fff;
     display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:22px; }
@@ -2865,7 +2883,8 @@ const LOTTIE_FILES = {
   confetti:'confetti.json',
   crown:   'crown animation.json',
   loading: 'loading purple.json',
-  notif:   'notification.json'
+  notif:   'notification.json',
+  profilebg:'profile-bg.json'
 };
 const LOOP_LIMIT = 3;
 const lottieLoops = [];      // faol loop animatsiyalar (eng eski birinchi)
@@ -2896,7 +2915,9 @@ function lottieMount(container, key, opts){
     const anim = lottie.loadAnimation({
       container, renderer: 'svg', loop: !!opts.loop,
       autoplay: opts.autoplay !== false, animationData: json,
-      rendererSettings: { preserveAspectRatio: 'xMidYMid meet', progressiveLoad: true }
+      // 'meet' = butunlay sig'adi (chetlarda bo'sh joy qolishi mumkin),
+      // 'slice' = idishni to'liq qoplaydi (chetlari kesiladi) — fon uchun.
+      rendererSettings: { preserveAspectRatio: opts.preserve || 'xMidYMid meet', progressiveLoad: true }
     });
     if(opts.speed) anim.setSpeed(opts.speed);
     holder.anim = anim;
@@ -2986,6 +3007,17 @@ function initWheelMiniLottie(){
   };
   wheelMiniTimer = setInterval(tick, 10000);   // har 10 soniyada
   setTimeout(tick, 1200);
+}
+
+/* ---- Profil sarlavhasi foni: doimiy sekin loop ---- */
+function initProfileBgLottie(){
+  const head = document.querySelector('.profile-header');
+  if(!head || head.dataset.lot) return;
+  const el = document.createElement('div'); el.className = 'lot profile-bg-lot';
+  head.insertBefore(el, head.firstChild);
+  const h = lottieMount(el, 'profilebg', { loop:true, speed:0.8, preserve:'xMidYMid slice' });
+  if(!h){ el.remove(); return; }
+  head.dataset.lot = '1';
 }
 
 /* ---- 6. Toj: level-up modali ichida bir marta ---- */
@@ -4200,6 +4232,7 @@ function initLottieUI(){
   initCoinLottie();
   initGiftLottie();
   initWheelMiniLottie();
+  initProfileBgLottie();
 }
 /* defer skript DOMContentLoaded'dan OLDIN bajariladi, shuning uchun
    o'sha paytda `lottie` allaqachon mavjud bo'ladi. */
