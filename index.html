@@ -570,6 +570,50 @@
     background:var(--purple); border:2px solid var(--bg); display:flex; align-items:center; justify-content:center;
     cursor:pointer; z-index:2; box-shadow:0 2px 8px rgba(0,0,0,0.4); }
   .profile-phone{ font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--muted); }
+  /* Banner: faqat rasm + kamera tugmasi + ism + daraja nishoni.
+     Email bu yerdan olib tashlandi — u endi "Shaxsiy ma'lumotlar" kartasida. */
+  .profile-name{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:18px;
+    letter-spacing:0.2px; line-height:1.2; max-width:82%; margin:0 auto;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .profile-badge{ display:inline-flex; align-items:center; margin-top:9px; padding:5px 13px 5px 10px;
+    border-radius:999px; background:rgba(255,255,255,0.09); border:1px solid rgba(255,255,255,0.16);
+    font-size:12px; font-weight:600; color:rgba(255,255,255,0.92); }
+
+  /* ---------- Shaxsiy ma'lumotlar (iOS Settings uslubidagi qatorlar) ----------
+     Sozlamalar kartasi .profile-row dan foydalanadi va unga TEGILMAYDI —
+     bu yerda alohida .info-* sinflari ishlatiladi. */
+  .info-card{ padding:4px; }
+  .info-row{ display:flex; align-items:center; gap:12px; padding:12px 10px; border-radius:12px;
+    border-bottom:1px solid var(--line); cursor:pointer; transition:background .15s ease; }
+  .info-row:last-child{ border-bottom:none; }
+  .info-row:active{ background:rgba(255,255,255,0.05); }
+  .info-ico{ width:30px; height:30px; border-radius:9px; flex-shrink:0; color:#fff;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 2px 7px rgba(0,0,0,0.38); }
+  .info-ico svg{ width:17px; height:17px; }
+  .info-ico.ic-person{ background:linear-gradient(160deg, #8B6BFF, #4B2FD6); }
+  .info-ico.ic-mail{ background:linear-gradient(160deg, #5AA9FF, #2A62D6); }
+  .info-ico.ic-level{ background:linear-gradient(160deg, #B48BFF, #6C3BD8); }
+  .info-ico.ic-coin{ background:linear-gradient(160deg, #FFD76A, #D99400); }
+  .info-ico.ic-streak{ background:linear-gradient(160deg, #FF9A55, #E2452F); }
+  /* Yorliq hech qachon ikki qatorga tushmaydi; joy yetmasa faqat qiymat
+     qisqaradi (...) — 320px ekranda ham qatorlar bir xil balandlikda qoladi. */
+  .info-name{ flex:0 0 auto; font-size:14px; font-weight:600; white-space:nowrap; }
+  .info-val{ display:flex; align-items:center; justify-content:flex-end; gap:6px; flex:1 1 auto; min-width:0; }
+  .info-val b, .info-val .profile-phone{ min-width:0; font-size:12.5px; font-weight:600; color:var(--muted);
+    text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .info-chev{ width:13px; height:13px; flex-shrink:0; color:var(--muted); opacity:0.55; }
+  /* Yig'iladigan qism: yopiq holatda 0 balandlik — sahifada joy olmaydi.
+     max-height o'tishi (transition) uchun ochilganda JS haqiqiy scrollHeight
+     ni qo'yadi, animatsiya tugagach 'none' ga o'tkaziladi (tarjima/qiymat
+     o'zgarsa balandlik o'zi moslashishi uchun). */
+  .info-head{ border-bottom:none; }
+  .info-card.open .info-head{ border-bottom:1px solid var(--line); }
+  .info-caret{ transition:transform .22s ease; }
+  .info-card.open .info-caret{ transform:rotate(90deg); }
+  .info-body{ max-height:0; overflow:hidden; transition:max-height .28s ease; }
+  @media (prefers-reduced-motion: reduce){
+    .info-caret, .info-body{ transition:none; }
+  }
 
   /* ---------- Avatar rasm tanlash / kesish (crop) oynasi ---------- */
   #avatarCropOverlay{ display:none; position:fixed; inset:0; background:rgba(5,4,10,0.82); backdrop-filter:blur(5px);
@@ -1522,8 +1566,45 @@
           <div class="avatar-edit-badge" onclick="openAvatarPicker()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
         </div>
         <input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="onAvatarFileSelected(this.files[0])">
-        <div class="profile-phone" id="profilePhone">+998 -- --- -- --</div>
+        <div class="profile-name" id="profileName">--</div>
+        <div class="profile-badge" id="profileBadge">🥉 Bronza</div>
       </div>
+
+      <!-- ---- Shaxsiy ma'lumotlar: BITTA yig'iladigan qator ----
+           Yopiq holatda faqat bitta ikonka+sarlavha ko'rinadi (joy olmaydi),
+           bosilganda ichidagi email / daraja / topilgan / seriya ochiladi.
+           profilePhone, profLifetime, profLevel, profStreak id'lari
+           o'zgarmadi — mavjud JS shundoq ishlaydi. -->
+      <div class="card info-card" id="personalInfoCard">
+        <div class="info-row info-head" onclick="togglePersonalInfo()" id="personalInfoHead">
+          <span class="info-ico ic-person"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          <span class="info-name" data-i18n="personalInfoTitle">Shaxsiy ma'lumotlar</span>
+          <span class="info-val"><svg class="info-chev info-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+        </div>
+        <div class="info-body" id="personalInfoBody">
+        <div class="info-row" onclick="copyProfileEmail()">
+          <span class="info-ico ic-mail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg></span>
+          <span class="info-name" data-i18n="emailLbl">Email</span>
+          <span class="info-val"><b class="profile-phone" id="profilePhone">--</b><svg class="info-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+        </div>
+        <div class="info-row" onclick="switchTab('level')">
+          <span class="info-ico ic-level"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3a2 2 0 0 1-2 4"/><path d="M7 5H4a2 2 0 0 0 2 4"/></svg></span>
+          <span class="info-name" data-i18n="currentLevel">Joriy daraja</span>
+          <span class="info-val"><b id="profLevel">Bronze</b><svg class="info-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+        </div>
+        <div class="info-row" onclick="switchTab('wallet')">
+          <span class="info-ico ic-coin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.6 2.6 0 0 0-2.5-1.5c-1.4 0-2.5.8-2.5 2s1.1 1.7 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2a2.6 2.6 0 0 1-2.5-1.5"/><path d="M12 6.5v11"/></svg></span>
+          <span class="info-name" data-i18n="totalEarned">Umumiy topilgan</span>
+          <span class="info-val"><b id="profLifetime">0 coin</b><svg class="info-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+        </div>
+        <div class="info-row" onclick="switchTab('home')">
+          <span class="info-ico ic-streak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4 0 6.5-2.7 6.5-6 0-4-3.5-5.5-3-9.5C13 8 12 9.5 12 11c-1-1-1.5-2.5-1.5-4C8 8.5 5.5 11 5.5 16c0 3.3 2.5 6 6.5 6z"/></svg></span>
+          <span class="info-name" data-i18n="dailyStreakLbl">Kunlik seriya</span>
+          <span class="info-val"><b id="profStreak">0 kun</b><svg class="info-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+        </div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="section-label" style="margin:0 0 10px" data-i18n="promoEnterLbl">🎁 Promo kod</div>
         <div class="referral-box" style="margin-top:0">
@@ -1531,11 +1612,6 @@
             style="background:none;border:none;outline:none;color:var(--text);flex:1;font-family:'JetBrains Mono',monospace;font-size:13px;margin:0;padding:0;min-width:0;text-transform:uppercase">
           <button class="copy-btn" onclick="redeemPromoCode(this)" data-i18n="btnRedeem">Faollashtirish</button>
         </div>
-      </div>
-      <div class="card">
-        <div class="profile-row"><span data-i18n="totalEarned">Umumiy topilgan</span><b id="profLifetime">0 coin</b></div>
-        <div class="profile-row"><span data-i18n="currentLevel">Joriy daraja</span><b id="profLevel">Bronze</b></div>
-        <div class="profile-row"><span data-i18n="dailyStreakLbl">Kunlik seriya</span><b id="profStreak">0 kun</b></div>
       </div>
       <div class="card" style="padding:6px 4px">
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('language')">
@@ -2268,6 +2344,7 @@ const I18N = {
     noActivity:"Hali harakat yo'q", noPaymentHistory:"Hali to'lov tarixi yo'q", paymentHistoryTitle:"To'lov tarixim", backBtn:"‹ Orqaga",
     filterAllHist:"Barchasi", filterPending:"Kutilmoqda", filterPaid:"Muvaffaqiyatli", filterCancelled:"Bekor qilingan",
     totalEarned:"Umumiy topilgan", currentLevel:"Joriy daraja", dailyStreakLbl:"Kunlik seriya",
+    personalInfoTitle:"Shaxsiy ma'lumotlar", emailLbl:"Email", toastEmailCopied:"Email nusxalandi!",
     langMenuItem:"Til / Language", leaderboardMenuItem:"Reyting", levelMenuItem:"Level",
     paymentHistoryMenuItem:"To'lov tarixi", taskHistoryMenuItem:"Vazifalar tarixi", myFriendsMenuItem:"Do'stlarim",
     helpMenuItem:"Yordam / Qo'llab-quvvatlash", privacyMenuItem:"Maxfiylik siyosati", termsMenuItem:"Foydalanish shartlari", deleteAccountMenuItem:"Hisobni o'chirish", deleteNowBtn:"Hisobni butunlay o'chirish",
@@ -2349,6 +2426,7 @@ const I18N = {
     noActivity:"No activity yet", noPaymentHistory:"No payment history yet", paymentHistoryTitle:"Payment history", backBtn:"‹ Back",
     filterAllHist:"All", filterPending:"Pending", filterPaid:"Successful", filterCancelled:"Cancelled",
     totalEarned:"Total earned", currentLevel:"Current level", dailyStreakLbl:"Daily streak",
+    personalInfoTitle:"Personal info", emailLbl:"Email", toastEmailCopied:"Email copied!",
     langMenuItem:"Language", leaderboardMenuItem:"Leaderboard", levelMenuItem:"Level",
     paymentHistoryMenuItem:"Payment history", taskHistoryMenuItem:"Task history", myFriendsMenuItem:"My friends",
     helpMenuItem:"Help / Support", privacyMenuItem:"Privacy policy", termsMenuItem:"Terms of service", deleteAccountMenuItem:"Delete account", deleteNowBtn:"Permanently delete account",
@@ -2430,6 +2508,7 @@ const I18N = {
     noActivity:"Пока нет операций", noPaymentHistory:"Пока нет истории платежей", paymentHistoryTitle:"История платежей", backBtn:"‹ Назад",
     filterAllHist:"Все", filterPending:"В ожидании", filterPaid:"Успешно", filterCancelled:"Отменено",
     totalEarned:"Всего заработано", currentLevel:"Текущий уровень", dailyStreakLbl:"Дней подряд",
+    personalInfoTitle:"Личные данные", emailLbl:"Email", toastEmailCopied:"Email скопирован!",
     langMenuItem:"Язык", leaderboardMenuItem:"Рейтинг", levelMenuItem:"Уровень",
     paymentHistoryMenuItem:"История платежей", taskHistoryMenuItem:"История заданий", myFriendsMenuItem:"Мои друзья",
     helpMenuItem:"Помощь / Поддержка", privacyMenuItem:"Политика конфиденциальности", termsMenuItem:"Условия использования", deleteAccountMenuItem:"Удалить аккаунт", deleteNowBtn:"Удалить аккаунт навсегда",
@@ -2788,7 +2867,10 @@ function enterApp(){
   document.getElementById('appScreen').style.display = 'flex';
   document.getElementById('appScreen').style.flexDirection = 'column';
   renderAvatarImage();
-  document.getElementById('profilePhone').textContent = state.email || '';
+  const phoneEl = document.getElementById('profilePhone');
+  if(phoneEl) phoneEl.textContent = state.email || '';
+  const profNameEl = document.getElementById('profileName');
+  if(profNameEl) profNameEl.textContent = profileDisplayName();
   const greetNameEl = document.getElementById('greetName'); if(greetNameEl) greetNameEl.textContent = t('defaultUserName');
   document.getElementById('referralLink').textContent = state.referralCode;
   renderAll();
@@ -3453,13 +3535,60 @@ function renderActivity(){
   }).join('');
 }
 
+/* Bannerdagi ism. Alohida "name" maydoni backendda yo'q, shuning uchun
+   tartib: Firebase Auth displayName -> email egasi (@ dan oldingi qism) ->
+   tarjimadagi standart nom. Hech qanday yozish/so'rov qilinmaydi. */
+function profileDisplayName(){
+  try{
+    const u = (typeof auth !== 'undefined' && auth.currentUser) ? auth.currentUser : null;
+    if(u && u.displayName && u.displayName.trim()) return u.displayName.trim();
+  }catch(e){}
+  if(state.email && state.email.indexOf('@') > 0) return state.email.split('@')[0];
+  return t('defaultUserName');
+}
+
 function renderProfile(){
+  const phoneEl = document.getElementById('profilePhone');
+  if(phoneEl && state.email) phoneEl.textContent = state.email;
+  const nameEl = document.getElementById('profileName');
+  if(nameEl) nameEl.textContent = profileDisplayName();
   document.getElementById('profLifetime').textContent = fmtNum(state.lifetimeCoins) + ' coin';
   const lnum = getLevelInfo(state.lifetimeCoins).num;
   const lb = levelBadge(lnum);
   document.getElementById('profLevel').innerHTML = badgeIconHtml(lb, 16) + t(lb.key) + ' • ' + levelLabel(lnum);
+  const badgeEl = document.getElementById('profileBadge');
+  if(badgeEl) badgeEl.innerHTML = badgeIconHtml(lb, 16) + t(lb.key) + ' • ' + levelLabel(lnum);
   document.getElementById('profStreak').textContent = state.streakCount + ' ' + t('daysSuffix');
   renderSoundState();
+}
+
+/* "Shaxsiy ma'lumotlar" qatorini ochish/yopish */
+function togglePersonalInfo(){
+  const card = document.getElementById('personalInfoCard');
+  const body = document.getElementById('personalInfoBody');
+  if(!card || !body) return;
+  sndClick();
+  const open = card.classList.toggle('open');
+  if(open){
+    body.style.maxHeight = body.scrollHeight + 'px';
+    // O'tish tugagach cheklovni olib tashlaymiz: til yoki qiymat o'zgarsa
+    // (masalan uzun email) balandlik o'zi moslashadi.
+    setTimeout(() => { if(card.classList.contains('open')) body.style.maxHeight = 'none'; }, 300);
+  } else {
+    body.style.maxHeight = body.scrollHeight + 'px';
+    void body.offsetHeight;            // reflow — 'none' dan animatsiya boshlanishi uchun
+    body.style.maxHeight = '0px';
+  }
+}
+
+/* Email qatoriga bosilganda — nusxalash (qator o'ngidagi › shu amalni bildiradi) */
+function copyProfileEmail(){
+  if(!state.email) return;
+  sndClick();
+  copyTextRobust(state.email).then((ok) => {
+    if(ok) showToast(t('toastEmailCopied'));
+    else showToast(t('toastCopyFail'), true);
+  });
 }
 
 /* Daraja yozuvi bitta joydan chiqadi, shuning uchun hamma ekranda bir xil
