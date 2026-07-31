@@ -587,8 +587,13 @@
     border-bottom:1px solid var(--line); cursor:pointer; transition:background .15s ease; }
   .info-row:last-child{ border-bottom:none; }
   .info-row:active{ background:rgba(255,255,255,0.05); }
-  .info-ico{ width:30px; height:30px; border-radius:9px; flex-shrink:0; color:#fff;
+  .info-ico{ position:relative; width:30px; height:30px; border-radius:9px; flex-shrink:0; color:#fff;
     display:flex; align-items:center; justify-content:center; box-shadow:0 2px 7px rgba(0,0,0,0.38); }
+  /* Lottie ikonka plitkani to'ldiradi. JSON ichidagi binafsha doira fon
+     o'chirilgan — plitkaning o'z gradienti ko'rinib turadi, shunda ikonka
+     qolgan uchtasi bilan bir xil shaklda bo'ladi. */
+  .info-ico > .lot{ position:absolute; inset:-3px; }
+  .info-ico > .lot svg{ width:100% !important; height:100% !important; }
   .info-ico svg{ width:17px; height:17px; }
   .info-ico.ic-person{ background:linear-gradient(160deg, #8B6BFF, #4B2FD6); }
   .info-ico.ic-mail{ background:linear-gradient(160deg, #5AA9FF, #2A62D6); }
@@ -1570,6 +1575,14 @@
         <div class="profile-badge" id="profileBadge">🥉 Bronza</div>
       </div>
 
+      <div class="card">
+        <div class="section-label" style="margin:0 0 10px" data-i18n="promoEnterLbl">🎁 Promo kod</div>
+        <div class="referral-box" style="margin-top:0">
+          <input type="text" id="promoInput" placeholder="TASKUP2026" autocapitalize="characters"
+            style="background:none;border:none;outline:none;color:var(--text);flex:1;font-family:'JetBrains Mono',monospace;font-size:13px;margin:0;padding:0;min-width:0;text-transform:uppercase">
+          <button class="copy-btn" onclick="redeemPromoCode(this)" data-i18n="btnRedeem">Faollashtirish</button>
+        </div>
+      </div>
       <!-- ---- Shaxsiy ma'lumotlar: BITTA yig'iladigan qator ----
            Yopiq holatda faqat bitta ikonka+sarlavha ko'rinadi (joy olmaydi),
            bosilganda ichidagi email / daraja / topilgan / seriya ochiladi.
@@ -1577,7 +1590,7 @@
            o'zgarmadi — mavjud JS shundoq ishlaydi. -->
       <div class="card info-card" id="personalInfoCard">
         <div class="info-row info-head" onclick="togglePersonalInfo()" id="personalInfoHead">
-          <span class="info-ico ic-person"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          <span class="info-ico ic-person" id="personalInfoIco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
           <span class="info-name" data-i18n="personalInfoTitle">Shaxsiy ma'lumotlar</span>
           <span class="info-val"><svg class="info-chev info-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
         </div>
@@ -1605,14 +1618,6 @@
         </div>
       </div>
 
-      <div class="card">
-        <div class="section-label" style="margin:0 0 10px" data-i18n="promoEnterLbl">🎁 Promo kod</div>
-        <div class="referral-box" style="margin-top:0">
-          <input type="text" id="promoInput" placeholder="TASKUP2026" autocapitalize="characters"
-            style="background:none;border:none;outline:none;color:var(--text);flex:1;font-family:'JetBrains Mono',monospace;font-size:13px;margin:0;padding:0;min-width:0;text-transform:uppercase">
-          <button class="copy-btn" onclick="redeemPromoCode(this)" data-i18n="btnRedeem">Faollashtirish</button>
-        </div>
-      </div>
       <div class="card" style="padding:6px 4px">
         <div class="profile-row" style="padding:13px 14px; cursor:pointer" onclick="switchTab('language')">
           <span class="row-flex"><span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span><span data-i18n="langMenuItem">Til / Language</span></span><span class="muted" id="currentLangLabel">O'zbekcha ›</span>
@@ -2930,6 +2935,7 @@ function switchTab(tab){
   window.scrollTo(0, 0);
   if(tab === 'leaderboard') loadLeaderboard(currentLbPeriod, document.querySelector('#tab-leaderboard .lb-tab[data-p="' + currentLbPeriod + '"]'));
   if(tab === 'leaderboard' && typeof initPodiumLottie === 'function') initPodiumLottie();
+  if(tab === 'profile' && typeof playPersonalInfoLottie === 'function') playPersonalInfoLottie();
   if(tab === 'history') loadPaymentHistory(currentUid);
 }
 
@@ -2997,7 +3003,8 @@ const LOTTIE_FILES = {
   loading: 'loading purple.json',
   notif:   'notification.json',
   profilebg:'profile-bg.json',
-  podium:  'leaderboard.json'
+  podium:  'leaderboard.json',
+  profileicon:'profile-icon.json'
 };
 const LOOP_LIMIT = 3;
 const lottieLoops = [];      // faol loop animatsiyalar (eng eski birinchi)
@@ -3137,6 +3144,34 @@ function initPodiumLottie(){
     if(json) pod.classList.add('has-lot');
     else { el.remove(); delete pod.dataset.lot; }
   });
+}
+
+/* ---- "Shaxsiy ma'lumotlar" ikonkasi ----
+   LOOP EMAS: bir vaqtda 3 tadan ko'p loop bo'lmasligi kerak, va uchta joy
+   allaqachon band (balans tangasi, profil foni, reyting podiumi). Shuning
+   uchun animatsiya profil sahifasi ochilganda va qatorga har bosilganda
+   bir marta o'ynaydi. */
+let personalInfoAnim = null;
+function initPersonalInfoLottie(){
+  const box = document.getElementById('personalInfoIco');
+  if(!box || box.dataset.lot) return null;
+  const el = document.createElement('div'); el.className = 'lot';
+  box.appendChild(el);
+  const h = lottieMount(el, 'profileicon', { loop:false, speed:1 });
+  if(!h){ el.remove(); return null; }
+  box.dataset.lot = '1';
+  Promise.resolve(loadLottieData('profileicon')).then(json => {
+    if(json){
+      const svg = box.querySelector('svg:not(.lot svg)');
+      if(svg && !el.contains(svg)) svg.style.display = 'none';   // statik zaxira SVG
+      personalInfoAnim = h;
+    } else { el.remove(); delete box.dataset.lot; }
+  });
+  return h;
+}
+function playPersonalInfoLottie(){
+  const h = personalInfoAnim || initPersonalInfoLottie();
+  if(h && h.anim){ try{ h.anim.goToAndPlay(0, true); }catch(e){} }
 }
 
 /* ---- Profil sarlavhasi foni: doimiy sekin loop ---- */
@@ -3568,6 +3603,7 @@ function togglePersonalInfo(){
   const body = document.getElementById('personalInfoBody');
   if(!card || !body) return;
   sndClick();
+  if(typeof playPersonalInfoLottie === 'function') playPersonalInfoLottie();
   const open = card.classList.toggle('open');
   if(open){
     body.style.maxHeight = body.scrollHeight + 'px';
