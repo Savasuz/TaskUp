@@ -708,11 +708,6 @@
   /* ---------- Podium ---------- */
   .podium{ display:flex; align-items:flex-end; justify-content:center; gap:10px; padding:16px 4px 0; }
   .podium-slot{ flex:1; display:flex; flex-direction:column; align-items:center; position:relative; }
-  /* Zaxira (Lottie yuklanmasa yoki reduced-motion) taglik balandliklari —
-     ilgari HTML ichida inline style bo'lgan, endi CSS'da. */
-  .podium-slot.first  .podium-bar{ height:95px; background:linear-gradient(180deg, #FFC94A, #FFB020); color:#2A1800; }
-  .podium-slot.second .podium-bar{ height:70px; background:linear-gradient(180deg, #3A3D4A, #2A2C36); }
-  .podium-slot.third  .podium-bar{ height:52px; background:linear-gradient(180deg, #4A3323, #3A2818); }
   .avatar-frame-wrap-lb-podium{ width:76px; height:76px; margin-bottom:6px; }
   .avatar-frame-wrap-lb-podium .avatar-frame-img{ width:76px; height:76px; }
   .avatar-frame-wrap-lb-podium.gold{ width:88px; height:88px; }
@@ -728,33 +723,9 @@
   .podium-coin{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--amber); margin:2px 0 8px; }
   .podium-bar{ width:100%; border-radius:10px 10px 0 0; display:flex; align-items:flex-start; justify-content:center;
     padding-top:8px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; color:rgba(255,255,255,0.6); }
-  .podium{ position:relative; overflow:hidden; }
-  .podium-slot{ z-index:1; }
-  /* Lottie 3D taglik. O'lchamlari animatsiyaning o'zidan piksel bo'yicha
-     o'lchab olingan (1000x1000 comp): kumush blok markazi x=255, oltin x=504,
-     bronza x=729; ustki yuzalar markazi y=748 / 586 / 806.
-     .podium.has-lot ga 14% yon padding beriladi -> ustunlar markazi
-     0.26W / 0.50W / 0.74W ga tushadi. Shu uchta nuqtaga mos kelishi uchun
-     1 comp birligi = 0.0010127 * W  =>  Lottie eni 101.27%, chap chekkasi 0.176%.
-     'slice' + 'YMax' => pastdan tekislanadi, ortiqchasi kesiladi.
-     Idish kvadrat (comp ham 1000x1000) va pastdan biriktirilgan: shunda
-     masshtabni HAR DOIM eni belgilaydi, podium balandligi qanday bo'lishidan
-     qat'i nazar. Yuqoridan oshgani .podium overflow:hidden bilan kesiladi. */
-  .podium-lot{ position:absolute; left:0.176%; bottom:0;
-    width:101.27%; aspect-ratio:1/1; z-index:0; pointer-events:none;
-    opacity:0; transition:opacity .35s ease; }
-  .podium.has-lot .podium-lot{ opacity:1; }
-  /* Lottie chizilgach: oltin/kumush/bronza bloklar va ulardagi 1/2/3 raqamlari
-     rasmning o'zida bor -> CSS tagliklari shaffof bo'ladi. Ular endi faqat
-     "aralashtirgich": avatar/ism/tangani mos blok ustki yuzasiga ko'taradi.
-     Balandliklar foizda (ustun eni = podium eni / 3) — shuning uchun ekran
-     kengligi o'zgarsa ham bloklar bilan mos qoladi. */
-  .podium.has-lot{ gap:0; padding-left:14%; padding-right:14%; }
-  .podium.has-lot .podium-bar{ background:none; box-shadow:none; color:transparent;
-    height:0; padding-top:0; }
-  .podium.has-lot .podium-slot.first  .podium-bar{ padding-bottom:174.7%; }
-  .podium.has-lot .podium-slot.second .podium-bar{ padding-bottom:106.3%; }
-  .podium.has-lot .podium-slot.third  .podium-bar{ padding-bottom:81.9%; }
+  .podium-slot.first .podium-bar{ background:linear-gradient(180deg, #FFC94A, #FFB020); color:#2A1800; }
+  .podium-slot.second .podium-bar{ background:linear-gradient(180deg, #3A3D4A, #2A2C36); }
+  .podium-slot.third .podium-bar{ background:linear-gradient(180deg, #4A3323, #3A2818); }
   .toast{ position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
     background:var(--purple); color:#fff; padding:10px 20px; border-radius:30px;
     font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:13px;
@@ -1709,7 +1680,7 @@
           </div>
           <div class="podium-name" id="p2Name">--</div>
           <div class="podium-coin"><span class="mini-coin">$</span> <span id="p2Coin">0</span></div>
-          <div class="podium-bar">2</div>
+          <div class="podium-bar" style="height:70px">2</div>
         </div>
         <div class="podium-slot first">
           <div class="podium-crown"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:var(--amber)"><path d="M2 18h20l-2-9-5 4-3-7-3 7-5-4z"/></svg></div>
@@ -1719,7 +1690,7 @@
           </div>
           <div class="podium-name" id="p1Name">--</div>
           <div class="podium-coin"><span class="mini-coin">$</span> <span id="p1Coin">0</span></div>
-          <div class="podium-bar">1</div>
+          <div class="podium-bar" style="height:95px">1</div>
         </div>
         <div class="podium-slot third">
           <div class="avatar-frame-wrap avatar-frame-wrap-lb-podium">
@@ -1728,7 +1699,7 @@
           </div>
           <div class="podium-name" id="p3Name">--</div>
           <div class="podium-coin"><span class="mini-coin">$</span> <span id="p3Coin">0</span></div>
-          <div class="podium-bar">3</div>
+          <div class="podium-bar" style="height:52px">3</div>
         </div>
       </div>
       <div id="lbRestList" style="margin-top:16px"></div>
@@ -2934,7 +2905,6 @@ function switchTab(tab){
   document.querySelector('.screen').scrollTop = 0;
   window.scrollTo(0, 0);
   if(tab === 'leaderboard') loadLeaderboard(currentLbPeriod, document.querySelector('#tab-leaderboard .lb-tab[data-p="' + currentLbPeriod + '"]'));
-  if(tab === 'leaderboard' && typeof initPodiumLottie === 'function') initPodiumLottie();
   if(tab === 'profile' && typeof playPersonalInfoLottie === 'function') playPersonalInfoLottie();
   if(tab === 'history') loadPaymentHistory(currentUid);
 }
@@ -3003,7 +2973,6 @@ const LOTTIE_FILES = {
   loading: 'loading purple.json',
   notif:   'notification.json',
   profilebg:'profile-bg.json',
-  podium:  'leaderboard.json',
   profileicon:'profile-icon.json'
 };
 const LOOP_LIMIT = 3;
@@ -3129,26 +3098,9 @@ function initWheelMiniLottie(){
   setTimeout(tick, 1200);
 }
 
-/* ---- Reyting podiumi: 3D taglik + suzuvchi bulutlar (loop) ---- */
-function initPodiumLottie(){
-  const pod = document.querySelector('.podium');
-  if(!pod || pod.dataset.lot) return;
-  const el = document.createElement('div'); el.className = 'lot podium-lot';
-  pod.insertBefore(el, pod.firstChild);
-  const h = lottieMount(el, 'podium', { loop:true, speed:0.7, preserve:'xMidYMax slice' });
-  if(!h){ el.remove(); return; }
-  pod.dataset.lot = '1';
-  // 'has-lot' faqat JSON haqiqatan yuklangach qo'yiladi. Aks holda (internet
-  // yo'q / fayl yetib kelmadi) eski CSS tagliklar joyida qoladi.
-  Promise.resolve(loadLottieData('podium')).then(json => {
-    if(json) pod.classList.add('has-lot');
-    else { el.remove(); delete pod.dataset.lot; }
-  });
-}
-
 /* ---- "Shaxsiy ma'lumotlar" ikonkasi ----
    LOOP EMAS: bir vaqtda 3 tadan ko'p loop bo'lmasligi kerak, va uchta joy
-   allaqachon band (balans tangasi, profil foni, reyting podiumi). Shuning
+   allaqachon band bo'lishi mumkin (balans tangasi, sovg'a, profil foni). Shuning
    uchun animatsiya profil sahifasi ochilganda va qatorga har bosilganda
    bir marta o'ynaydi. */
 let personalInfoAnim = null;
