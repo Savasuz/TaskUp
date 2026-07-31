@@ -33,6 +33,10 @@ jobs:
           # umuman bo'lmasdi, delete-account.html esa ochilmasdi.
           cp index.html privacy-policy.html terms-of-service.html terms.html delete-account.html manifest.json www/
           cp -r assets www/
+          # Animations/ — Lottie JSON fayllari (index.html ularni fetch qiladi).
+          # assets/vendor/lottie_light.min.js bilan birga OFFLINE ishlashi uchun
+          # APK ichiga kirishi shart.
+          cp -r Animations www/
           # daily-bonus-banner.png / lucky-wheel-home-banner.png / lucky-wheel-modal.png —
           # bosh sahifadagi bannerlar va g'ildirak modali uchun HAQIQIY fon rasmlari
           # (background-image); assets/ui/icon-*.png — statistika kartalari
