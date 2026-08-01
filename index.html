@@ -232,20 +232,37 @@
     letter-spacing:0.2px; }
   .balance-pill-wallet{ position:relative; flex-shrink:0; color:#fff; opacity:0.5; display:flex; }
   .balance-pill-wallet svg{ width:17px; height:17px; }
-  .avatar-frame-wrap{ position:relative; flex-shrink:0; }
-  .avatar-frame-img{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; object-fit:contain; z-index:1; }
-  /* Ramka (frame) rasmlarining ichki halqasi canvas markazidan biroz yuqorida joylashgan
-     (pastda osilib turuvchi marvarid/gerb/ajdar bezaklari uchun joy qoldirilgan, har bir
-     ramkada darajasi turlicha) — shu sababli avatar rasmi ham xuddi shu nuqtaga (frame
-     bilan bir xil markazlashtirish usuli: position:absolute + translate(-50%,-50%))
-     moslashtirilgan, canvas markaziga emas. Aniq "top" qiymati AVATAR_FRAMES massividan
-     JS orqali inline style sifatida qo'yiladi (har bir ramka rasmi uchun o'lchab olingan).
-     Ramka bezaklari (masalan ajdar jag'i) avatar doirasi ichiga chiqib turgan joylarda
-     ATAYLAB avatar ustidan ko'rinadi (z-index:1 ramkada, 0 avatarda) - bu ramka
-     dizaynining tabiiy qismi, badge ustiga chizilgan bezak sifatida ko'rinishi kerak. */
-  .avatar-frame-wrap .profile-avatar,
-  .avatar-frame-wrap .podium-avatar,
-  .avatar-frame-wrap .row-avatar{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:0; }
+  /* ---------- Daraja nishoni (rank badge) ----------
+     Bitta qayta ishlatiladigan komponent: Profil, Reyting podiumi va Reyting
+     qatorlarida aynan shu ishlatiladi. Faqat --rb-av (avatar diametri) beriladi.
+
+     Element OQIMDA faqat avatar joyini egallaydi; nishon esa uning markazidan
+     tashqariga chiqadi (overflow ko'rinadi). Shu sababli qanotlar kesilmaydi,
+     lekin qo'shni elementlarning kengligiga ta'sir qilmaydi.
+
+     Nishon kompozitsiyalari 1000x591, avatar teshigi markazda va eni
+     kompozitsiya enining ~29% i (piksel bo'yicha o'lchangan: eng tori 264,
+     eng kengi 342 birlik). Shuning uchun nishon eni = avatar / 0.29 —
+     sakkovtasida ham teshik avatarga aniq to'g'ri keladi va nishonlar bir xil
+     vizual o'lchamda ko'rinadi. */
+  .rank-badge{ --rb-w:calc(var(--rb-av) / 0.29); --rb-h:calc(var(--rb-w) * 0.591);
+    position:relative; width:var(--rb-av); height:var(--rb-av); flex-shrink:0;
+    /* Qanotlar avatar qutisidan tashqariga chiqadi. Shu chiqish aynan chekka
+       (margin) sifatida band qilinadi: qanotlar kesilmaydi, lekin hech qanday
+       qo'shni element ustiga tushmaydi. */
+    margin:calc((var(--rb-h) - var(--rb-av)) / 2) calc((var(--rb-w) - var(--rb-av)) / 2); }
+  /* Balandlik ATAYLAB aniq hisoblanadi: aspect-ratio ichidagi SVG tabiiy
+     balandligiga bo'ysunib qolar edi (idish balandligi auto bo'lgani uchun). */
+  .rank-badge .rb-frame{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:var(--rb-w); height:var(--rb-h); z-index:0; pointer-events:none; }
+  .rank-badge .rb-frame svg{ display:block; width:100% !important; height:100% !important; }
+  /* Avatar HAR DOIM nishon ustida (z-index:1) va hech qachon kesilmaydi. */
+  .rank-badge .rb-av{ position:absolute; inset:0; z-index:1; border-radius:50%; overflow:hidden;
+    background:linear-gradient(135deg, var(--purple), var(--blue)); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk', sans-serif; font-weight:700; }
+  .rank-badge .rb-av svg{ width:55%; height:55%; }
+  .rank-badge .rb-av img{ width:100%; height:100%; object-fit:cover; object-position:center; }
   .balance-chip{ background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:9px 14px; cursor:pointer; flex-shrink:0; }
   .balance-chip-value{ display:flex; align-items:center; gap:5px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; margin-top:2px; }
   .coin-dot{ width:16px; height:16px; border-radius:50%; background:var(--amber); display:inline-flex; align-items:center; justify-content:center; font-size:9px; color:#2A1800; font-weight:700; }
@@ -515,9 +532,6 @@
   .row-avatar{ width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--purple),var(--blue));
     display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; overflow:hidden; }
   .row-avatar svg{ width:55%; height:55%; }
-  .avatar-frame-wrap-lb-row{ width:52px; height:52px; flex-shrink:0; }
-  .avatar-frame-wrap-lb-row .avatar-frame-img{ width:52px; height:52px; }
-  .avatar-frame-wrap-lb-row .row-avatar{ width:28px; height:28px; }
   .list-body{ flex:1; min-width:0; }
   .list-name{ font-size:13px; font-weight:600; }
   .list-val{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--amber); font-weight:600; display:flex; align-items:center; gap:4px; }
@@ -586,8 +600,6 @@
   .profile-header > *{ position:relative; z-index:1; }
   .profile-avatar{ width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue)); color:#fff;
     display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:22px; }
-  .avatar-frame-wrap-profile{ width:128px; height:128px; margin:0 auto 12px; }
-  .avatar-frame-wrap-profile .avatar-frame-img{ width:128px; height:128px; }
   .avatar-edit-badge{ position:absolute; width:28px; height:28px; border-radius:50%; right:24px; bottom:24px;
     background:var(--purple); border:2px solid var(--bg); display:flex; align-items:center; justify-content:center;
     cursor:pointer; z-index:2; box-shadow:0 2px 8px rgba(0,0,0,0.4); }
@@ -728,15 +740,19 @@
   .level-reward-amt{ font-family:'JetBrains Mono', monospace; color:var(--amber); font-size:12.5px; font-weight:600; }
 
   /* ---------- Podium ---------- */
-  .podium{ position:relative; display:flex; align-items:flex-end; justify-content:center; gap:10px; padding:16px 4px 0; }
+  /* Nishon qanotlari chekka (margin) sifatida joy egallaydi: 30px avatar ->
+     103px nishon. Uchtasi 360px ekranda ham sig'ishi uchun oraliq 4px. */
+  .podium{ position:relative; display:flex; align-items:flex-end; justify-content:center; gap:4px; padding:16px 4px 0; }
   .podium-slot{ flex:1; display:flex; flex-direction:column; align-items:center; position:relative; z-index:1; }
-  /* Konfetti foni — 2/1/3-o'rin ortida. Kompozitsiya kvadrat (10000x10000),
-     'slice' bilan podium qutisini to'liq qoplaydi. */
-  .podium-bg-lot{ position:absolute; inset:0; z-index:0; pointer-events:none; opacity:0.9; }
-  .avatar-frame-wrap-lb-podium{ width:76px; height:76px; margin-bottom:6px; }
-  .avatar-frame-wrap-lb-podium .avatar-frame-img{ width:76px; height:76px; }
-  .avatar-frame-wrap-lb-podium.gold{ width:88px; height:88px; }
-  .avatar-frame-wrap-lb-podium.gold .avatar-frame-img{ width:88px; height:88px; }
+  /* Fon + konfetti — 2/1/3-o'rin ortida. Kompozitsiya 1280x720 (landshaft),
+     podium nisbatiga yaqin, shuning uchun 'slice' juda oz qirqadi.
+     Fon to'rtburchagi qirqim bo'lib turmasligi uchun burchaklar yumaloqlanadi
+     va pastki chekkasi sahifa foniga singdiriladi. */
+  .podium-bg-lot{ position:absolute; inset:0; z-index:0; pointer-events:none;
+    border-radius:18px; overflow:hidden;
+    -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 62%, rgba(0,0,0,0) 100%);
+    mask-image:linear-gradient(180deg, #000 0%, #000 62%, rgba(0,0,0,0) 100%); }
+  .podium-slot .rank-badge{ margin-bottom:calc((var(--rb-h) - var(--rb-av)) / 2 + 6px); }
   .podium-avatar{ width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue));
     color:#fff; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; overflow:hidden; }
   .podium-avatar svg{ width:55%; height:55%; }
@@ -1566,9 +1582,9 @@
     <!-- ---- PROFILE TAB ---- -->
     <div class="tab-content" id="tab-profile">
       <div class="profile-header">
-        <div class="avatar-frame-wrap avatar-frame-wrap-profile">
-          <div class="profile-avatar" id="profileAvatar" onclick="openAvatarPicker()" style="cursor:pointer">--</div>
-          <img class="avatar-frame-img" id="profileAvatarFrame" src="assets/avatars/frame-oddiy.png" alt="">
+        <div class="rank-badge" id="profileBadge2" style="--rb-av:78px; margin:0 auto 12px">
+          <div class="rb-frame"></div>
+          <div class="rb-av" id="profileAvatar" onclick="openAvatarPicker()" style="cursor:pointer">--</div>
           <div class="avatar-edit-badge" onclick="openAvatarPicker()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
         </div>
         <input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="onAvatarFileSelected(this.files[0])">
@@ -1704,9 +1720,9 @@
       </div>
       <div class="podium">
         <div class="podium-slot second">
-          <div class="avatar-frame-wrap avatar-frame-wrap-lb-podium">
-            <div class="podium-avatar silver" id="p2Avatar">--</div>
-            <img class="avatar-frame-img" id="p2Frame" src="assets/avatars/frame-oddiy.png" alt="">
+          <div class="rank-badge" id="p2Badge" style="--rb-av:30px">
+            <div class="rb-frame"></div>
+            <div class="rb-av" id="p2Avatar">--</div>
           </div>
           <div class="podium-name" id="p2Name">--</div>
           <div class="podium-coin"><span class="mini-coin">$</span> <span id="p2Coin">0</span></div>
@@ -1714,18 +1730,18 @@
         </div>
         <div class="podium-slot first">
           <div class="podium-crown"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:var(--amber)"><path d="M2 18h20l-2-9-5 4-3-7-3 7-5-4z"/></svg></div>
-          <div class="avatar-frame-wrap avatar-frame-wrap-lb-podium gold">
-            <div class="podium-avatar gold" id="p1Avatar">--</div>
-            <img class="avatar-frame-img" id="p1Frame" src="assets/avatars/frame-oddiy.png" alt="">
+          <div class="rank-badge" id="p1Badge" style="--rb-av:30px">
+            <div class="rb-frame"></div>
+            <div class="rb-av" id="p1Avatar">--</div>
           </div>
           <div class="podium-name" id="p1Name">--</div>
           <div class="podium-coin"><span class="mini-coin">$</span> <span id="p1Coin">0</span></div>
           <div class="podium-bar" style="height:95px">1</div>
         </div>
         <div class="podium-slot third">
-          <div class="avatar-frame-wrap avatar-frame-wrap-lb-podium">
-            <div class="podium-avatar bronze" id="p3Avatar">--</div>
-            <img class="avatar-frame-img" id="p3Frame" src="assets/avatars/frame-oddiy.png" alt="">
+          <div class="rank-badge" id="p3Badge" style="--rb-av:30px">
+            <div class="rb-frame"></div>
+            <div class="rb-av" id="p3Avatar">--</div>
           </div>
           <div class="podium-name" id="p3Name">--</div>
           <div class="podium-coin"><span class="mini-coin">$</span> <span id="p3Coin">0</span></div>
@@ -3193,6 +3209,7 @@ function clearTabLottie(){
 }
 function syncTabLottie(tab){
   if(tabLot && tabLot.tab === tab) return;
+  if(tab !== 'leaderboard' && typeof destroyRankBadgeLoops === 'function') destroyRankBadgeLoops();
   clearTabLottie();
   if(!lottieAvailable()) return;
   if(tab === 'friends') mountFriendsLottie();
@@ -3741,21 +3758,92 @@ function levelBadge(num){
   for(const b of LEVEL_BADGES){ if(num >= b.min) return b; }
   return LEVEL_BADGES[LEVEL_BADGES.length - 1];
 }
-/* Avatar ramkalari (frame) - level oralig'iga qarab */
-/* top: har bir ramka rasmining haqiqiy halqa teshigi piksel darajasida o'lchangan
-   vertikal markazi (canvas markazi 50% emas - har birida turlicha, pastda osilib
-   turuvchi gerb/marvarid/ajdar bezaklari sabab) - avatar rasmi shu nuqtaga joylashadi. */
-const AVATAR_FRAMES = [
-  { min: 81, img: 'assets/avatars/frame-olimdar.png',   top: 47 },
-  { min: 61, img: 'assets/avatars/frame-afsonaviy.png', top: 49 },
-  { min: 46, img: 'assets/avatars/frame-betakror.png',  top: 47 },
-  { min: 31, img: 'assets/avatars/frame-epic.png',      top: 45.5 },
-  { min: 16, img: 'assets/avatars/frame-noyob.png',     top: 44 },
-  { min: 1,  img: 'assets/avatars/frame-oddiy.png',     top: 46 }
+/* ================= Daraja nishonlari (rank badge) =================
+   YAGONA MANBA. Daraja -> nishon. Boshqa hech qayerda nishon fayli yoki
+   daraja oralig'i yozilmaydi; hamma joy shu ro'yxatdan foydalanadi.
+   Eski PNG ramkalar (AVATAR_FRAMES) butunlay olib tashlandi. */
+const RANK_BADGES = [
+  { min: 86, lvl: 8, name: 'Immortal' },
+  { min: 71, lvl: 7, name: 'Dragon'   },
+  { min: 61, lvl: 6, name: 'Crystal'  },
+  { min: 46, lvl: 5, name: 'Royal'    },
+  { min: 31, lvl: 4, name: 'Diamond'  },
+  { min: 21, lvl: 3, name: 'Gold'     },
+  { min: 11, lvl: 2, name: 'Silver'   },
+  { min: 1,  lvl: 1, name: 'Bronze'   }
 ];
-function avatarFrame(num){
-  for(const f of AVATAR_FRAMES){ if(num >= f.min) return f; }
-  return AVATAR_FRAMES[AVATAR_FRAMES.length - 1];
+function rankBadge(num){
+  for(const b of RANK_BADGES){ if(num >= b.min) return b; }
+  return RANK_BADGES[RANK_BADGES.length - 1];
+}
+function rankBadgeFile(lvl){ return 'Animations/badges/lvl-' + lvl + '/data.json'; }
+
+/* Komponent. `inner` — avatar ichidagi HTML (rasm yoki SVG ikonka).
+   Qaytgan HTML DOM'ga qo'yilgach mountRankBadges() chaqirilishi kerak. */
+function rankBadgeHtml(level, inner, size, opts){
+  opts = opts || {};
+  const b = rankBadge(level);
+  return '<div class="rank-badge" data-rb="' + b.lvl + '"' +
+         (opts.loop ? ' data-rb-loop="1"' : '') +
+         (opts.id ? ' id="' + opts.id + '"' : '') +
+         ' style="--rb-av:' + size + 'px' + (opts.style ? ';' + opts.style : '') + '">' +
+         '<div class="rb-frame"></div>' +
+         '<div class="rb-av"' + (opts.avId ? ' id="' + opts.avId + '"' : '') + '>' + inner + '</div>' +
+         '</div>';
+}
+
+/* Nishon animatsiyalarini qurish. data-rb-loop bo'lsa doimiy aylanadi
+   (podium), aks holda birinchi kadrda qotib turadi — ko'rinishi bir xil,
+   lekin ro'yxatdagi o'nlab qatorda CPU sarflamaydi. */
+const rankBadgeAnims = [];
+/* Reyting ro'yxati har safar innerHTML bilan qaytadan chiziladi, ya'ni eski
+   nishon elementlari DOM'dan chiqib ketadi. Ular bilan birga Lottie nusxalari
+   ham tashlanmasa, har qayta chizishda o'nlab animatsiya (va ular ushlab
+   turgan rasmlar) xotirada qolib ketardi: davr almashtirilganda xotira
+   15 -> 30 MB ga chiqib, FPS ham tushardi. */
+function pruneRankBadgeAnims(){
+  for(let i = rankBadgeAnims.length - 1; i >= 0; i--){
+    const a = rankBadgeAnims[i];
+    const el = a && (a.wrapper || a.container);
+    if(!el || !document.contains(el)){
+      try{ a.destroy(); }catch(e){}
+      rankBadgeAnims.splice(i, 1);
+    }
+  }
+}
+function mountRankBadges(root){
+  pruneRankBadgeAnims();
+  const boxes = (root || document).querySelectorAll('.rank-badge[data-rb]');
+  boxes.forEach(box => {
+    const lvl = box.getAttribute('data-rb');
+    if(box.dataset.rbBuilt === lvl) return;              // allaqachon shu nishon
+    const holder = box.querySelector('.rb-frame');
+    if(!holder) return;
+    holder.innerHTML = '';
+    box.dataset.rbBuilt = lvl;
+    if(typeof lottie === 'undefined') return;
+    const loop = box.hasAttribute('data-rb-loop') && !reducedMotion;
+    const anim = lottie.loadAnimation({
+      container: holder, renderer: 'svg', loop: loop, autoplay: loop,
+      path: rankBadgeFile(lvl),
+      rendererSettings: { preserveAspectRatio: 'xMidYMid meet', progressiveLoad: true }
+    });
+    anim.addEventListener('DOMLoaded', () => {
+      // Statik holatda oxirgi kadr ko'rsatiladi: nishon to'liq yig'ilgan bo'ladi.
+      if(!loop) anim.goToAndStop(anim.totalFrames - 1, true);
+    });
+    rankBadgeAnims.push(anim);
+  });
+}
+/* Reyting tabidan chiqilganda podiumdagi loop nishonlar to'xtatiladi. */
+function destroyRankBadgeLoops(){
+  for(let i = rankBadgeAnims.length - 1; i >= 0; i--){
+    const a = rankBadgeAnims[i];
+    if(!a.loop) continue;
+    try{ a.destroy(); }catch(e){}
+    rankBadgeAnims.splice(i, 1);
+  }
+  document.querySelectorAll('.rank-badge[data-rb-loop]').forEach(b => { delete b.dataset.rbBuilt; });
 }
 function badgeIconHtml(badge, size){
   return `<img src="${badge.img}" alt="" style="width:${size}px; height:${size}px; object-fit:contain; vertical-align:-${Math.round(size*0.2)}px; margin-right:${Math.round(size*0.22)}px">`;
@@ -3817,10 +3905,8 @@ function renderLevel(){
   const bIco = document.getElementById('levelBadgeIco'); if(bIco) bIco.innerHTML = badgeIconHtml(badge, 14);
   const bLine = document.getElementById('levelBadgeLine'); if(bLine) bLine.innerHTML = badgeIconHtml(badge, 18) + t(badge.key);
   const heroShield = document.getElementById('levelHeroShieldImg'); if(heroShield) heroShield.src = badge.img;
-  const frame = avatarFrame(info.num);
-  const hf = document.getElementById('homeAvatarFrame'); if(hf) hf.src = frame.img;
-  const pf = document.getElementById('profileAvatarFrame'); if(pf) pf.src = frame.img;
-  const pa = document.getElementById('profileAvatar'); if(pa) pa.style.top = frame.top + '%';
+  const pb = document.getElementById('profileBadge2');
+  if(pb){ pb.setAttribute('data-rb', rankBadge(info.num).lvl); mountRankBadges(pb.parentElement); }
   const pct = Math.min(100, (info.current / info.needed) * 100);
   const fill1 = document.getElementById('xpBarFill'); if(fill1) fill1.style.width = pct + '%';
   const fill2 = document.getElementById('xpBarFill2'); if(fill2) fill2.style.width = pct + '%';
@@ -3869,11 +3955,19 @@ function lbAvatarInnerHtml(entry){
     : USER_ICON_SVG;
 }
 function updatePodiumAvatar(prefix, entry){
-  const frame = avatarFrame(getLevelInfo(entry.lifetimeCoins || 0).num);
   const avatarEl = document.getElementById(prefix + 'Avatar');
-  const frameEl = document.getElementById(prefix + 'Frame');
-  if(avatarEl){ avatarEl.innerHTML = lbAvatarInnerHtml(entry); avatarEl.style.top = frame.top + '%'; }
-  if(frameEl) frameEl.src = frame.img;
+  if(avatarEl) avatarEl.innerHTML = lbAvatarInnerHtml(entry);
+  const box = document.getElementById(prefix + 'Badge');
+  if(box){
+    box.setAttribute('data-rb', rankBadge(getLevelInfo(entry.lifetimeCoins || 0).num).lvl);
+    // Faqat 1-o'rin nishoni aylanadi. Uchtasi ham loop qilganda reyting tabida
+    // bir vaqtda 6 ta animatsiya bo'lib, 4x CPU sinovida 58 -> 34 fps ga tushardi.
+    // Faqat 1-o'rin nishoni aylanadi. Uchtasi ham aylanganda reyting tabi
+    // 4x CPU sinovida 54 -> 34 fps ga tushardi; bittasi bilan farq sezilmaydi.
+    if(prefix === 'p1') box.setAttribute('data-rb-loop', '1');
+    else box.removeAttribute('data-rb-loop');
+    mountRankBadges(box.parentElement);
+  }
 }
 function renderLeaderboardData(top, period){
   const fmtV = v => fmtNum(v || 0);
@@ -3884,18 +3978,16 @@ function renderLeaderboardData(top, period){
   updatePodiumAvatar('p1', get(0)); updatePodiumAvatar('p2', get(1)); updatePodiumAvatar('p3', get(2));
   const rest = top.slice(3);
   document.getElementById('lbRestList').innerHTML = rest.length ? rest.map((r, i) => {
-    const frame = avatarFrame(getLevelInfo(r.lifetimeCoins || 0).num);
+    const lvl = getLevelInfo(r.lifetimeCoins || 0).num;
     return `
     <div class="list-row" style="${r.me?'border-color:var(--purple)':''}">
       <div style="width:22px; text-align:center; font-family:'Space Grotesk',sans-serif; font-weight:700; color:var(--muted)">${i+4}</div>
-      <div class="avatar-frame-wrap avatar-frame-wrap-lb-row" style="margin-left:8px">
-        <div class="row-avatar" style="top:${frame.top}%">${lbAvatarInnerHtml(r)}</div>
-        <img class="avatar-frame-img" src="${frame.img}" alt="">
-      </div>
+      ${rankBadgeHtml(lvl, lbAvatarInnerHtml(r), 44)}
       <div class="list-body" style="margin-left:8px"><div class="list-name">${escapeHtml(r.name)}${r.me ? ' (' + t('youWord') + ')' : ''}</div></div>
       <div class="list-val">${period === 'referrals' ? '👥' : '<span class="mini-coin">$</span>'} ${fmtV(r.value)}</div>
     </div>`;
   }).join('') : (top.length ? '' : `<div class="activity-empty">${t('lbEmpty')}</div>`);
+  mountRankBadges(document.getElementById('lbRestList'));
 }
 function renderLeaderboard(){
   const c = lbCache[currentLbPeriod];
