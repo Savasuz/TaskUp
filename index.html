@@ -728,8 +728,11 @@
   .level-reward-amt{ font-family:'JetBrains Mono', monospace; color:var(--amber); font-size:12.5px; font-weight:600; }
 
   /* ---------- Podium ---------- */
-  .podium{ display:flex; align-items:flex-end; justify-content:center; gap:10px; padding:16px 4px 0; }
-  .podium-slot{ flex:1; display:flex; flex-direction:column; align-items:center; position:relative; }
+  .podium{ position:relative; display:flex; align-items:flex-end; justify-content:center; gap:10px; padding:16px 4px 0; }
+  .podium-slot{ flex:1; display:flex; flex-direction:column; align-items:center; position:relative; z-index:1; }
+  /* Konfetti foni — 2/1/3-o'rin ortida. Kompozitsiya kvadrat (10000x10000),
+     'slice' bilan podium qutisini to'liq qoplaydi. */
+  .podium-bg-lot{ position:absolute; inset:0; z-index:0; pointer-events:none; opacity:0.9; }
   .avatar-frame-wrap-lb-podium{ width:76px; height:76px; margin-bottom:6px; }
   .avatar-frame-wrap-lb-podium .avatar-frame-img{ width:76px; height:76px; }
   .avatar-frame-wrap-lb-podium.gold{ width:88px; height:88px; }
@@ -740,7 +743,10 @@
   .podium-avatar.gold{ border-color:var(--amber); width:50px; height:50px; }
   .podium-avatar.silver{ border-color:#C0C0C0; }
   .podium-avatar.bronze{ border-color:#CD7F32; }
-  .podium-crown{ font-size:20px; margin-bottom:2px; }
+  .podium-crown{ position:relative; font-size:20px; margin-bottom:2px; }
+  /* Lottie toj statik SVG dan kattaroq; manfiy chekka bilan qator balandligi
+     avvalgidek qoladi, ya'ni avatar pastga siljimaydi. */
+  .podium-crown .crown-lot{ width:36px; height:36px; margin:-8px 0 -6px; }
   .podium-name{ font-size:11.5px; font-weight:700; text-align:center; }
   .podium-coin{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--amber); margin:2px 0 8px; }
   .podium-bar{ width:100%; border-radius:10px 10px 0 0; display:flex; align-items:flex-start; justify-content:center;
@@ -2928,7 +2934,8 @@ function switchTab(tab){
   window.scrollTo(0, 0);
   if(tab === 'leaderboard') loadLeaderboard(currentLbPeriod, document.querySelector('#tab-leaderboard .lb-tab[data-p="' + currentLbPeriod + '"]'));
   if(tab === 'profile' && typeof playPersonalInfoLottie === 'function') playPersonalInfoLottie();
-  if(tab === 'friends' && typeof initFriendsLottie === 'function') initFriendsLottie();
+  if(typeof syncTabLottie === 'function') syncTabLottie(tab);
+  if(tab === 'leaderboard' && typeof playPodiumCrownLottie === 'function') playPodiumCrownLottie();
   if(tab === 'history') loadPaymentHistory(currentUid);
 }
 
@@ -2997,7 +3004,9 @@ const LOTTIE_FILES = {
   notif:   'notification.json',
   profilebg:'profile-bg.json',
   profileicon:'profile-icon.json',
-  friends: 'friends.json'
+  friends: 'friends.json',
+  podiumbg:'podium-bg.json',
+  crowngold:'crown-gold.json'
 };
 const LOOP_LIMIT = 3;
 const lottieLoops = [];      // faol loop animatsiyalar (eng eski birinchi)
@@ -3154,17 +3163,88 @@ function playPersonalInfoLottie(){
    Do'stlar tabi birinchi marta ochilganda quriladi. Splash yopilgandan keyin
    doimiy loop ikkita (balans tangasi va profil foni), demak bu uchinchisi —
    LOOP_LIMIT ga tegmaydi va hech narsa pauza qilinmaydi. */
-function initFriendsLottie(){
+/* ---- Tabga bog'liq LOOP animatsiyalar ----
+   Qoida: bir vaqtda 3 tadan ko'p loop bo'lmasin. Doimiy loop ikkita —
+   balans tangasi va profil foni. Demak tabga tegishli looplardan bir vaqtda
+   faqat BITTASI yashashi kerak: tabdan chiqilganda u butunlay yo'q qilinadi.
+   Aks holda LOOP_LIMIT ishga tushib eng eski loopni (balans tangasini) pauza
+   qilardi va u hech qachon qayta boshlanmasdi. */
+function destroyLottie(holder){
+  if(!holder) return;
+  holder.destroyed = true;          // hali yuklanmagan bo'lsa — umuman qurilmaydi
+  const a = holder.anim;
+  if(!a) return;
+  try{ a.destroy(); }catch(e){}
+  lottieAll.delete(a);
+  const i = lottieLoops.indexOf(a);
+  if(i >= 0) lottieLoops.splice(i, 1);
+  holder.anim = null;
+}
+
+let tabLot = null;   // { tab, holder, el, onGone }
+function clearTabLottie(){
+  if(!tabLot) return;
+  destroyLottie(tabLot.holder);
+  try{ tabLot.el.remove(); }catch(e){}
+  if(tabLot.onGone){ try{ tabLot.onGone(); }catch(e){} }
+  tabLot = null;
+}
+function syncTabLottie(tab){
+  if(tabLot && tabLot.tab === tab) return;
+  clearTabLottie();
+  if(!lottieAvailable()) return;
+  if(tab === 'friends') mountFriendsLottie();
+  else if(tab === 'leaderboard') mountPodiumBgLottie();
+}
+
+/* Do'stlar sahifasi sarlavhasidagi rasm */
+function mountFriendsLottie(){
   const box = document.getElementById('inviteHeroArt');
-  if(!box || box.dataset.lot) return;
+  if(!box) return;
+  const img = box.querySelector('img');
   const el = document.createElement('div'); el.className = 'lot invite-lot';
   box.appendChild(el);
   const h = lottieMount(el, 'friends', { loop:true, speed:1.6 });
   if(!h){ el.remove(); return; }
-  box.dataset.lot = '1';
+  tabLot = { tab:'friends', holder:h, el, onGone: () => { if(img) img.style.display = ''; } };
   Promise.resolve(loadLottieData('friends')).then(json => {
-    if(json){ const img = box.querySelector('img'); if(img) img.style.display = 'none'; }
-    else { el.remove(); delete box.dataset.lot; }
+    if(!tabLot || tabLot.el !== el) return;      // oraliqda tab almashgan
+    if(json){ if(img) img.style.display = 'none'; }
+    else clearTabLottie();
+  });
+}
+
+/* Reyting podiumi ortidagi konfetti foni */
+function mountPodiumBgLottie(){
+  const pod = document.querySelector('.podium');
+  if(!pod) return;
+  const el = document.createElement('div'); el.className = 'lot podium-bg-lot';
+  pod.insertBefore(el, pod.firstChild);
+  const h = lottieMount(el, 'podiumbg', { loop:true, speed:0.9, preserve:'xMidYMid slice' });
+  if(!h){ el.remove(); return; }
+  tabLot = { tab:'leaderboard', holder:h, el };
+}
+
+/* 1-o'rin toji. LOOP EMAS — uchinchi loop o'rni konfetti fonida.
+   Rasmning o'zi hamma kadrda to'liq chizilgan, faqat yaltirash harakatlanadi,
+   shuning uchun oxirgi kadrda to'xtaganda ham toj joyida ko'rinib turadi. */
+let crownLot = null;
+function playPodiumCrownLottie(){
+  const box = document.querySelector('.podium-crown');
+  if(!box) return;
+  if(crownLot && crownLot.anim){ try{ crownLot.anim.goToAndPlay(0, true); }catch(e){} return; }
+  if(!lottieAvailable() || box.dataset.lot) return;
+  const el = document.createElement('div'); el.className = 'lot crown-lot';
+  box.appendChild(el);
+  const h = lottieMount(el, 'crowngold', { loop:false });
+  if(!h){ el.remove(); return; }
+  box.dataset.lot = '1';
+  Promise.resolve(loadLottieData('crowngold')).then(json => {
+    if(json){
+      const svg = box.querySelector('svg:not(.lot svg)');
+      if(svg) svg.style.display = 'none';        // statik zaxira SVG
+      crownLot = h;
+    } else { el.remove(); delete box.dataset.lot; }
   });
 }
 
@@ -3206,7 +3286,11 @@ function initLoadingLottie(){
   loadingLot = lottieMount(el, 'loading', { loop:true });
 }
 function stopLoadingLottie(){
-  if(loadingLot && loadingLot.anim){ try{ loadingLot.anim.destroy(); lottieAll.delete(loadingLot.anim); }catch(e){} }
+  // destroyLottie() lottieLoops dan ham o'chiradi. Avval faqat destroy()
+  // chaqirilardi va o'chirilgan animatsiya ro'yxatda qolib ketardi: hisob
+  // 3 ta ko'rinib turar, keyingi loop esa chinakam ishlayotganini pauza
+  // qilib qo'yishi mumkin edi.
+  destroyLottie(loadingLot);
   loadingLot = null;
   const el = document.querySelector('.loading-lot'); if(el) el.remove();
 }
