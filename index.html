@@ -753,7 +753,13 @@
     border-radius:18px; overflow:hidden;
     -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 62%, rgba(0,0,0,0) 100%);
     mask-image:linear-gradient(180deg, #000 0%, #000 62%, rgba(0,0,0,0) 100%); }
-  .podium-slot .rank-badge{ margin-bottom:calc((var(--rb-h) - var(--rb-av)) / 2 + 6px); }
+  /* Podiumda 45/40px avatar uchun nishon 155/138px bo'ladi — uchtasi 431px
+     joy so'raydi, 360px ekranda esa atigi 320px bor. Shuning uchun bu yerda
+     yon chekka BAND QILINMAYDI: ustunlar 104px da qoladi va qanotlar
+     qo'shnining ustiga chiqadi (sahifa yon tomonga siljimaydi, chetlari
+     kesilmaydi). Vertikal chekka o'z joyida — ism/tanga ustiga tushmaydi. */
+  .podium-slot .rank-badge{ margin-left:0; margin-right:0;
+    margin-bottom:calc((var(--rb-h) - var(--rb-av)) / 2 + 6px); }
   .podium-avatar{ width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue));
     color:#fff; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; overflow:hidden; }
   .podium-avatar svg{ width:55%; height:55%; }
@@ -1725,7 +1731,7 @@
       </div>
       <div class="podium">
         <div class="podium-slot second">
-          <div class="rank-badge" id="p2Badge" style="--rb-av:30px">
+          <div class="rank-badge" id="p2Badge" style="--rb-av:40px">
             <div class="rb-frame"></div>
             <div class="rb-av" id="p2Avatar">--</div>
           </div>
@@ -1735,7 +1741,7 @@
         </div>
         <div class="podium-slot first">
           <div class="podium-crown"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:var(--amber)"><path d="M2 18h20l-2-9-5 4-3-7-3 7-5-4z"/></svg></div>
-          <div class="rank-badge" id="p1Badge" style="--rb-av:32px">
+          <div class="rank-badge" id="p1Badge" style="--rb-av:45px">
             <div class="rb-frame"></div>
             <div class="rb-av" id="p1Avatar">--</div>
           </div>
@@ -1744,7 +1750,7 @@
           <div class="podium-bar" style="height:95px">1</div>
         </div>
         <div class="podium-slot third">
-          <div class="rank-badge" id="p3Badge" style="--rb-av:30px">
+          <div class="rank-badge" id="p3Badge" style="--rb-av:40px">
             <div class="rb-frame"></div>
             <div class="rb-av" id="p3Avatar">--</div>
           </div>
