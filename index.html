@@ -3796,7 +3796,23 @@ function rankBadgeHtml(level, inner, size, opts){
    (podium), aks holda birinchi kadrda qotib turadi — ko'rinishi bir xil,
    lekin ro'yxatdagi o'nlab qatorda CPU sarflamaydi. */
 const rankBadgeAnims = [];
+/* Reyting ro'yxati har safar innerHTML bilan qaytadan chiziladi, ya'ni eski
+   nishon elementlari DOM'dan chiqib ketadi. Ular bilan birga Lottie nusxalari
+   ham tashlanmasa, har qayta chizishda o'nlab animatsiya (va ular ushlab
+   turgan rasmlar) xotirada qolib ketardi: davr almashtirilganda xotira
+   15 -> 30 MB ga chiqib, FPS ham tushardi. */
+function pruneRankBadgeAnims(){
+  for(let i = rankBadgeAnims.length - 1; i >= 0; i--){
+    const a = rankBadgeAnims[i];
+    const el = a && (a.wrapper || a.container);
+    if(!el || !document.contains(el)){
+      try{ a.destroy(); }catch(e){}
+      rankBadgeAnims.splice(i, 1);
+    }
+  }
+}
 function mountRankBadges(root){
+  pruneRankBadgeAnims();
   const boxes = (root || document).querySelectorAll('.rank-badge[data-rb]');
   boxes.forEach(box => {
     const lvl = box.getAttribute('data-rb');
