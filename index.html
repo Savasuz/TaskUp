@@ -760,6 +760,9 @@
      kesilmaydi). Vertikal chekka o'z joyida — ism/tanga ustiga tushmaydi. */
   .podium-slot .rank-badge{ margin-left:0; margin-right:0;
     margin-bottom:calc((var(--rb-h) - var(--rb-av)) / 2 + 6px); }
+  /* 1-o'rin nishoni biroz tepada tursin: ustun pastdan tekislangani uchun
+     qo'shimcha pastki chekka uni yuqoriga ko'taradi. */
+  .podium-slot.first .rank-badge{ margin-bottom:calc((var(--rb-h) - var(--rb-av)) / 2 + 22px); }
   .podium-avatar{ width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue));
     color:#fff; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; overflow:hidden; }
   .podium-avatar svg{ width:55%; height:55%; }
