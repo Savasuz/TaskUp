@@ -730,9 +730,14 @@
   /* ---------- Podium ---------- */
   .podium{ position:relative; display:flex; align-items:flex-end; justify-content:center; gap:10px; padding:16px 4px 0; }
   .podium-slot{ flex:1; display:flex; flex-direction:column; align-items:center; position:relative; z-index:1; }
-  /* Konfetti foni — 2/1/3-o'rin ortida. Kompozitsiya kvadrat (10000x10000),
-     'slice' bilan podium qutisini to'liq qoplaydi. */
-  .podium-bg-lot{ position:absolute; inset:0; z-index:0; pointer-events:none; opacity:0.9; }
+  /* Tungi osmon + konfetti foni — 2/1/3-o'rin ortida. Kompozitsiya 1080x1920
+     (portret), 'YMin slice' bilan tepasi ko'rinadi: oy, yulduzlar, bulutlar.
+     To'q binafsha osmon to'rtburchagi qirqim bo'lib turmasligi uchun burchaklar
+     yumaloqlanadi va pastki chekkasi sahifa foniga singdiriladi. */
+  .podium-bg-lot{ position:absolute; inset:0; z-index:0; pointer-events:none;
+    border-radius:18px; overflow:hidden;
+    -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 62%, rgba(0,0,0,0) 100%);
+    mask-image:linear-gradient(180deg, #000 0%, #000 62%, rgba(0,0,0,0) 100%); }
   .avatar-frame-wrap-lb-podium{ width:76px; height:76px; margin-bottom:6px; }
   .avatar-frame-wrap-lb-podium .avatar-frame-img{ width:76px; height:76px; }
   .avatar-frame-wrap-lb-podium.gold{ width:88px; height:88px; }
@@ -3222,7 +3227,7 @@ function mountPodiumBgLottie(){
   if(!pod) return;
   const el = document.createElement('div'); el.className = 'lot podium-bg-lot';
   pod.insertBefore(el, pod.firstChild);
-  const h = lottieMount(el, 'podiumbg', { loop:true, speed:0.9, preserve:'xMidYMid slice' });
+  const h = lottieMount(el, 'podiumbg', { loop:true, speed:0.9, preserve:'xMidYMin slice' });
   if(!h){ el.remove(); return; }
   tabLot = { tab:'leaderboard', holder:h, el };
 }
