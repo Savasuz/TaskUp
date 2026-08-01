@@ -600,7 +600,7 @@
   .profile-header > *{ position:relative; z-index:1; }
   .profile-avatar{ width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue)); color:#fff;
     display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:22px; }
-  .avatar-edit-badge{ position:absolute; width:28px; height:28px; border-radius:50%; right:24px; bottom:24px;
+  .avatar-edit-badge{ display:none; position:absolute; width:28px; height:28px; border-radius:50%; right:24px; bottom:24px;
     background:var(--purple); border:2px solid var(--bg); display:flex; align-items:center; justify-content:center;
     cursor:pointer; z-index:2; box-shadow:0 2px 8px rgba(0,0,0,0.4); }
   .profile-phone{ font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--muted); }
@@ -634,6 +634,7 @@
   .info-ico.ic-level{ background:linear-gradient(160deg, #B48BFF, #6C3BD8); }
   .info-ico.ic-coin{ background:linear-gradient(160deg, #FFD76A, #D99400); }
   .info-ico.ic-streak{ background:linear-gradient(160deg, #FF9A55, #E2452F); }
+  .info-ico.ic-photo{ background:linear-gradient(160deg, #57D6A6, #17916A); }
   /* Yorliq hech qachon ikki qatorga tushmaydi; joy yetmasa faqat qiymat
      qisqaradi (...) — 320px ekranda ham qatorlar bir xil balandlikda qoladi. */
   .info-name{ flex:0 0 auto; font-size:14px; font-weight:600; white-space:nowrap; }
@@ -1582,10 +1583,9 @@
     <!-- ---- PROFILE TAB ---- -->
     <div class="tab-content" id="tab-profile">
       <div class="profile-header">
-        <div class="rank-badge" id="profileBadge2" style="--rb-av:78px; margin:0 auto 12px">
+        <div class="rank-badge" id="profileBadge2" data-rb-loop="1" style="--rb-av:68px; margin:0 auto 12px">
           <div class="rb-frame"></div>
           <div class="rb-av" id="profileAvatar" onclick="openAvatarPicker()" style="cursor:pointer">--</div>
-          <div class="avatar-edit-badge" onclick="openAvatarPicker()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
         </div>
         <input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="onAvatarFileSelected(this.files[0])">
         <div class="profile-name" id="profileName">--</div>
@@ -1626,6 +1626,11 @@
           <span class="info-ico ic-coin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.6 2.6 0 0 0-2.5-1.5c-1.4 0-2.5.8-2.5 2s1.1 1.7 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2a2.6 2.6 0 0 1-2.5-1.5"/><path d="M12 6.5v11"/></svg></span>
           <span class="info-name" data-i18n="totalEarned">Umumiy topilgan</span>
           <span class="info-val"><b id="profLifetime">0 coin</b><svg class="info-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+        </div>
+        <div class="info-row" onclick="openAvatarPicker()">
+          <span class="info-ico ic-photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+          <span class="info-name" data-i18n="changePhoto">Rasmni o'zgartirish</span>
+          <span class="info-val"><svg class="info-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
         </div>
         <div class="info-row" onclick="switchTab('home')">
           <span class="info-ico ic-streak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4 0 6.5-2.7 6.5-6 0-4-3.5-5.5-3-9.5C13 8 12 9.5 12 11c-1-1-1.5-2.5-1.5-4C8 8.5 5.5 11 5.5 16c0 3.3 2.5 6 6.5 6z"/></svg></span>
@@ -1730,7 +1735,7 @@
         </div>
         <div class="podium-slot first">
           <div class="podium-crown"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:var(--amber)"><path d="M2 18h20l-2-9-5 4-3-7-3 7-5-4z"/></svg></div>
-          <div class="rank-badge" id="p1Badge" style="--rb-av:30px">
+          <div class="rank-badge" id="p1Badge" style="--rb-av:32px">
             <div class="rb-frame"></div>
             <div class="rb-av" id="p1Avatar">--</div>
           </div>
@@ -2366,7 +2371,7 @@ const I18N = {
     noActivity:"Hali harakat yo'q", noPaymentHistory:"Hali to'lov tarixi yo'q", paymentHistoryTitle:"To'lov tarixim", backBtn:"‹ Orqaga",
     filterAllHist:"Barchasi", filterPending:"Kutilmoqda", filterPaid:"Muvaffaqiyatli", filterCancelled:"Bekor qilingan",
     totalEarned:"Umumiy topilgan", currentLevel:"Joriy daraja", dailyStreakLbl:"Kunlik seriya",
-    personalInfoTitle:"Shaxsiy ma'lumotlar", emailLbl:"Email", toastEmailCopied:"Email nusxalandi!",
+    personalInfoTitle:"Shaxsiy ma'lumotlar", emailLbl:"Email", toastEmailCopied:"Email nusxalandi!", changePhoto:"Rasmni o'zgartirish",
     langMenuItem:"Til / Language", leaderboardMenuItem:"Reyting", levelMenuItem:"Level",
     paymentHistoryMenuItem:"To'lov tarixi", taskHistoryMenuItem:"Vazifalar tarixi", myFriendsMenuItem:"Do'stlarim",
     helpMenuItem:"Yordam / Qo'llab-quvvatlash", privacyMenuItem:"Maxfiylik siyosati", termsMenuItem:"Foydalanish shartlari", deleteAccountMenuItem:"Hisobni o'chirish", deleteNowBtn:"Hisobni butunlay o'chirish",
@@ -2448,7 +2453,7 @@ const I18N = {
     noActivity:"No activity yet", noPaymentHistory:"No payment history yet", paymentHistoryTitle:"Payment history", backBtn:"‹ Back",
     filterAllHist:"All", filterPending:"Pending", filterPaid:"Successful", filterCancelled:"Cancelled",
     totalEarned:"Total earned", currentLevel:"Current level", dailyStreakLbl:"Daily streak",
-    personalInfoTitle:"Personal info", emailLbl:"Email", toastEmailCopied:"Email copied!",
+    personalInfoTitle:"Personal info", emailLbl:"Email", toastEmailCopied:"Email copied!", changePhoto:"Change photo",
     langMenuItem:"Language", leaderboardMenuItem:"Leaderboard", levelMenuItem:"Level",
     paymentHistoryMenuItem:"Payment history", taskHistoryMenuItem:"Task history", myFriendsMenuItem:"My friends",
     helpMenuItem:"Help / Support", privacyMenuItem:"Privacy policy", termsMenuItem:"Terms of service", deleteAccountMenuItem:"Delete account", deleteNowBtn:"Permanently delete account",
@@ -2530,7 +2535,7 @@ const I18N = {
     noActivity:"Пока нет операций", noPaymentHistory:"Пока нет истории платежей", paymentHistoryTitle:"История платежей", backBtn:"‹ Назад",
     filterAllHist:"Все", filterPending:"В ожидании", filterPaid:"Успешно", filterCancelled:"Отменено",
     totalEarned:"Всего заработано", currentLevel:"Текущий уровень", dailyStreakLbl:"Дней подряд",
-    personalInfoTitle:"Личные данные", emailLbl:"Email", toastEmailCopied:"Email скопирован!",
+    personalInfoTitle:"Личные данные", emailLbl:"Email", toastEmailCopied:"Email скопирован!", changePhoto:"Изменить фото",
     langMenuItem:"Язык", leaderboardMenuItem:"Рейтинг", levelMenuItem:"Уровень",
     paymentHistoryMenuItem:"История платежей", taskHistoryMenuItem:"История заданий", myFriendsMenuItem:"Мои друзья",
     helpMenuItem:"Помощь / Поддержка", privacyMenuItem:"Политика конфиденциальности", termsMenuItem:"Условия использования", deleteAccountMenuItem:"Удалить аккаунт", deleteNowBtn:"Удалить аккаунт навсегда",
@@ -2952,6 +2957,8 @@ function switchTab(tab){
   window.scrollTo(0, 0);
   if(tab === 'leaderboard') loadLeaderboard(currentLbPeriod, document.querySelector('#tab-leaderboard .lb-tab[data-p="' + currentLbPeriod + '"]'));
   if(tab === 'profile' && typeof playPersonalInfoLottie === 'function') playPersonalInfoLottie();
+  if(tab === 'profile' && typeof mountRankBadges === 'function') mountRankBadges(document.getElementById('tab-profile'));
+  if(typeof setProfileBadgeRunning === 'function') setProfileBadgeRunning(tab === 'profile');
   if(typeof syncTabLottie === 'function') syncTabLottie(tab);
   if(tab === 'leaderboard' && typeof playPodiumCrownLottie === 'function') playPodiumCrownLottie();
   if(tab === 'history') loadPaymentHistory(currentUid);
@@ -3834,16 +3841,38 @@ function mountRankBadges(root){
     });
     rankBadgeAnims.push(anim);
   });
+  // renderLevel() profil nishonini boshqa tabda turganda ham quradi — shu
+  // yerda darhol to'g'ri holatga keltiriladi, aks holda reytingda ko'rinmay
+  // turib aylanaverardi.
+  const act = document.querySelector('.tab-content.active');
+  setProfileBadgeRunning(!!act && act.id === 'tab-profile');
 }
-/* Reyting tabidan chiqilganda podiumdagi loop nishonlar to'xtatiladi. */
+/* Profil nishoni doim aylanadi, lekin faqat profil ochiq turganda: boshqa
+   tabda u ko'rinmaydi, ishlab tursa esa reytingdagi FPS ni yeb qo'yardi. */
+function setProfileBadgeRunning(on){
+  const holder = document.querySelector('#profileBadge2 .rb-frame');
+  if(!holder) return;
+  rankBadgeAnims.forEach(a => {
+    if((a.wrapper || a.container) !== holder) return;
+    try{ on ? a.play() : a.pause(); }catch(e){}
+  });
+}
+
+/* Reyting tabidan chiqilganda FAQAT podiumdagi loop nishon to'xtatiladi.
+   Profil nishoni doim aylanib turadi va bunga tegilmaydi. */
 function destroyRankBadgeLoops(){
-  for(let i = rankBadgeAnims.length - 1; i >= 0; i--){
-    const a = rankBadgeAnims[i];
-    if(!a.loop) continue;
-    try{ a.destroy(); }catch(e){}
-    rankBadgeAnims.splice(i, 1);
-  }
-  document.querySelectorAll('.rank-badge[data-rb-loop]').forEach(b => { delete b.dataset.rbBuilt; });
+  const boxes = document.querySelectorAll('.podium-slot .rank-badge[data-rb-loop]');
+  boxes.forEach(box => {
+    const holder = box.querySelector('.rb-frame');
+    for(let i = rankBadgeAnims.length - 1; i >= 0; i--){
+      const a = rankBadgeAnims[i];
+      if((a.wrapper || a.container) !== holder) continue;
+      try{ a.destroy(); }catch(e){}
+      rankBadgeAnims.splice(i, 1);
+    }
+    holder.innerHTML = '';
+    delete box.dataset.rbBuilt;
+  });
 }
 function badgeIconHtml(badge, size){
   return `<img src="${badge.img}" alt="" style="width:${size}px; height:${size}px; object-fit:contain; vertical-align:-${Math.round(size*0.2)}px; margin-right:${Math.round(size*0.22)}px">`;
