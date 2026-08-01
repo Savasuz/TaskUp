@@ -744,9 +744,11 @@
   .podium-avatar.silver{ border-color:#C0C0C0; }
   .podium-avatar.bronze{ border-color:#CD7F32; }
   .podium-crown{ position:relative; font-size:20px; margin-bottom:2px; }
-  /* Lottie toj statik SVG dan kattaroq; manfiy chekka bilan qator balandligi
-     avvalgidek qoladi, ya'ni avatar pastga siljimaydi. */
-  .podium-crown .crown-lot{ width:36px; height:36px; margin:-8px 0 -6px; }
+  /* Toj 350x350 kompozitsiyaning o'rtasidagi ~58% ni egallaydi, atrofi bo'sh.
+     Shuning uchun idish 72px: ko'rinadigan toj ~42px bo'ladi — eski 20px lik
+     SVG dan roppa-rosa ikki barobar katta. Manfiy chekkalar shu bo'sh joyni
+     yeb yuboradi, aks holda toj bilan avatar orasi ochilib ketardi. */
+  .podium-crown .crown-lot{ width:72px; height:72px; margin:-18px 0 -12px; }
   .podium-name{ font-size:11.5px; font-weight:700; text-align:center; }
   .podium-coin{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--amber); margin:2px 0 8px; }
   .podium-bar{ width:100%; border-radius:10px 10px 0 0; display:flex; align-items:flex-start; justify-content:center;
