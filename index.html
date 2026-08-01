@@ -382,8 +382,12 @@
 
   /* ---------- Invite hero ---------- */
   .invite-hero{ padding:24px 10px 20px; }
-  .invite-emoji{ display:flex; justify-content:center; margin-bottom:8px; }
+  .invite-emoji{ position:relative; display:flex; justify-content:center; margin-bottom:8px; }
   .invite-emoji img{ width:200px; height:200px; object-fit:contain; }
+  /* Lottie kompozitsiyasi 1000x700 — statik PNG dan kengroq, shuning uchun
+     o'z nisbatida ko'rsatiladi. JSON yuklanmasa (oflayn / reduced-motion)
+     yuqoridagi PNG o'z joyida qolaveradi. */
+  .invite-lot{ width:min(100%, 300px); aspect-ratio:1000/700; }
 
   /* ---------- Vazifalar bo'sh holati ---------- */
   .tasks-empty{ display:none; flex-direction:column; align-items:center; text-align:center; padding:36px 24px 20px; }
@@ -1462,7 +1466,7 @@
     <!-- ---- FRIENDS TAB ---- -->
     <div class="tab-content" id="tab-friends">
       <div class="invite-hero">
-        <div class="invite-emoji"><img src="assets/menu/friends-empty.png" alt="" width="200" height="200"></div>
+        <div class="invite-emoji" id="inviteHeroArt"><img src="assets/menu/friends-empty.png" alt="" width="200" height="200"></div>
         <div class="sec-title" style="text-align:center; margin-bottom:6px" data-i18n="inviteHeroTitle">Do'stlaringizni taklif qiling</div>
         <div style="text-align:center; font-size:12.5px; color:var(--muted)" data-i18n="inviteHeroSub">Har bir do'st uchun 1 000 coin — do'stingiz 500 coin oladi</div>
         
@@ -2924,6 +2928,7 @@ function switchTab(tab){
   window.scrollTo(0, 0);
   if(tab === 'leaderboard') loadLeaderboard(currentLbPeriod, document.querySelector('#tab-leaderboard .lb-tab[data-p="' + currentLbPeriod + '"]'));
   if(tab === 'profile' && typeof playPersonalInfoLottie === 'function') playPersonalInfoLottie();
+  if(tab === 'friends' && typeof initFriendsLottie === 'function') initFriendsLottie();
   if(tab === 'history') loadPaymentHistory(currentUid);
 }
 
@@ -2991,7 +2996,8 @@ const LOTTIE_FILES = {
   loading: 'loading purple.json',
   notif:   'notification.json',
   profilebg:'profile-bg.json',
-  profileicon:'profile-icon.json'
+  profileicon:'profile-icon.json',
+  friends: 'friends.json'
 };
 const LOOP_LIMIT = 3;
 const lottieLoops = [];      // faol loop animatsiyalar (eng eski birinchi)
@@ -3142,6 +3148,24 @@ function initPersonalInfoLottie(){
 function playPersonalInfoLottie(){
   const h = personalInfoAnim || initPersonalInfoLottie();
   if(h && h.anim){ try{ h.anim.goToAndPlay(0, true); }catch(e){} }
+}
+
+/* ---- Do'stlar sahifasi sarlavhasidagi rasm: doimiy loop ----
+   Do'stlar tabi birinchi marta ochilganda quriladi. Splash yopilgandan keyin
+   doimiy loop ikkita (balans tangasi va profil foni), demak bu uchinchisi —
+   LOOP_LIMIT ga tegmaydi va hech narsa pauza qilinmaydi. */
+function initFriendsLottie(){
+  const box = document.getElementById('inviteHeroArt');
+  if(!box || box.dataset.lot) return;
+  const el = document.createElement('div'); el.className = 'lot invite-lot';
+  box.appendChild(el);
+  const h = lottieMount(el, 'friends', { loop:true, speed:1.6 });
+  if(!h){ el.remove(); return; }
+  box.dataset.lot = '1';
+  Promise.resolve(loadLottieData('friends')).then(json => {
+    if(json){ const img = box.querySelector('img'); if(img) img.style.display = 'none'; }
+    else { el.remove(); delete box.dataset.lot; }
+  });
 }
 
 /* ---- Profil sarlavhasi foni: doimiy sekin loop ---- */
