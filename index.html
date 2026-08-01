@@ -730,10 +730,10 @@
   /* ---------- Podium ---------- */
   .podium{ position:relative; display:flex; align-items:flex-end; justify-content:center; gap:10px; padding:16px 4px 0; }
   .podium-slot{ flex:1; display:flex; flex-direction:column; align-items:center; position:relative; z-index:1; }
-  /* Tungi osmon + konfetti foni — 2/1/3-o'rin ortida. Kompozitsiya 1080x1920
-     (portret), 'YMin slice' bilan tepasi ko'rinadi: oy, yulduzlar, bulutlar.
-     To'q binafsha osmon to'rtburchagi qirqim bo'lib turmasligi uchun burchaklar
-     yumaloqlanadi va pastki chekkasi sahifa foniga singdiriladi. */
+  /* Fon + konfetti — 2/1/3-o'rin ortida. Kompozitsiya 1280x720 (landshaft),
+     podium nisbatiga yaqin, shuning uchun 'slice' juda oz qirqadi.
+     Fon to'rtburchagi qirqim bo'lib turmasligi uchun burchaklar yumaloqlanadi
+     va pastki chekkasi sahifa foniga singdiriladi. */
   .podium-bg-lot{ position:absolute; inset:0; z-index:0; pointer-events:none;
     border-radius:18px; overflow:hidden;
     -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 62%, rgba(0,0,0,0) 100%);
@@ -3227,7 +3227,7 @@ function mountPodiumBgLottie(){
   if(!pod) return;
   const el = document.createElement('div'); el.className = 'lot podium-bg-lot';
   pod.insertBefore(el, pod.firstChild);
-  const h = lottieMount(el, 'podiumbg', { loop:true, speed:0.9, preserve:'xMidYMin slice' });
+  const h = lottieMount(el, 'podiumbg', { loop:true, speed:0.9, preserve:'xMidYMid slice' });
   if(!h){ el.remove(); return; }
   tabLot = { tab:'leaderboard', holder:h, el };
 }
