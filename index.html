@@ -3426,7 +3426,16 @@ function mountChestArt(){
     if(!h){ el.remove(); return; }
     box.dataset.lot = '1';
     Promise.resolve(loadLottieData(box.getAttribute('data-anim'))).then(json => {
-      if(json && h.anim) h.anim.goToAndStop(0, true);
+      if(!json || !h.anim) return;
+      // Endigina "Olish" bosilgan sandiq qayta chizilgan bo'lsa — darrov
+      // bayram animatsiyasini boshlaymiz, aks holda 0-kadrda turadi.
+      const item = box.closest('.chest-item');
+      if(item && item.dataset.chest && item.dataset.chest === pendingChestPlay){
+        pendingChestPlay = null;
+        celebrateChest(h.anim);
+      } else {
+        h.anim.goToAndStop(0, true);
+      }
     });
   });
 }
@@ -3502,10 +3511,26 @@ function stopChestLocks(){
   document.querySelectorAll('.chest-lock[data-lot]').forEach(x => { delete x.dataset.lot; });
 }
 
-function playChestArt(id){
-  const box = document.querySelector('.chest-item[data-chest="' + id + '"] .chest-art .lot');
-  if(!box) return;
-  lottieAll.forEach(a => { if((a.wrapper || a.container) === box){ try{ a.goToAndPlay(0, true); }catch(e){} } });
+/* "Olish" bosilganda sandiq o'z animatsiyasini takroran o'ynaydi.
+   CHEST_CELEBRATE_MS tugagach loop uziladi va sandiq oxirgi kadrda qoladi.
+   Vaqt bilan chegaralangani ataylab: uchala olingan sandiq abadiy loop
+   qilsa, uch dona doimiy animatsiya qo'shilib, sahifadagi loop budjetini
+   (nur + fon + balans tangasi) buzardi. */
+const CHEST_CELEBRATE_MS = 5000;
+let pendingChestPlay = null;   // qayta chizilgach o'ynatiladigan sandiq id'si
+function celebrateChest(anim){
+  if(!anim) return;
+  try{
+    anim.loop = true;
+    anim.goToAndPlay(0, true);
+  }catch(e){ return; }
+  setTimeout(() => {
+    try{
+      if(!document.contains(anim.wrapper || anim.container)) return;
+      anim.loop = false;
+      anim.goToAndStop(Math.max(0, anim.totalFrames - 1), true);
+    }catch(e){}
+  }, CHEST_CELEBRATE_MS);
 }
 /* Mukofot tangasi sandiqdan balans hisoblagichi tomon uchadi */
 function flyCoinsToBalance(fromEl, count){
@@ -3537,7 +3562,11 @@ function claimChest(id){
   withBtnLoading(btn, fns.httpsCallable('claimMilestone')({ id }).then((res) => {
     const reward = (res.data && res.data.reward) || c.reward;
     state.claimedMilestones = (state.claimedMilestones || []).concat([id]);
-    playChestArt(id);
+    // renderChests() qatorni innerHTML bilan qayta quradi, shuning uchun
+    // animatsiyani shu yerda boshlash befoyda edi — u darrov yo'q qilinardi.
+    // O'rniga sandiq id'si belgilanadi va mountChestArt yangi instansiyani
+    // qurishi bilan o'zi o'ynatadi.
+    pendingChestPlay = id;
     flyCoinsToBalance(item && item.querySelector('.chest-art'), 7);
     showToast('+' + fmtNum(reward) + ' ' + t('toastTaskDone'));
     renderChests();
