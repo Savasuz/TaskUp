@@ -2271,11 +2271,26 @@ const DAILY_CAP_BASE = 3000;
 const DAILY_CAP_PER_LEVEL = 250;
 const DAILY_CAP_MAX_LEVEL = 10; // 10-darajadan keyin limit oshmaydi
 function getDailyCap(level){ return DAILY_CAP_BASE + (Math.min(Math.max(1, level), DAILY_CAP_MAX_LEVEL) - 1) * DAILY_CAP_PER_LEVEL; }
-function getTaskLabel(id){
-  const map = { video: 'taskVideoName', download: 'taskDownloadName', survey: 'taskSurveyName', ad: 'taskAdName', telegram: 'taskTgName', invite: 'taskInviteName', rate: 'taskRateName' };
-  if(map[id]) return t(map[id]);
-  const ct = (typeof catalogTasks !== 'undefined') && catalogTasks.find(x => x.id === id);
-  return (ct && ct.name) || id;
+/* "Bugun" — SERVER mintaqasida (Asia/Tashkent).
+
+   Avval mijoz `new Date().toDateString()` ishlatardi, ya'ni QURILMA vaqt
+   mintaqasini. Server esa functions/index.js dagi `process.env.TZ` tufayli
+   doim Toshkent vaqtida ishlaydi. Qurilma boshqa mintaqada bo'lsa (yoki
+   foydalanuvchi safarda bo'lsa) ikkalasi bir kunga farq qilardi: kunlik
+   reset, dailyLimit hisoblagichi, kunlik bonus va g'ildirak holati
+   serverdagidan boshqacha ko'rinardi.
+
+   Format `Date.toDateString()` bilan bir xil ("Mon Aug 03 2026") — Firestore'da
+   sanalar aynan shu ko'rinishda saqlanadi, shuning uchun solishtirish ishlaydi. */
+const APP_TZ = 'Asia/Tashkent';
+function todayStr(){
+  try {
+    return new Date().toLocaleDateString('en-US', {
+      timeZone: APP_TZ, weekday: 'short', month: 'short', day: '2-digit', year: 'numeric'
+    }).replace(/,/g, '');
+  } catch(e){
+    return new Date().toDateString();   // Intl yo'q bo'lsa — eski xatti-harakat
+  }
 }
 
 let state = {
@@ -2843,8 +2858,14 @@ function initUserData(uid){
         taskCounts: {}, tasksCompletedTotal: 0, dailyEarned: 0,
         friendsCount: 0, friendsBonus: 0, cashedOutTotal: 0,
         streakCount: 0, lastStreakClaim: null,
-        lastReset: new Date().toDateString(),
-        referralCode: 'TASKUP-' + uid.slice(-4).toUpperCase(),
+        lastReset: todayStr(),
+        // 4 ta belgi 36^4 ~ 1.68M variant beradi va ~1500 foydalanuvchida
+        // to'qnashuv ehtimoli 50% ga chiqadi. redeemReferral kodni aniq
+        // moslik bo'yicha qidiradi, ya'ni to'qnashuvda bonus boshqa odamga
+        // ketardi. 6 ta belgi 36^6 ~ 2.2 mlrd variant beradi.
+        // DIQQAT: firestore.rules'dagi create qoidasi ham aynan shu
+        // formulani tekshiradi — biri o'zgarsa, ikkinchisi ham o'zgarishi shart.
+        referralCode: 'TASKUP-' + uid.slice(-6).toUpperCase(),
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
         document.getElementById('authScreen').style.display = 'none';
@@ -2907,7 +2928,7 @@ function taskDoneCount(task){
   const once = !!(task && typeof task === 'object' && task.repeat === 'once');
   const p = state.taskProgress[id];
   let n = 0;
-  if(p && (once || p.lastResetDate === new Date().toDateString())) n = Number(p.count) || 0;
+  if(p && (once || p.lastResetDate === todayStr())) n = Number(p.count) || 0;
   const legacy = once ? 0 : (Number(state.taskCounts[id]) || 0);
   return Math.max(n, legacy);
 }
@@ -2919,7 +2940,7 @@ function subscribeUser(uid){
   unsubscribeUser = userRef.onSnapshot((doc) => {
     if(!doc.exists) return;
     const data = doc.data();
-    const today = new Date().toDateString();
+    const today = todayStr();
     /* Yangi kun: hisoblagichlarni faqat KO'RSATISH uchun nolga tenglaymiz.
        Firestore'ga yozmaymiz — haqiqiy reset serverda, completeTask tranzaksiyasi
        ichida atomik bajariladi. (Avval mijoz o'zi yozardi, lekin bu kunlik
@@ -3183,7 +3204,7 @@ function closeWheel(){
   document.getElementById('wheelOverlay').classList.remove('show');
 }
 function renderWheelState(){
-  const spun = state.lastSpin === new Date().toDateString();
+  const spun = state.lastSpin === todayStr();
   const btn = document.getElementById('spinBtn');
   const cardBtn = document.getElementById('wheelCardBtn');
   if(btn && !spinning){ btn.disabled = spun; btn.textContent = spun ? t('wheelAlready') : t('btnSpin'); }
@@ -4020,7 +4041,7 @@ function doSpin(){
     const target = wheelRotation + 5 * 360 + ((finalAngle - current + 360) % 360);
     animateWheelTo(target, reducedMotion ? 400 : 4400, () => {
       spinning = false;
-      state.lastSpin = new Date().toDateString();
+      state.lastSpin = todayStr();
       celebrateReward(prize, document.getElementById('wheelDisc'));
       showToast(`+${prize} ${t('wheelWin')}`);
       document.getElementById('wheelNote').textContent = t('wheelTomorrow');
@@ -4030,7 +4051,7 @@ function doSpin(){
   }).catch((err) => {
     spinning = false;
     const m = err && err.message;
-    if(m === 'already-spun'){ state.lastSpin = new Date().toDateString(); showToast(t('wheelAlready'), true); }
+    if(m === 'already-spun'){ state.lastSpin = todayStr(); showToast(t('wheelAlready'), true); }
     else { console.error(err); showToast(friendlyError(err), true); }
     renderWheelState();
   });
@@ -4150,7 +4171,7 @@ function updateTaskCardStates(){
 }
 
 function renderStreak(){
-  const today = new Date().toDateString();
+  const today = todayStr();
   const btn = document.getElementById('streakBtn');
   const sub = document.getElementById('streakSub');
   const bonus = Math.min(500, 200 + state.streakCount * 50);
@@ -5000,7 +5021,7 @@ function verifyTelegramTask(taskId, btnEl){
 function topTaskReward(tasks){
   let max = 0, maxCount = 0;
   tasks.forEach(tk => {
-    if(!tk.nameKey && tk.kind === 'rewarded_ad') return;
+    if(taskVerify(tk) === 'admob') return;   // reklama vazifasi "eng ko'p mukofot" ga qo'shilmaydi
     const r = taskReward(tk);
     if(r > max){ max = r; maxCount = 1; }
     else if(r === max && r > 0){ maxCount++; }
@@ -5189,7 +5210,7 @@ function completeTask(taskId, btnEl){
 function claimStreak(){
   sndClick();
   if(!currentUid) return;
-  if(state.lastStreakClaim === new Date().toDateString()) return;
+  if(state.lastStreakClaim === todayStr()) return;
   // ANTI-CHEAT: bonus serverda hisoblanadi
   const btn = document.getElementById('streakBtn');
   if(btn) btn.disabled = true;
