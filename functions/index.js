@@ -217,31 +217,18 @@ exports.completeTask = onCall(async (req) => {
    o'sha kanalda administrator bo'lishi kerak — aks holda getChatMember
    javob bermaydi.
 
-   Bot tokeni: process.env.TELEGRAM_BOT_TOKEN, bo'lmasa Firestore'dagi
-   config/telegram hujjatining botToken maydoni. ATAYLAB defineSecret
-   ISHLATILMADI: Secret Manager'da kalit yaratilmagan bo'lsa `firebase
-   deploy --only functions` butun deploy'ni rad etadi, ya'ni bitta
-   sozlanmagan token qolgan o'nta funksiyani ham yangilanmay qoldirardi.
-   config/telegram hujjatiga mijoz kira olmaydi — firestore.rules'da unga
-   mos qoida yo'q, standart holat esa taqiqlash.
+   Bot tokeni Secret Manager'da: TELEGRAM_BOT_TOKEN (CARD_ENC_KEY bilan bir
+   xil uslub). Yangilash:
+     firebase functions:secrets:set TELEGRAM_BOT_TOKEN
 
    Foydalanuvchining Telegram ID'si users/{uid}.telegramId da kutiladi.
    Ilovada hozircha Telegram bilan bog'lash oqimi yo'q, shuning uchun bu
    tekshiruv 'tg-not-linked' bilan tugaydi — vazifa turini adminda
    'telegram' qilishdan oldin o'sha oqim qo'shilishi kerak. */
+const TELEGRAM_BOT_TOKEN = defineSecret('TELEGRAM_BOT_TOKEN');
 const TG_MEMBER_STATUSES = ['creator', 'administrator', 'member'];
-let tgTokenCache = { at: 0, token: null };
 
-async function telegramToken() {
-  if (process.env.TELEGRAM_BOT_TOKEN) return process.env.TELEGRAM_BOT_TOKEN;
-  if (tgTokenCache.token && Date.now() - tgTokenCache.at < 5 * 60 * 1000) return tgTokenCache.token;
-  const snap = await db.collection('config').doc('telegram').get();
-  const token = snap.exists ? String(snap.data().botToken || '') : '';
-  tgTokenCache = { at: Date.now(), token };
-  return token;
-}
-
-exports.verifyTelegram = onCall(async (req) => {
+exports.verifyTelegram = onCall({ secrets: [TELEGRAM_BOT_TOKEN] }, async (req) => {
   const uid = requireAuth(req);
   const taskId = String((req.data && req.data.taskId) || '').trim();
   if (!taskId || taskId.length > 100) throw new HttpsError('invalid-argument', 'bad-task-id');
@@ -258,7 +245,7 @@ exports.verifyTelegram = onCall(async (req) => {
   const tgId = userSnap.exists ? userSnap.data().telegramId : null;
   if (!tgId) throw new HttpsError('failed-precondition', 'tg-not-linked');
 
-  const token = await telegramToken();
+  const token = TELEGRAM_BOT_TOKEN.value();
   if (!token) throw new HttpsError('failed-precondition', 'tg-token-missing');
 
   let body;
