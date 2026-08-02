@@ -119,6 +119,18 @@ function maskEmail(email) {
    butunlay chetlab o'tardi. */
 const SELF_SERVE_VERIFY = ['auto', 'manual', 'trust'];
 
+/* Mukofot maydonining nomi ikki xil: admin panel `reward` yozadi, bazaga
+   seed qilingan 16 ta vazifada esa u `coin` deb nomlangan. Ikkalasi ham
+   qabul qilinadi, `reward` ustunroq.
+
+   Bu FAQAT ko'rinish masalasi emas edi: bu yerda qiymat topilmasa
+   reward 0 bo'lib, vazifa 'bad-task' bilan rad etilardi — ya'ni `coin`
+   maydonli vazifalar bosilganda umuman mukofot bermasdi. */
+function taskRewardOf(td) {
+  const raw = (td && td.reward != null && td.reward !== '') ? td.reward : (td ? td.coin : 0);
+  return Math.max(0, Math.floor(Number(raw)) || 0);
+}
+
 function taskProgressCount(pd, td, today) {
   if (!pd) return 0;
   if (td.repeat !== 'once' && pd.lastResetDate !== today) return 0;
@@ -164,7 +176,7 @@ async function grantTask(uid, taskId, allowVerify) {
     if ((td.totalLimit || 0) > 0 && (td.completedCount || 0) >= td.totalLimit) {
       throw new HttpsError('resource-exhausted', 'total-limit');
     }
-    const reward = Math.floor(Number(td.reward)) || 0;
+    const reward = taskRewardOf(td);
     const limit = Math.floor(Number(td.dailyLimit)) || 1;
     const label = td.name || taskId;
     if (reward <= 0) throw new HttpsError('failed-precondition', 'bad-task');
