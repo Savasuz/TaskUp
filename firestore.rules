@@ -57,12 +57,41 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if isOwner(uid) || isAdmin();
 
-      // Yangi hisob faqat nol balans bilan ochiladi
+      /* Yangi hisob. Avval bu yerda FAQAT to'rtta pul maydoni nolligi
+         tekshirilardi, qolgan hamma maydonni foydalanuvchi o'zi belgilay
+         olardi. Ilova ularni nol bilan yozadi, lekin hujum ilova orqali
+         emas — SDK'dan to'g'ridan-to'g'ri bajariladi: ro'yxatdan o'tib,
+         hujjatni o'zi yaratadi. Shu yo'l bilan mumkin bo'lgan narsalar:
+
+           tasksCompletedTotal: 100  -> uchala sandiq darrov = 2300 tanga
+           weeklyCoins: 999999       -> haftalik TOP-1 mukofoti
+           telegramId: <birovniki>   -> Telegram vazifasini a'zo bo'lmay olish
+           referralCode: <birovniki> -> referal bonuslarini o'g'irlash
+           claimedMilestones / streakCount / friendsBonus — erkin
+
+         Endi ruxsat etilgan maydonlar ro'yxati va ularning boshlang'ich
+         qiymatlari qat'iy belgilangan. Yangi maydon qo'shilsa shu ro'yxatga
+         ham qo'shilishi kerak, aks holda ro'yxatdan o'tish ishlamay qoladi. */
       allow create: if isOwner(uid)
+        && request.resource.data.keys().hasOnly([
+             'email', 'coins', 'lifetimeCoins', 'taskCounts', 'tasksCompletedTotal',
+             'dailyEarned', 'friendsCount', 'friendsBonus', 'cashedOutTotal',
+             'streakCount', 'lastStreakClaim', 'lastReset', 'referralCode', 'createdAt'
+           ])
         && request.resource.data.coins == 0
         && request.resource.data.lifetimeCoins == 0
         && request.resource.data.cashedOutTotal == 0
-        && request.resource.data.dailyEarned == 0;
+        && request.resource.data.dailyEarned == 0
+        && request.resource.data.tasksCompletedTotal == 0
+        && request.resource.data.friendsCount == 0
+        && request.resource.data.friendsBonus == 0
+        && request.resource.data.streakCount == 0
+        && request.resource.data.taskCounts.size() == 0
+        && request.resource.data.lastStreakClaim == null
+        && request.resource.data.email is string
+        && request.resource.data.email.size() < 200
+        // Referal kodi uid'dan kelib chiqadi — birovnikini qo'yib bo'lmaydi
+        && request.resource.data.referralCode == 'TASKUP-' + uid[uid.size()-6:uid.size()].upper();
 
       // XAVFSIZLIK: kunlik hisoblagichlarni (taskCounts, dailyEarned, lastReset)
       // egasi O'ZGARTIRA OLMAYDI.

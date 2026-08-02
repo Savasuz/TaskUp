@@ -706,8 +706,13 @@ exports.redeemReferral = onCall(async (req) => {
   if (meSnap.data().referredBy) throw new HttpsError('failed-precondition', 'already-redeemed');
   if ((meSnap.data().referralCode || '').toUpperCase() === code) throw new HttpsError('failed-precondition', 'own-code');
 
-  const q = await db.collection('users').where('referralCode', '==', code).limit(1).get();
+  /* limit(2): eski hisoblarda referal kodi uid'ning atigi 4 ta belgisidan
+     hosil qilingan va to'qnashishi mumkin. Avval limit(1) ishlatilardi —
+     to'qnashuvda bonus jimgina BOSHQA odamga ketardi. Endi noaniqlik
+     aniqlanadi va so'rov rad etiladi (admin qo'lda hal qiladi). */
+  const q = await db.collection('users').where('referralCode', '==', code).limit(2).get();
   if (q.empty) throw new HttpsError('not-found', 'code-not-found');
+  if (q.size > 1) throw new HttpsError('failed-precondition', 'ambiguous-code');
   const refUserRef = q.docs[0].ref;
   if (refUserRef.id === uid) throw new HttpsError('failed-precondition', 'own-code');
 
