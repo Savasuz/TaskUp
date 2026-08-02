@@ -1513,6 +1513,11 @@
         <div class="wheel-card-body">
           <b data-i18n="wheelTitle">Omadli g'ildirak</b>
           <span data-i18n="wheelSub">Kuniga 1 marta bepul — 500 tangagacha yutib oling!</span>
+          <!-- Kunlik bonus kartasidagi bilan bir xil hisoblagich. G'ildirak ham
+               mahalliy yarim tunda tiklanadi, shuning uchun startDailyTimer()
+               ikkalasini bitta hisobdan yangilaydi. Faqat bugun aylantirilgan
+               bo'lsa ko'rinadi — tugma faol turganda "qolgan vaqt" chalg'itardi. -->
+          <div class="daily-timer" id="wheelTimer" hidden>00:00:00</div>
           <button class="task-btn" id="wheelCardBtn" onclick="event.stopPropagation(); openWheel()" data-i18n="btnSpin">Aylantirish</button>
         </div>
         <!-- Dekorativ mini g'ildirak — modal bilan bir xil CSS komponentlar
@@ -3080,6 +3085,8 @@ function renderWheelState(){
   const cardBtn = document.getElementById('wheelCardBtn');
   if(btn && !spinning){ btn.disabled = spun; btn.textContent = spun ? t('wheelAlready') : t('btnSpin'); }
   if(cardBtn){ cardBtn.disabled = spun; cardBtn.textContent = spun ? t('wheelTomorrow') : t('btnSpin'); }
+  const timer = document.getElementById('wheelTimer');
+  if(timer) timer.hidden = !spun;
 }
 const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -4056,8 +4063,10 @@ function startDailyTimer(){
     const h = String(Math.floor(diff/3600000)).padStart(2,'0');
     const m = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
     const s = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
-    document.getElementById('dailyTimer').textContent = `${h}:${m}:${s}`;
-    const adTimer = document.getElementById('dailyTimerAd'); if(adTimer) adTimer.textContent = `${h}:${m}:${s}`;
+    const txt = `${h}:${m}:${s}`;
+    document.getElementById('dailyTimer').textContent = txt;
+    const adTimer = document.getElementById('dailyTimerAd'); if(adTimer) adTimer.textContent = txt;
+    const wheelTimer = document.getElementById('wheelTimer'); if(wheelTimer) wheelTimer.textContent = txt;
   }
   update(); setInterval(update, 1000);
 }
