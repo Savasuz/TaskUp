@@ -162,6 +162,52 @@ exports.completeTask = onCall(async (req) => {
   });
 });
 
+/* ---------- Vazifa bosqichlari (sandiqlar) ----------
+   30 / 50 / 100 ta bajarilgan vazifa uchun bir martalik mukofot.
+   Chegara ham, mukofot miqdori ham SERVERDA belgilangan: mijoz faqat
+   qaysi sandiqni ochmoqchi ekanini yuboradi. Har bir sandiq bir marta
+   olinadi — claimedMilestones ro'yxati tranzaksiya ichida tekshiriladi,
+   shuning uchun ikki marta bosish yoki parallel so'rov ikkinchi marta
+   to'lamaydi. Kunlik limit (dailyEarned/cap) bu mukofotga TA'SIR QILMAYDI:
+   bu vazifa daromadi emas, bir martalik bosqich mukofoti. */
+const TASK_MILESTONES = [
+  { id: 'm30',  tasks: 30,  reward: 300  },
+  { id: 'm50',  tasks: 50,  reward: 500  },
+  { id: 'm100', tasks: 100, reward: 1500 }
+];
+
+exports.claimMilestone = onCall(async (req) => {
+  const uid = requireAuth(req);
+  const id = String((req.data && req.data.id) || '').trim();
+  const ms = TASK_MILESTONES.find((m) => m.id === id);
+  if (!ms) throw new HttpsError('invalid-argument', 'bad-milestone');
+
+  const userRef = db.collection('users').doc(uid);
+  return db.runTransaction(async (tx) => {
+    const doc = await tx.get(userRef);
+    if (!doc.exists) throw new HttpsError('not-found', 'user-not-found');
+    const d = doc.data();
+    if (d.banned === true) throw new HttpsError('permission-denied', 'banned');
+
+    const done = Math.floor(Number(d.tasksCompletedTotal)) || 0;
+    if (done < ms.tasks) throw new HttpsError('failed-precondition', 'not-enough-tasks');
+
+    const claimed = Array.isArray(d.claimedMilestones) ? d.claimedMilestones : [];
+    if (claimed.indexOf(ms.id) !== -1) throw new HttpsError('already-exists', 'already-claimed');
+
+    tx.update(userRef, {
+      coins: (d.coins || 0) + ms.reward,
+      lifetimeCoins: (d.lifetimeCoins || 0) + ms.reward,
+      claimedMilestones: claimed.concat([ms.id]),
+      ...weeklyPatch(d, ms.reward)
+    });
+    tx.set(userRef.collection('history').doc(), {
+      label: `${ms.tasks} ta vazifa sandig'i`, amount: ms.reward, at: FieldValue.serverTimestamp()
+    });
+    return { reward: ms.reward, id: ms.id };
+  });
+});
+
 /* ---------- Kunlik bonus (streak) ---------- */
 exports.claimStreak = onCall(async (req) => {
   const uid = requireAuth(req);
