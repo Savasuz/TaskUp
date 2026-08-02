@@ -233,12 +233,18 @@ exports.completeTask = onCall(async (req) => {
    xil uslub). Yangilash:
      firebase functions:secrets:set TELEGRAM_BOT_TOKEN
 
-   Foydalanuvchining Telegram ID'si users/{uid}.telegramId da kutiladi.
-   Ilovada hozircha Telegram bilan bog'lash oqimi yo'q, shuning uchun bu
-   tekshiruv 'tg-not-linked' bilan tugaydi — vazifa turini adminda
-   'telegram' qilishdan oldin o'sha oqim qo'shilishi kerak. */
+   Foydalanuvchining Telegram ID'si users/{uid}.telegramId da saqlanadi —
+   uni quyidagi telegramWebhook funksiyasi yozadi. */
 const TELEGRAM_BOT_TOKEN = defineSecret('TELEGRAM_BOT_TOKEN');
 const TG_MEMBER_STATUSES = ['creator', 'administrator', 'member'];
+
+function tgApi(token, method, params) {
+  return fetch('https://api.telegram.org/bot' + token + '/' + method, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params)
+  }).then((r) => r.json());
+}
 
 exports.verifyTelegram = onCall({ secrets: [TELEGRAM_BOT_TOKEN] }, async (req) => {
   const uid = requireAuth(req);
@@ -275,6 +281,105 @@ exports.verifyTelegram = onCall({ secrets: [TELEGRAM_BOT_TOKEN] }, async (req) =
   }
 
   return grantTask(uid, taskId, ['telegram']);
+});
+
+/* ---------- Telegram hisobini bog'lash (bot webhook) ----------
+   Ilova foydalanuvchini t.me/<bot>?start=<uid> ga yo'naltiradi. Telegram
+   "/start <uid>" xabarini shu funksiyaga yuboradi, biz esa xabar
+   egasining Telegram ID'sini users/{uid}.telegramId ga yozamiz.
+
+   XAVFSIZLIK — ikkala nuqta ham majburiy:
+
+   1) Bu ochiq HTTP endpoint. Imzosiz bo'lsa istalgan odam soxta "update"
+      yuborib, O'ZINING telegramId'sini BEGONA uid'ga yozib qo'yishi va
+      shu orqali boshqa hisobga obuna vazifasini "bajarib" berishi mumkin
+      edi. Telegram setWebhook'dagi secret_token'ni har so'rovda
+      X-Telegram-Bot-Api-Secret-Token sarlavhasida qaytaradi — shuni
+      tekshiramiz. Secret sifatida bot tokenining SHA-256 hex yig'indisi
+      ishlatiladi: yangi Secret Manager kaliti kerak emas (kalit
+      yaratilmagan bo'lsa `firebase deploy --only functions` BUTUN
+      deploy'ni rad etadi), va tokenning o'zi hech qayerda ochilmaydi.
+      Telegram secret_token uchun faqat [A-Za-z0-9_-] ruxsat beradi,
+      shuning uchun tokenni to'g'ridan-to'g'ri qo'yib bo'lmaydi (unda ':' bor).
+
+   2) Bitta Telegram hisobi ko'p akkauntga bog'lanmasligi kerak, aks holda
+      bitta obuna bilan cheksiz akkauntga mukofot olinardi. telegram_links
+      teskari indeksi tranzaksiya ichida tekshiriladi.
+
+   Webhook'ni ro'yxatdan o'tkazish (bir marta):
+     TOKEN='<bot tokeni>'
+     SEC=$(printf %s "$TOKEN" | sha256sum | cut -d' ' -f1)
+     curl -sS "https://api.telegram.org/bot$TOKEN/setWebhook" \
+       -d "url=https://us-central1-taskup-df8ee.cloudfunctions.net/telegramWebhook" \
+       -d "secret_token=$SEC" */
+const TG_UID_RE = /^[A-Za-z0-9_-]{6,128}$/;
+
+exports.telegramWebhook = onRequest({ secrets: [TELEGRAM_BOT_TOKEN] }, async (req, res) => {
+  // Telegram xatolikda qayta yuboradi; mantiqiy rad javoblarida ham 200
+  // qaytaramiz, aks holda u bir xil update'ni cheksiz takrorlaydi.
+  try {
+    if (req.method !== 'POST') { res.status(405).send('method-not-allowed'); return; }
+
+    const token = TELEGRAM_BOT_TOKEN.value();
+    if (!token) { res.status(500).send('no-token'); return; }
+
+    const expected = crypto.createHash('sha256').update(token).digest('hex');
+    const got = String(req.get('X-Telegram-Bot-Api-Secret-Token') || '');
+    // Doimiy vaqtli solishtirish — sarlavha tashqaridan keladi
+    const a = Buffer.from(expected), bb = Buffer.from(got.padEnd(expected.length).slice(0, expected.length));
+    if (got.length !== expected.length || !crypto.timingSafeEqual(a, bb)) {
+      res.status(403).send('bad-secret');
+      return;
+    }
+
+    const msg = (req.body && (req.body.message || req.body.edited_message)) || null;
+    const from = msg && msg.from;
+    const text = String((msg && msg.text) || '');
+    if (!from || !from.id || !text.startsWith('/start')) { res.status(200).send('ignored'); return; }
+
+    const tgId = String(from.id);
+    const uid = text.split(/\s+/)[1] || '';
+    const reply = (t) => tgApi(token, 'sendMessage', { chat_id: from.id, text: t }).catch(() => {});
+
+    if (!uid) {
+      await reply('Hisobni bog\'lash uchun TaskUp ilovasidagi Telegram vazifasini bosing — havola sizni shu yerga o\'zi olib keladi.');
+      res.status(200).send('no-payload');
+      return;
+    }
+    if (!TG_UID_RE.test(uid)) {
+      await reply('Havola noto\'g\'ri. Iltimos, TaskUp ilovasidan qaytadan urinib ko\'ring.');
+      res.status(200).send('bad-uid');
+      return;
+    }
+
+    const userRef = db.collection('users').doc(uid);
+    const linkRef = db.collection('telegram_links').doc(tgId);
+
+    const outcome = await db.runTransaction(async (tx) => {
+      const [userDoc, linkDoc] = [await tx.get(userRef), await tx.get(linkRef)];
+      if (!userDoc.exists) return 'no-user';
+      if (userDoc.data().banned === true) return 'banned';
+      if (linkDoc.exists && linkDoc.data().uid !== uid) return 'taken';
+
+      tx.update(userRef, { telegramId: tgId });
+      tx.set(linkRef, { uid, at: FieldValue.serverTimestamp() }, { merge: true });
+      return 'ok';
+    });
+
+    if (outcome === 'ok') {
+      await reply('✅ Telegram hisobingiz TaskUp bilan bog\'landi. Endi ilovaga qaytib "Tekshirish" tugmasini bosing.');
+    } else if (outcome === 'taken') {
+      await reply('⚠️ Bu Telegram hisobi boshqa TaskUp akkauntiga bog\'langan.');
+    } else if (outcome === 'banned') {
+      await reply('Hisobingiz bloklangan.');
+    } else {
+      await reply('TaskUp akkaunti topilmadi. Ilovaga kirib, vazifani qaytadan bosing.');
+    }
+    res.status(200).send(outcome);
+  } catch (err) {
+    console.error('telegramWebhook:', err);
+    res.status(200).send('error');
+  }
 });
 
 /* ---------- AdMob server-side verification (SSV) ----------

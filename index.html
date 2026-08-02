@@ -2282,6 +2282,7 @@ let state = {
   email: '', referralCode: '', avatarUrl: '',
   coins: 0, lifetimeCoins: 0,
   taskCounts: {}, taskProgress: {}, tasksCompletedTotal: 0, dailyEarned: 0, claimedMilestones: [],
+  telegramId: null,
   friendsCount: 0, friendsBonus: 0, cashedOutTotal: 0,
   streakCount: 0, lastStreakClaim: null,
   history: [], paymentHistory: []
@@ -2452,7 +2453,7 @@ const I18N = {
     avatarCropTitle:"Rasmni moslashtiring", avatarCropHint:"Suring va moslang", avatarCropCancel:"Bekor qilish", avatarCropSave:"Saqlash",
     toastAvatarType:"Faqat rasm faylini tanlang", toastAvatarSize:"Rasm hajmi 5 MB dan kichik bo'lsin", toastAvatarUploaded:"Profil rasmi yangilandi", toastAvatarError:"Rasmni yuklashda xatolik yuz berdi",
     enterRefCode:"Sizni taklif qilishganmi? Kodni kiriting", btnRedeem:"Faollashtirish", toastEnterCode:"Taklif kodini kiriting", toastRefRedeemed:"tanga! Referral faollashdi", toastRefAlready:"Siz allaqachon kod kiritgansiz", toastRefNotFound:"Bunday kod topilmadi", toastRefOwn:"O'z kodingizni kirita olmaysiz", toastRefError:"Xatolik yuz berdi",
-    btnVerify:"Tekshirish", toastNotSubscribed:"Kanalga obuna bo'lmagansiz", toastTgNotLinked:"Telegram hisobi ulanmagan", toastNeedsVerify:"Bu vazifa alohida tekshiruvdan o'tadi",
+    btnVerify:"Tekshirish", toastNotSubscribed:"Kanalga obuna bo'lmagansiz", toastTgNotLinked:"Telegram hisobi ulanmagan", toastTgLinkFirst:"Avval botda /start ni bosing, keyin \"Tekshirish\"", toastNeedsVerify:"Bu vazifa alohida tekshiruvdan o'tadi",
     btnClaim:"Olish", adSoon:"Ilovada tez orada", toastNotStarted:"Vazifa hali boshlanmagan", toastEnded:"Vazifa muddati tugagan", toastTotalLimit:"Vazifa umumiy limiti tugagan",
     toastNotEnough:"Balansingizda buncha tanga yo'q",
     wheelTitle:"Omadli g'ildirak", wheelSub:"Kuniga 1 marta bepul — 500 tangagacha yutib oling!", btnSpin:"Aylantirish", btnClose:"Yopish",
@@ -2536,7 +2537,7 @@ const I18N = {
     avatarCropTitle:"Adjust your photo", avatarCropHint:"Drag and adjust", avatarCropCancel:"Cancel", avatarCropSave:"Save",
     toastAvatarType:"Please select an image file", toastAvatarSize:"Image size must be under 5 MB", toastAvatarUploaded:"Profile photo updated", toastAvatarError:"Failed to upload photo",
     enterRefCode:"Were you invited? Enter the code", btnRedeem:"Activate", toastEnterCode:"Enter the referral code", toastRefRedeemed:"coins! Referral activated", toastRefAlready:"You already used a code", toastRefNotFound:"Code not found", toastRefOwn:"You can't use your own code", toastRefError:"Something went wrong",
-    btnVerify:"Verify", toastNotSubscribed:"You are not subscribed to the channel", toastTgNotLinked:"Telegram account is not linked", toastNeedsVerify:"This task goes through a separate check",
+    btnVerify:"Verify", toastNotSubscribed:"You are not subscribed to the channel", toastTgNotLinked:"Telegram account is not linked", toastTgLinkFirst:"Press /start in the bot first, then \"Verify\"", toastNeedsVerify:"This task goes through a separate check",
     btnClaim:"Claim", adSoon:"Soon in the app", toastNotStarted:"Task hasn't started yet", toastEnded:"Task has ended", toastTotalLimit:"Task completion limit reached",
     toastNotEnough:"You don't have that many coins",
     wheelTitle:"Lucky Wheel", wheelSub:"One free spin a day — win up to 500 coins!", btnSpin:"Spin", btnClose:"Close",
@@ -2620,7 +2621,7 @@ const I18N = {
     avatarCropTitle:"Настройте фото", avatarCropHint:"Перетащите и настройте", avatarCropCancel:"Отмена", avatarCropSave:"Сохранить",
     toastAvatarType:"Выберите файл изображения", toastAvatarSize:"Размер изображения должен быть меньше 5 МБ", toastAvatarUploaded:"Фото профиля обновлено", toastAvatarError:"Ошибка загрузки фото",
     enterRefCode:"Вас пригласили? Введите код", btnRedeem:"Активировать", toastEnterCode:"Введите реферальный код", toastRefRedeemed:"монет! Реферал активирован", toastRefAlready:"Вы уже использовали код", toastRefNotFound:"Код не найден", toastRefOwn:"Нельзя использовать свой код", toastRefError:"Произошла ошибка",
-    btnVerify:"Проверить", toastNotSubscribed:"Вы не подписаны на канал", toastTgNotLinked:"Telegram-аккаунт не привязан", toastNeedsVerify:"Это задание проходит отдельную проверку",
+    btnVerify:"Проверить", toastNotSubscribed:"Вы не подписаны на канал", toastTgNotLinked:"Telegram-аккаунт не привязан", toastTgLinkFirst:"Сначала нажмите /start в боте, затем \"Проверить\"", toastNeedsVerify:"Это задание проходит отдельную проверку",
     btnClaim:"Получить", adSoon:"Скоро в приложении", toastNotStarted:"Задание ещё не началось", toastEnded:"Задание завершено", toastTotalLimit:"Лимит задания исчерпан",
     toastNotEnough:"У вас недостаточно монет",
     wheelTitle:"Колесо удачи", wheelSub:"1 бесплатное вращение в день — до 500 монет!", btnSpin:"Крутить", btnClose:"Закрыть",
@@ -2936,6 +2937,8 @@ function subscribeUser(uid){
     state.streakCount = data.streakCount || 0;
     state.lastStreakClaim = data.lastStreakClaim || null;
     state.lastSpin = data.lastSpin || null;
+    // telegramWebhook yozadi; bog'langach snapshot orqali darrov keladi
+    state.telegramId = data.telegramId || null;
     state.referralCode = data.referralCode || state.referralCode;
     state.email = data.email || state.email;
     state.avatarUrl = data.avatarUrl || '';
@@ -4911,12 +4914,38 @@ function taskReward(task){
   return Math.max(0, Math.floor(Number(raw)) || 0);
 }
 
+/* Telegram hisobini bog'lash. Bot "/start <uid>" ni olib, Telegram ID'ni
+   users/{uid}.telegramId ga yozadi (telegramWebhook Cloud Function).
+   Bog'langani shu maydon orqali bilinadi — u foydalanuvchi hujjati
+   onSnapshot'i bilan darrov keladi, sahifani yangilash shart emas. */
+const TG_VERIFY_BOT = 'TaskUpVerifyBot';
+function tgLinked(){ return !!state.telegramId; }
+function openTgLink(){
+  if(!currentUid) return;
+  window.open('https://t.me/' + TG_VERIFY_BOT + '?start=' + encodeURIComponent(currentUid), '_blank');
+}
+
 function startLinkTask(taskId, encodedUrl, verify, btnEl){
   sndClick();
   if(!currentUid) return;
   const task = catalogTasks.find(x => x.id === taskId);
   const dailyLimit = Number(task && task.dailyLimit) || 1;
   if(taskDoneCount(task || taskId) >= dailyLimit){ showToast(t('toastLimitReached'), true); return; }
+
+  // Telegram vazifasi va hisob hali bog'lanmagan bo'lsa, avval botga
+  // yuboramiz: kanalga obuna bo'lishning o'zi yetmaydi, server a'zolikni
+  // tekshirish uchun foydalanuvchining Telegram ID'sini bilishi kerak.
+  if(verify === 'telegram' && !tgLinked()){
+    openTgLink();
+    showToast(t('toastTgLinkFirst'));
+    if(btnEl){
+      btnEl.removeAttribute('data-i18n');
+      btnEl.textContent = t('btnVerify');
+      btnEl.onclick = function(){ verifyTelegramTask(taskId, btnEl); };
+    }
+    return;
+  }
+
   window.open(decodeURIComponent(encodedUrl), '_blank');
   const btn = btnEl;
   if(!btn) return;
@@ -4958,7 +4987,9 @@ function verifyTelegramTask(taskId, btnEl){
   }).catch((err) => {
     const msg = err && err.message;
     if(msg === 'not-subscribed') showToast(t('toastNotSubscribed'), true);
-    else if(msg === 'tg-not-linked') showToast(t('toastTgNotLinked'), true);
+    // Hisob bog'lanmagan bo'lsa foydalanuvchini o'zi botga qaytaramiz —
+    // aks holda u nima qilishni bilmay "Tekshirish" ni bosaverardi.
+    else if(msg === 'tg-not-linked'){ showToast(t('toastTgNotLinked'), true); openTgLink(); }
     else if(msg === 'limit') showToast(t('toastLimitReached'), true);
     else if(msg === 'dailycap') showToast(t('toastDailyCapReached'), true);
     else { console.error(err); showToast(friendlyError(err), true); }
