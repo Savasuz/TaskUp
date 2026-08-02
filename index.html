@@ -319,6 +319,36 @@
     color:#FFD54A; gap:3px; text-shadow:0 0 10px rgba(255,190,60,0.35); white-space:nowrap; }
   .sc-bonus .daily-reward .mini-coin{ width:11px; height:11px; font-size:6.5px; }
 
+  /* ---------- Vazifa sandiqlari ----------
+     Bosh sahifadagi taklif banneri o'rnida: 30/50/100 ta vazifa uchun uchta
+     sandiq. Qulf ochilgach tugma joyida "Olish" ga aylanadi. */
+  .chest-card{ background:var(--bg-card); border:1px solid var(--line); border-radius:18px;
+    padding:14px 12px 16px; margin-bottom:20px; }
+  .chest-head{ display:flex; align-items:baseline; justify-content:space-between; margin:0 4px 6px; }
+  .chest-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14px; }
+  .chest-progress{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--muted); }
+  .chest-row{ display:flex; gap:8px; }
+  .chest-item{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; }
+  .chest-art{ position:relative; width:100%; aspect-ratio:1; }
+  .chest-art .lot{ position:absolute; inset:0; }
+  /* Ochilmagan sandiq xiraroq turadi — ochilgani darrov ajralib ko'rinadi. */
+  .chest-item.locked .chest-art{ filter:grayscale(0.7) brightness(0.62); }
+  .chest-amt{ display:flex; align-items:center; gap:4px; font-family:'Space Grotesk', sans-serif;
+    font-weight:700; font-size:12.5px; margin:2px 0 7px; white-space:nowrap; }
+  .chest-btn{ width:100%; height:32px; border:none; border-radius:10px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:5px;
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:12.5px;
+    background:var(--bg-alt); color:var(--muted); transition:transform .12s ease; }
+  .chest-btn svg{ width:14px; height:14px; }
+  .chest-item.ready .chest-btn{ background:linear-gradient(180deg, #34D98A, #16A46A); color:#04150D; }
+  .chest-item.ready .chest-btn:active{ transform:scale(0.94); }
+  .chest-item.done .chest-btn{ background:rgba(46,204,143,0.14); color:var(--green); }
+  /* Olingan tanga balans tomon uchadi */
+  .coin-fly{ position:fixed; z-index:80; width:22px; height:22px; pointer-events:none;
+    border-radius:50%; background:radial-gradient(circle at 35% 28%, #FFF3B0, #FFC93C 55%, #C9861A 100%);
+    box-shadow:0 2px 8px rgba(0,0,0,0.45); }
+  @media (prefers-reduced-motion: reduce){ .coin-fly{ display:none; } }
+
   /* ---------- Referral banner ---------- */
   .banner{ position:relative; overflow:hidden; border-radius:18px; margin-bottom:20px; width:100%; aspect-ratio:1536/1024;
     background-image:url('assets/invite-banner.png'); background-size:cover; background-position:center; }
@@ -1470,14 +1500,12 @@
 
       <div id="homeTaskList"></div>
 
-      <div class="banner">
-        <div class="banner-text">
-          <div class="banner-title" data-i18n="bannerTitle">Do'stlaringizni taklif qiling</div>
-          <div class="banner-sub" data-i18n-html="bannerSub">Do'stingiz kodingizni kiritsa, siz <span class="banner-highlight">1 000</span> coin olasiz.</div>
+      <div class="chest-card">
+        <div class="chest-head">
+          <div class="chest-title" data-i18n="chestTitle">Vazifa sandiqlari</div>
+          <div class="chest-progress" id="chestProgress">0 / 30</div>
         </div>
-        <button class="banner-btn" onclick="switchTab('friends')" data-i18n-aria="inviteBtn" aria-label="Taklif qilish">
-          <span class="banner-btn-label" data-i18n="inviteBtn">Taklif qilish</span>
-        </button>
+        <div class="chest-row" id="chestRow"></div>
       </div>
 
       <div class="sec-head"><div class="sec-title" data-i18n="statsTitle">Statistika</div></div>
@@ -2166,7 +2194,7 @@ function getTaskLabel(id){
 let state = {
   email: '', referralCode: '', avatarUrl: '',
   coins: 0, lifetimeCoins: 0,
-  taskCounts: {}, tasksCompletedTotal: 0, dailyEarned: 0,
+  taskCounts: {}, tasksCompletedTotal: 0, dailyEarned: 0, claimedMilestones: [],
   friendsCount: 0, friendsBonus: 0, cashedOutTotal: 0,
   streakCount: 0, lastStreakClaim: null,
   history: [], paymentHistory: []
@@ -2390,6 +2418,7 @@ const I18N = {
     noActivity:"Hali harakat yo'q", noPaymentHistory:"Hali to'lov tarixi yo'q", paymentHistoryTitle:"To'lov tarixim", backBtn:"‹ Orqaga",
     filterAllHist:"Barchasi", filterPending:"Kutilmoqda", filterPaid:"Muvaffaqiyatli", filterCancelled:"Bekor qilingan",
     totalEarned:"Umumiy topilgan", currentLevel:"Joriy daraja", dailyStreakLbl:"Kunlik seriya",
+    chestTitle:"Vazifa sandiqlari", chestClaim:"Olish", chestNotYet:"Hali yetarli vazifa bajarilmagan", chestAlready:"Bu sandiq allaqachon olingan",
     personalInfoTitle:"Shaxsiy ma'lumotlar", emailLbl:"Email", toastEmailCopied:"Email nusxalandi!", changePhoto:"Rasmni o'zgartirish",
     langMenuItem:"Til / Language", leaderboardMenuItem:"Reyting", levelMenuItem:"Level",
     paymentHistoryMenuItem:"To'lov tarixi", taskHistoryMenuItem:"Vazifalar tarixi", myFriendsMenuItem:"Do'stlarim",
@@ -2472,6 +2501,7 @@ const I18N = {
     noActivity:"No activity yet", noPaymentHistory:"No payment history yet", paymentHistoryTitle:"Payment history", backBtn:"‹ Back",
     filterAllHist:"All", filterPending:"Pending", filterPaid:"Successful", filterCancelled:"Cancelled",
     totalEarned:"Total earned", currentLevel:"Current level", dailyStreakLbl:"Daily streak",
+    chestTitle:"Task chests", chestClaim:"Claim", chestNotYet:"Not enough tasks completed yet", chestAlready:"This chest is already claimed",
     personalInfoTitle:"Personal info", emailLbl:"Email", toastEmailCopied:"Email copied!", changePhoto:"Change photo",
     langMenuItem:"Language", leaderboardMenuItem:"Leaderboard", levelMenuItem:"Level",
     paymentHistoryMenuItem:"Payment history", taskHistoryMenuItem:"Task history", myFriendsMenuItem:"My friends",
@@ -2554,6 +2584,7 @@ const I18N = {
     noActivity:"Пока нет операций", noPaymentHistory:"Пока нет истории платежей", paymentHistoryTitle:"История платежей", backBtn:"‹ Назад",
     filterAllHist:"Все", filterPending:"В ожидании", filterPaid:"Успешно", filterCancelled:"Отменено",
     totalEarned:"Всего заработано", currentLevel:"Текущий уровень", dailyStreakLbl:"Дней подряд",
+    chestTitle:"Сундуки заданий", chestClaim:"Забрать", chestNotYet:"Выполнено недостаточно заданий", chestAlready:"Этот сундук уже получен",
     personalInfoTitle:"Личные данные", emailLbl:"Email", toastEmailCopied:"Email скопирован!", changePhoto:"Изменить фото",
     langMenuItem:"Язык", leaderboardMenuItem:"Рейтинг", levelMenuItem:"Уровень",
     paymentHistoryMenuItem:"История платежей", taskHistoryMenuItem:"История заданий", myFriendsMenuItem:"Мои друзья",
@@ -2754,6 +2785,7 @@ function subscribeUser(uid){
     state.taskCounts = newDay ? {} : (data.taskCounts || {});
     state.dailyEarned = newDay ? 0 : (data.dailyEarned || 0);
     state.tasksCompletedTotal = data.tasksCompletedTotal || 0;
+    state.claimedMilestones = Array.isArray(data.claimedMilestones) ? data.claimedMilestones : [];
     state.friendsCount = data.friendsCount || 0;
     state.friendsBonus = data.friendsBonus || 0;
     state.cashedOutTotal = data.cashedOutTotal || 0;
@@ -3055,6 +3087,8 @@ const LOTTIE_FILES = {
   friends: 'friends.json',
   podiumbg:'podium-bg.json',
   crowngold:'crown-gold.json',
+  chest:    'chest.json',
+  chestmoney:'chest-money.json',
   cointurn: 'coin-turn.json'
 };
 const LOOP_LIMIT = 3;
@@ -3273,6 +3307,109 @@ function mountPodiumBgLottie(){
   const h = lottieMount(el, 'podiumbg', { loop:true, speed:0.9, preserve:'xMidYMid slice' });
   if(!h){ el.remove(); return; }
   tabLot = { tab:'leaderboard', holder:h, el };
+}
+
+/* ---- Vazifa sandiqlari ----
+   Chegara va mukofot SERVERDA ham aynan shunday yozilgan (claimMilestone).
+   Bu yerdagi ro'yxat faqat ko'rinish uchun: bosilganda server qayta tekshiradi,
+   shuning uchun mijozdagi qiymatni o'zgartirib qo'yish hech narsa bermaydi. */
+const TASK_CHESTS = [
+  { id: 'm30',  tasks: 30,  reward: 300,  anim: 'chest' },
+  { id: 'm50',  tasks: 50,  reward: 500,  anim: 'chest' },
+  { id: 'm100', tasks: 100, reward: 1500, anim: 'chestmoney' }
+];
+const LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+
+function chestState(c){
+  if((state.claimedMilestones || []).indexOf(c.id) !== -1) return 'done';
+  return (state.tasksCompletedTotal || 0) >= c.tasks ? 'ready' : 'locked';
+}
+function renderChests(){
+  const row = document.getElementById('chestRow');
+  if(!row) return;
+  const done = state.tasksCompletedTotal || 0;
+  const next = TASK_CHESTS.find(c => chestState(c) !== 'done') || TASK_CHESTS[TASK_CHESTS.length - 1];
+  const prog = document.getElementById('chestProgress');
+  if(prog) prog.textContent = Math.min(done, next.tasks) + ' / ' + next.tasks;
+
+  row.innerHTML = TASK_CHESTS.map(c => {
+    const st = chestState(c);
+    const btn = st === 'locked' ? LOCK_SVG
+      : st === 'ready' ? t('chestClaim')
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    return '<div class="chest-item ' + st + '" data-chest="' + c.id + '">' +
+      '<div class="chest-art" data-anim="' + c.anim + '"></div>' +
+      '<div class="chest-amt"><span class="mini-coin">$</span> +' + fmtNum(c.reward) + '</div>' +
+      '<button class="chest-btn" onclick="claimChest(\'' + c.id + '\')"' +
+        (st === 'ready' ? '' : ' disabled') + '>' + btn + '</button>' +
+      '</div>';
+  }).join('');
+  mountChestArt();
+  mountMiniCoins(row);
+}
+function mountChestArt(){
+  if(!lottieAvailable()) return;
+  document.querySelectorAll('.chest-art[data-anim]').forEach(box => {
+    if(box.dataset.lot) return;
+    const el = document.createElement('div'); el.className = 'lot';
+    box.appendChild(el);
+    // Loop emas: sandiq oxirgi kadrda turadi, olinganda bir marta o'ynaydi.
+    const h = lottieMount(el, box.getAttribute('data-anim'), { loop:false, autoplay:false });
+    if(!h){ el.remove(); return; }
+    box.dataset.lot = '1';
+    Promise.resolve(loadLottieData(box.getAttribute('data-anim'))).then(json => {
+      if(json && h.anim) h.anim.goToAndStop(0, true);
+    });
+  });
+}
+function playChestArt(id){
+  const box = document.querySelector('.chest-item[data-chest="' + id + '"] .chest-art .lot');
+  if(!box) return;
+  lottieAll.forEach(a => { if((a.wrapper || a.container) === box){ try{ a.goToAndPlay(0, true); }catch(e){} } });
+}
+/* Mukofot tangasi sandiqdan balans hisoblagichi tomon uchadi */
+function flyCoinsToBalance(fromEl, count){
+  if(reducedMotion || !fromEl) return;
+  const target = document.querySelector('.balance-pill-coin');
+  if(!target) return;
+  const a = fromEl.getBoundingClientRect(), b = target.getBoundingClientRect();
+  for(let i = 0; i < (count || 6); i++){
+    const dot = document.createElement('div');
+    dot.className = 'coin-fly';
+    dot.style.left = (a.left + a.width / 2 - 11) + 'px';
+    dot.style.top  = (a.top + a.height / 2 - 11) + 'px';
+    document.body.appendChild(dot);
+    const dx = b.left + b.width / 2 - (a.left + a.width / 2);
+    const dy = b.top + b.height / 2 - (a.top + a.height / 2);
+    dot.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: 'translate(' + (dx * 0.45 + (Math.random() * 40 - 20)) + 'px,' + (dy * 0.45 - 40) + 'px) scale(1.15)', opacity: 1, offset: 0.5 },
+      { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(0.4)', opacity: 0 }
+    ], { duration: 750 + i * 70, easing: 'cubic-bezier(.4,.1,.3,1)' }).onfinish = () => dot.remove();
+  }
+}
+function claimChest(id){
+  const c = TASK_CHESTS.find(x => x.id === id);
+  if(!c || !currentUid || chestState(c) !== 'ready') return;
+  const item = document.querySelector('.chest-item[data-chest="' + id + '"]');
+  const btn = item && item.querySelector('.chest-btn');
+  sndClick();
+  withBtnLoading(btn, fns.httpsCallable('claimMilestone')({ id }).then((res) => {
+    const reward = (res.data && res.data.reward) || c.reward;
+    state.claimedMilestones = (state.claimedMilestones || []).concat([id]);
+    playChestArt(id);
+    flyCoinsToBalance(item && item.querySelector('.chest-art'), 7);
+    showToast('+' + fmtNum(reward) + ' ' + t('toastTaskDone'));
+    renderChests();
+    loadHistory(currentUid);
+  }).catch((err) => {
+    const m = err && err.message;
+    let msg = friendlyError(err);
+    if(m === 'not-enough-tasks') msg = t('chestNotYet');
+    else if(m === 'already-claimed') msg = t('chestAlready');
+    showToast(msg, true);
+    renderChests();
+  }));
 }
 
 /* ---- Tangalar ----
@@ -3651,7 +3788,7 @@ function animateCount(el, from, to, duration){
   requestAnimationFrame(tick);
 }
 
-function renderAll(){ renderBalance(); renderStreak(); renderActivity(); renderProfile(); renderStats(); renderFriends(); renderPaymentHistory('all'); renderLevel(); renderLeaderboard(); renderWheelState(); }
+function renderAll(){ renderBalance(); renderChests(); renderStreak(); renderActivity(); renderProfile(); renderStats(); renderFriends(); renderPaymentHistory('all'); renderLevel(); renderLeaderboard(); renderWheelState(); }
 
 function renderBalance(){
   const coins = state.coins;
