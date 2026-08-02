@@ -613,10 +613,14 @@
 
   /* ---------- Activity (used in Wallet tab) ---------- */
   .card{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:14px; }
-  .activity-item{ display:flex; justify-content:space-between; align-items:center; padding:11px 2px; border-bottom:1px solid var(--line); font-size:13px; }
+  .activity-item{ display:flex; align-items:center; gap:11px; padding:11px 2px; border-bottom:1px solid var(--line); font-size:13px; }
   .activity-item:last-child{ border-bottom:none; }
+  /* Yorliq uzun bo'lsa faqat shu blok qisqaradi (...) — ikonka va summa
+     hech qachon siqilmaydi, shuning uchun 320px da ham qator buzilmaydi. */
+  .activity-main{ flex:1 1 auto; min-width:0; }
+  .activity-label{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .activity-time{ color:var(--muted); font-size:11px; margin-top:2px; }
-  .activity-amount{ font-family:'JetBrains Mono', monospace; font-weight:700; }
+  .activity-amount{ font-family:'JetBrains Mono', monospace; font-weight:700; flex-shrink:0; }
   .activity-empty{ text-align:center; color:var(--muted); font-size:12.5px; padding:16px 0; }
 
   .cashout-row{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px; color:var(--muted); }
@@ -703,6 +707,15 @@
   .info-ico.ic-coin{ background:linear-gradient(160deg, #FFD76A, #D99400); }
   .info-ico.ic-streak{ background:linear-gradient(160deg, #FF9A55, #E2452F); }
   .info-ico.ic-photo{ background:linear-gradient(160deg, #57D6A6, #17916A); }
+  /* "So'nggi harakatlar" qatorlari uchun qo'shimcha ranglar — plitka shakli,
+     o'lchami va soyasi profil kartasidagilar bilan bir xil. */
+  .info-ico.ic-task{ background:linear-gradient(160deg, #8B6BFF, #4B2FD6); }
+  .info-ico.ic-chest{ background:linear-gradient(160deg, #FFC86A, #D97A00); }
+  .info-ico.ic-cashout{ background:linear-gradient(160deg, #FF7B7B, #C62828); }
+  .info-ico.ic-friends{ background:linear-gradient(160deg, #5AD1C8, #128B87); }
+  .info-ico.ic-wheel{ background:linear-gradient(160deg, #C77DFF, #7B2CBF); }
+  .info-ico.ic-promo{ background:linear-gradient(160deg, #6FD3FF, #1C7FC4); }
+  .info-ico.ic-trophy{ background:linear-gradient(160deg, #FFD76A, #D99400); }
   /* Yorliq hech qachon ikki qatorga tushmaydi; joy yetmasa faqat qiymat
      qisqaradi (...) — 320px ekranda ham qatorlar bir xil balandlikda qoladi. */
   .info-name{ flex:0 0 auto; font-size:14px; font-weight:600; white-space:nowrap; }
@@ -4049,6 +4062,31 @@ function startDailyTimer(){
   update(); setInterval(update, 1000);
 }
 
+/* ---- "So'nggi harakatlar" ikonlari ----
+   Plitkalar profil kartasidagi `.info-ico` bilan bir xil: 30px, gradient
+   fon, ichida oq chiziqli ikonka.
+
+   Yorliqlarni Cloud Functions yozadi va ular DOIM o'zbekcha (ilova tili
+   bilan bog'liq emas), shuning uchun moslik o'zbekcha bo'lakchalar bo'yicha
+   tekshiriladi. Apostrof turi (' yoki ’) manba bo'yicha farq qilishi mumkin,
+   shuning uchun naqshlar apostrofsiz qismlarga tayanadi: "sandig", "taklifi",
+   "ildirak". Hech biriga mos kelmasa — bu oddiy vazifa mukofoti. */
+const ACT_ICONS = [
+  { re:/sandig/i,           cls:'ic-chest',   svg:'<rect x="3" y="9" width="18" height="12" rx="2"/><path d="M3 13h18"/><path d="M12 9v12"/><path d="M5 9V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2"/>' },
+  { re:/kunlik bonus/i,     cls:'ic-streak',  svg:'<path d="M12 22c4 0 6.5-2.7 6.5-6 0-4-3.5-5.5-3-9.5C13 8 12 9.5 12 11c-1-1-1.5-2.5-1.5-4C8 8.5 5.5 11 5.5 16c0 3.3 2.5 6 6.5 6z"/>' },
+  { re:/pul yechish/i,      cls:'ic-cashout', svg:'<path d="M14 3h7v7"/><path d="M21 3l-9 9"/><path d="M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/>' },
+  { re:/referral|taklifi/i, cls:'ic-friends', svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
+  { re:/ildirak/i,          cls:'ic-wheel',   svg:'<circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><path d="M5.6 5.6l12.8 12.8"/><path d="M18.4 5.6L5.6 18.4"/>' },
+  { re:/promo kod/i,        cls:'ic-promo',   svg:'<path d="M20.6 13.4L13.4 20.6a2 2 0 0 1-2.8 0l-7.2-7.2A2 2 0 0 1 3 12V4a1 1 0 0 1 1-1h8a2 2 0 0 1 1.4.6l7.2 7.2a2 2 0 0 1 0 2.6z"/><circle cx="7.5" cy="7.5" r="1.5"/>' },
+  { re:/haftalik top/i,     cls:'ic-trophy',  svg:'<path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3a2 2 0 0 1-2 4"/><path d="M7 5H4a2 2 0 0 0 2 4"/>' }
+];
+const ACT_ICON_TASK = { cls:'ic-task', svg:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>' };
+function activityIcon(label){
+  const s = String(label || '');
+  for(const it of ACT_ICONS){ if(it.re.test(s)) return it; }
+  return ACT_ICON_TASK;
+}
+
 function renderActivity(){
   const list = document.getElementById('activityList');
   const empty = document.getElementById('activityEmpty');
@@ -4056,7 +4094,10 @@ function renderActivity(){
   empty.style.display = 'none';
   list.innerHTML = state.history.slice(0,8).map(h => {
     const time = h.at.toLocaleDateString('uz-UZ', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
-    return `<div class="activity-item"><div><div>${h.label}</div><div class="activity-time">${time}</div></div>
+    const ico = activityIcon(h.label);
+    return `<div class="activity-item">
+      <span class="info-ico ${ico.cls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ico.svg}</svg></span>
+      <div class="activity-main"><div class="activity-label">${escapeHtml(h.label || '')}</div><div class="activity-time">${time}</div></div>
       <div class="activity-amount" style="color:${h.amount<0?'var(--red)':'var(--amber)'}">${h.amount>0?'+':''}${h.amount}</div></div>`;
   }).join('');
 }
