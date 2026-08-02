@@ -1060,12 +1060,19 @@ function subscribeTasks(){
   }, err => console.error(err));
 }
 function filterTasksAdmin(f, el){ taskFilter=f; document.querySelectorAll('#view-tasks .chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); renderTasksAdmin(); }
+/* Mukofot maydoni ikki nom bilan uchraydi: bu panel `reward` yozadi, bazaga
+   seed qilingan vazifalarda esa u `coin` deb nomlangan. Ilova va Cloud
+   Function ham xuddi shu qoidani qo'llaydi — `reward` ustunroq. */
+function adminTaskReward(t){
+  const raw = (t && t.reward != null && t.reward !== '') ? t.reward : (t ? t.coin : 0);
+  return Math.max(0, Math.floor(Number(raw)) || 0);
+}
 function renderTasksAdmin(){
   const filtered = tasksData.filter(t => taskFilter==='all' || (taskFilter==='on' && t.active) || (taskFilter==='off' && !t.active));
   document.getElementById('tasksAdminList').innerHTML = filtered.length ? filtered.map((t) => `
     <div class="task-row">
       <div class="task-ico ${ADMIN_ICON_CLASS[t.icon]||'ic-video'}">${ADMIN_ICON_EMOJI[t.icon]||'▶'}</div>
-      <div class="task-body"><div class="task-name">${escHtml(t.name)}</div><div class="task-meta">${escHtml(t.desc||'')} • +${t.reward} coin • ${window.t('perDay')} ${t.dailyLimit}</div><div class="task-meta">${window.t('kind_'+(t.kind||'link'))}${t.url ? ' • ' + escHtml(t.url.length > 34 ? t.url.slice(0,34)+'…' : t.url) : ''}${(t.totalLimit||0) > 0 ? ' • ' + (t.completedCount||0) + '/' + t.totalLimit : ''}</div></div>
+      <div class="task-body"><div class="task-name">${escHtml(t.name)}</div><div class="task-meta">${escHtml(t.desc||'')} • +${adminTaskReward(t)} coin • ${window.t('perDay')} ${t.dailyLimit || 1}</div><div class="task-meta">${window.t('kind_'+(t.kind||'link'))}${t.url ? ' • ' + escHtml(t.url.length > 34 ? t.url.slice(0,34)+'…' : t.url) : ''}${(t.totalLimit||0) > 0 ? ' • ' + (t.completedCount||0) + '/' + t.totalLimit : ''}</div></div>
       <span onclick="deleteTask('${t.id}')" style="color:var(--red);font-size:15px;cursor:pointer;padding:0 4px">✕</span>
       <div class="switch ${t.active?'on':''}" onclick="toggleTaskActive('${t.id}', ${!!t.active})"></div>
     </div>`).join('') : `<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">${t('noTasks')}</div>`;
