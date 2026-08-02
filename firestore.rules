@@ -42,6 +42,15 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Telegram hisobi -> uid teskari indeksi. Bitta Telegram akkaunti
+    // ko'p TaskUp hisobiga bog'lanmasligini ta'minlaydi, shuning uchun
+    // mijoz uni na o'qiy, na o'zgartira oladi — faqat telegramWebhook
+    // (Admin SDK) yozadi.
+    match /telegram_links/{telegramId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // Foydalanuvchi profili — ANTI-CHEAT:
     // tanga maydonlarini (coins, lifetimeCoins, cashedOutTotal, dailyEarned...)
     // faqat server (Cloud Functions, Admin SDK) va admin o'zgartira oladi.

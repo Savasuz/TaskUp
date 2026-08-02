@@ -338,7 +338,7 @@ setTimeout(function(){
       <div id="tgChatWrap" style="display:none">
         <label data-i18n="lblTgChat">Telegram kanal (@nom yoki chat_id)</label>
         <input type="text" id="newTaskTgChat" placeholder="@taskupuz">
-        <div class="form-hint" data-i18n="tgChatHint">Bot shu kanalda administrator bo'lishi va TELEGRAM_BOT_TOKEN maxfiy kaliti o'rnatilgan bo'lishi shart. Foydalanuvchining Telegram hisobi ulanmagan bo'lsa tekshiruv o'tmaydi.</div>
+        <div class="form-hint" data-i18n="tgChatHint">Bot shu kanalda administrator bo'lishi shart. Foydalanuvchining Telegram hisobi ilovadagi bog'lash boti orqali avtomatik ulanadi.</div>
       </div>
       <label data-i18n="lblRepeat">Takrorlanishi</label>
       <select id="newTaskRepeat">
@@ -719,7 +719,7 @@ const ADMIN_I18N = {
     kind_link:"🔗 Oddiy havola", kind_rewarded_ad:"📺 Rewarded Ad", kind_app_install:"⬇ Ilova yuklash", kind_telegram:"✈️ Telegram", kind_youtube:"▶ YouTube", kind_survey:"📋 So'rovnoma",
     lblTaskUrl:"Vazifa havolasi", lblVerify:"Tekshirish usuli", verifyAuto:"Avtomatik", verifyManual:"Qo'lda", verifyAdmob:"AdMob tekshiruvi",
     verifyTrust:"Ishonch (havola + 15 s)", verifyTelegram:"Telegram a'zoligi", lblTgChat:"Telegram kanal (@nom yoki chat_id)",
-    tgChatHint:"Bot shu kanalda administrator bo'lishi va TELEGRAM_BOT_TOKEN maxfiy kaliti o'rnatilgan bo'lishi shart. Foydalanuvchining Telegram hisobi ulanmagan bo'lsa tekshiruv o'tmaydi.",
+    tgChatHint:"Bot shu kanalda administrator bo'lishi shart. Foydalanuvchining Telegram hisobi ilovadagi bog'lash boti orqali avtomatik ulanadi.",
     tgChatRequired:"Telegram kanalini kiriting", lblRepeat:"Takrorlanishi", repeatDaily:"Har kuni tiklanadi", repeatOnce:"Bir marta (tiklanmaydi)",
     lblTotalLimit:"Umumiy bajarish limiti (ixtiyoriy, bo'sh = cheksiz)", lblStartDate:"Boshlanish sanasi (ixtiyoriy)", lblEndDate:"Tugash sanasi (ixtiyoriy)",
     admobHint:"Rewarded Ad uchun havola kerak emas — reklamani AdMob o'zi ko'rsatadi. Ad Unit ID bu yerga yozilmaydi, u Android ilova sozlamalarida saqlanadi.",
@@ -775,7 +775,7 @@ const ADMIN_I18N = {
     kind_link:"🔗 Simple link", kind_rewarded_ad:"📺 Rewarded Ad", kind_app_install:"⬇ App install", kind_telegram:"✈️ Telegram", kind_youtube:"▶ YouTube", kind_survey:"📋 Survey",
     lblTaskUrl:"Task link", lblVerify:"Verification method", verifyAuto:"Automatic", verifyManual:"Manual", verifyAdmob:"AdMob verification",
     verifyTrust:"Trust (link + 15 s)", verifyTelegram:"Telegram membership", lblTgChat:"Telegram channel (@name or chat_id)",
-    tgChatHint:"The bot must be an administrator of that channel and the TELEGRAM_BOT_TOKEN secret must be set. The check fails if the user has no linked Telegram account.",
+    tgChatHint:"The bot must be an administrator of that channel. The user's Telegram account is linked automatically through the linking bot in the app.",
     tgChatRequired:"Enter the Telegram channel", lblRepeat:"Repetition", repeatDaily:"Resets daily", repeatOnce:"Once (never resets)",
     lblTotalLimit:"Total completion limit (optional, empty = unlimited)", lblStartDate:"Start date (optional)", lblEndDate:"End date (optional)",
     admobHint:"Rewarded Ad needs no link — AdMob shows the ad itself. The Ad Unit ID is not entered here; it is stored in the Android app configuration.",
@@ -831,7 +831,7 @@ const ADMIN_I18N = {
     kind_link:"🔗 Обычная ссылка", kind_rewarded_ad:"📺 Rewarded Ad", kind_app_install:"⬇ Установка", kind_telegram:"✈️ Telegram", kind_youtube:"▶ YouTube", kind_survey:"📋 Опрос",
     lblTaskUrl:"Ссылка задания", lblVerify:"Способ проверки", verifyAuto:"Автоматически", verifyManual:"Вручную", verifyAdmob:"Проверка AdMob",
     verifyTrust:"Доверие (ссылка + 15 с)", verifyTelegram:"Подписка в Telegram", lblTgChat:"Telegram-канал (@имя или chat_id)",
-    tgChatHint:"Бот должен быть администратором канала, а секрет TELEGRAM_BOT_TOKEN — установлен. Если Telegram-аккаунт пользователя не привязан, проверка не пройдёт.",
+    tgChatHint:"Бот должен быть администратором канала. Telegram-аккаунт пользователя привязывается автоматически через бота привязки в приложении.",
     tgChatRequired:"Укажите Telegram-канал", lblRepeat:"Повторяемость", repeatDaily:"Сбрасывается ежедневно", repeatOnce:"Один раз (без сброса)",
     lblTotalLimit:"Общий лимит выполнений (необязательно, пусто = без лимита)", lblStartDate:"Дата начала (необязательно)", lblEndDate:"Дата окончания (необязательно)",
     admobHint:"Для Rewarded Ad ссылка не нужна — рекламу показывает сам AdMob. Ad Unit ID сюда не вводится, он хранится в конфигурации Android-приложения.",
