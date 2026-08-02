@@ -362,6 +362,12 @@
     font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:12.5px;
     background:var(--bg-alt); color:var(--muted); transition:transform .12s ease; }
   .chest-btn svg{ width:14px; height:14px; }
+  /* Qulf Lottie'si 200x200 kompozitsiyada, qulfning o'zi balandligining ~55%
+     qismini egallaydi — 30px idishda ~16px chiqadi, statik SVG bilan bir xil
+     og'irlikda ko'rinadi. Lottie ulanmasa ichidagi 14px SVG shundoq qoladi. */
+  .chest-lock{ display:flex; align-items:center; justify-content:center;
+    width:30px; height:30px; flex-shrink:0; }
+  .chest-lock .lot{ width:100%; height:100%; }
   .chest-item.ready .chest-btn{ background:linear-gradient(180deg, #34D98A, #16A46A); color:#04150D; }
   .chest-item.ready .chest-btn:active{ transform:scale(0.94); }
   .chest-item.done .chest-btn{ background:rgba(46,204,143,0.14); color:var(--green); }
@@ -3113,7 +3119,8 @@ const LOTTIE_FILES = {
   chestmoney:'chest-money.json',
   chestbg:  'chest-bg.json',
   rewardlight:'reward-light.json',
-  cointurn: 'coin-turn.json'
+  cointurn: 'coin-turn.json',
+  lock:     'lock.json'
 };
 const LOOP_LIMIT = 3;
 const lottieLoops = [];      // faol loop animatsiyalar (eng eski birinchi)
@@ -3288,6 +3295,21 @@ function destroyLottie(holder){
   holder.anim = null;
 }
 
+/* innerHTML bilan qayta chizilgan bo'limlar Lottie instansiyalarini DOM'dan
+   uzib qoldiradi — ular ko'rinmasa ham ishlashda davom etib xotira yeydi.
+   Konteyneri hujjatda qolmaganlarini yo'q qilamiz. */
+function pruneDetachedLottie(){
+  lottieAll.forEach(a => {
+    const el = a && (a.wrapper || a.container);
+    if(!el || !document.contains(el)){
+      try{ a.destroy(); }catch(e){}
+      lottieAll.delete(a);
+      const i = lottieLoops.indexOf(a);
+      if(i >= 0) lottieLoops.splice(i, 1);
+    }
+  });
+}
+
 let tabLot = null;   // { tab, holder, el, onGone }
 function clearTabLottie(){
   if(!tabLot) return;
@@ -3304,7 +3326,8 @@ function syncTabLottie(tab){
   if(tab === 'friends') mountFriendsLottie();
   else if(tab === 'leaderboard') mountPodiumBgLottie();
   else if(tab === 'home') mountChestBgLottie();
-  if(tab === 'home') mountChestGlow(); else stopChestGlow();
+  if(tab === 'home'){ mountChestGlow(); startChestLockTimer(); }
+  else { stopChestGlow(); stopChestLockTimer(); }
 }
 
 /* Do'stlar sahifasi sarlavhasidagi rasm */
@@ -3369,9 +3392,14 @@ function renderChests(){
   const prog = document.getElementById('chestProgress');
   if(prog) prog.textContent = Math.min(done, next.tasks) + ' / ' + next.tasks;
 
+  // Qator innerHTML bilan qayta quriladi — eski animatsiyalarni avval yopamiz,
+  // aks holda ular DOM'dan uzilgan holda ishlab qolaveradi.
+  stopChestGlow();
+  stopChestLocks();
+
   row.innerHTML = TASK_CHESTS.map(c => {
     const st = chestState(c);
-    const btn = st === 'locked' ? LOCK_SVG
+    const btn = st === 'locked' ? '<span class="chest-lock">' + LOCK_SVG + '</span>'
       : st === 'ready' ? t('chestClaim')
       : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
     return '<div class="chest-item ' + st + '" data-chest="' + c.id + '">' +
@@ -3381,8 +3409,10 @@ function renderChests(){
         (st === 'ready' ? '' : ' disabled') + '>' + btn + '</button>' +
       '</div>';
   }).join('');
+  pruneDetachedLottie();
   mountChestArt();
   mountChestGlow();
+  mountChestLocks();
   mountMiniCoins(row);
 }
 function mountChestArt(){
@@ -3423,6 +3453,51 @@ function stopChestGlow(){
   while(chestGlowHolders.length) destroyLottie(chestGlowHolders.pop());
   document.querySelectorAll('.chest-glow').forEach(x => x.remove());
   document.querySelectorAll('.chest-art[data-glow]').forEach(x => { delete x.dataset.glow; });
+}
+
+/* Yopiq sandiq tugmasidagi qulf — Lottie.
+   Animatsiyaning to'liq uzunligi qulfni OCHADI (48-69 kadrda ilgak ko'tariladi),
+   yopiq sandiq uchun bu noto'g'ri bo'lardi. Shuning uchun faqat [0,22] segmenti
+   — qulfning silkinishi — o'ynatiladi, qolgan vaqt 0-kadrda yopiq turadi.
+   Loop emas: har 6 soniyada bir marta silkinadi, shuning uchun LOOP_LIMIT
+   budjetiga umuman tegmaydi. Lottie yo'q bo'lsa (yoki reduced-motion)
+   span ichidagi statik SVG o'z holicha qoladi. */
+const chestLockHolders = [];
+let chestLockTimer = null;
+function mountChestLocks(){
+  if(!lottieAvailable()) return;
+  document.querySelectorAll('.chest-lock').forEach(span => {
+    if(span.dataset.lot) return;
+    const el = document.createElement('div'); el.className = 'lot';
+    const h = lottieMount(el, 'lock', { loop:false, autoplay:false });
+    if(!h) return;
+    span.innerHTML = ''; span.appendChild(el);
+    span.dataset.lot = '1';
+    chestLockHolders.push(h);
+    Promise.resolve(loadLottieData('lock')).then(() => {
+      if(h.anim && !h.destroyed) h.anim.goToAndStop(0, true);
+    });
+  });
+  startChestLockTimer();
+}
+function shakeChestLocks(){
+  if(document.hidden) return;
+  chestLockHolders.forEach(h => {
+    if(h.anim && !h.destroyed){ try{ h.anim.playSegments([0, 22], true); }catch(e){} }
+  });
+}
+function startChestLockTimer(){
+  stopChestLockTimer();
+  if(!chestLockHolders.length) return;
+  chestLockTimer = setInterval(shakeChestLocks, 6000);
+}
+function stopChestLockTimer(){
+  if(chestLockTimer){ clearInterval(chestLockTimer); chestLockTimer = null; }
+}
+function stopChestLocks(){
+  stopChestLockTimer();
+  while(chestLockHolders.length) destroyLottie(chestLockHolders.pop());
+  document.querySelectorAll('.chest-lock[data-lot]').forEach(x => { delete x.dataset.lot; });
 }
 
 function playChestArt(id){
