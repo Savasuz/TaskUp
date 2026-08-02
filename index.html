@@ -1254,6 +1254,21 @@
   var startedAt = (window.performance && performance.now) ? performance.now() : Date.now();
   var authReady = false, hidden = false, rafId = null;
 
+  /* Yuklanish paytidagi BIRINCHI xatoni saqlab qolamiz. Avval splash faqat
+     "Ilovani yuklab bo'lmadi" deb yozardi va haqiqiy sabab konsolda qolib
+     ketardi — foydalanuvchi konsolni ochmasa nosozlikni aniqlab bo'lmasdi.
+     Bu tinglovchi Firebase SDK <script> teglaridan OLDIN o'rnatiladi,
+     shuning uchun ularning yiqilishini ham ushlaydi. */
+  var firstError = '';
+  window.addEventListener('error', function(e){
+    if(firstError) return;
+    if(e && e.target && e.target !== window && e.target.src){
+      firstError = 'Skript yuklanmadi: ' + String(e.target.src).split('/').pop();
+    } else if(e && e.message){
+      firstError = e.message;
+    }
+  }, true);
+
   function now(){ return (window.performance && performance.now) ? performance.now() : Date.now(); }
   function hide(){
     if(hidden) return;
@@ -1262,8 +1277,11 @@
     fillEl.style.width = '100%';
     pctEl.textContent = '100%';
     screenEl.style.display = 'none';
-    // Sahifa tayyor — yuklovchi animatsiyani to'xtatamiz va o'chiramiz
-    if(typeof stopLoadingLottie === 'function') stopLoadingLottie();
+    // Sahifa tayyor — yuklovchi animatsiyani to'xtatamiz va o'chiramiz.
+    // try/catch: showLoadError() dagi bilan bir xil sabab — Lottie bloki
+    // yiqilgan bo'lsa bu chaqiruv TDZ xatosi berib, hide() ni chaqirgan
+    // kodni ham uzib qo'yardi.
+    try { if(typeof stopLoadingLottie === 'function') stopLoadingLottie(); } catch(e){}
   }
   function render(){
     var t = Math.min(1, (now() - startedAt) / DURATION);
@@ -1296,7 +1314,14 @@
   function showLoadError(){
     if(hidden) return;
     if(rafId) cancelAnimationFrame(rafId);
-    if(typeof stopLoadingLottie === 'function') stopLoadingLottie();
+    /* try/catch SHART. stopLoadingLottie() funksiya deklaratsiyasi bo'lgani
+       uchun `typeof` tekshiruvidan o'tadi, lekin u ishlatadigan `loadingLot`
+       o'zgaruvchisi `let` bilan e'lon qilingan. Firebase bloki yiqilsa
+       (masalan gstatic bloklangan bo'lsa) o'sha o'zgaruvchi TDZ da qoladi
+       va chaqiruv "Cannot access 'loadingLot' before initialization" bilan
+       yiqiladi — o'shanda showLoadError xabarni yozishga ulgurmay to'xtab,
+       splash 99% da abadiy qotib qolardi. */
+    try { if(typeof stopLoadingLottie === 'function') stopLoadingLottie(); } catch(e){}
     var art = document.querySelector('.loading-art');
     var bar = document.querySelector('.loading-bar');
     var sub = document.querySelector('.loading-sub');
@@ -1304,8 +1329,17 @@
     if(art) art.style.display = 'none';
     if(bar) bar.style.display = 'none';
     if(sub) sub.textContent = "Ilovani yuklab bo'lmadi";
+    // Sababni aniqlaymiz: eng ko'p uchraydigani — gstatic CDN'dan Firebase
+    // SDK yuklanmagani. Bunda `firebase` global obyekti umuman bo'lmaydi va
+    // auth.onAuthStateChanged ro'yxatdan o'tmaydi, natijada splash 99% da
+    // qotib qoladi. Firestore so'rovlari bu bosqichga yetib ham bormaydi.
+    var reason = '';
+    if(typeof firebase === 'undefined') reason = 'Firebase SDK yuklanmadi (gstatic.com bloklangan yoki internet yo‘q)';
+    else if(typeof auth === 'undefined') reason = 'Firebase ishga tushmadi';
+    else if(firstError) reason = firstError;
     if(txt){
-      txt.innerHTML = "Internet aloqasini tekshiring va qayta urinib ko'ring";
+      txt.innerHTML = "Internet aloqasini tekshiring va qayta urinib ko'ring"
+        + (reason ? '<br><span style="font-size:10.5px;opacity:0.55;word-break:break-word">' + reason.slice(0, 160) + '</span>' : '');
       txt.style.color = 'rgba(255,255,255,0.6)';
       txt.style.letterSpacing = '0';
       txt.style.textAlign = 'center';
@@ -1322,6 +1356,13 @@
       screenEl.appendChild(b);
     }
   }
+  /* Boot zanjiri xato bilan tugasa darrov sababni ko'rsatamiz (8 soniyani
+     kutmasdan) — splash hali ochiq bo'lsa. */
+  window.splashFail = function(msg){
+    if(hidden || anyScreenReady()) return;
+    if(msg && !firstError) firstError = String(msg);
+    showLoadError();
+  };
   setTimeout(function(){
     if(anyScreenReady()) hide();
     else showLoadError();
@@ -2806,15 +2847,26 @@ function initUserData(uid){
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
         document.getElementById('authScreen').style.display = 'none';
-        subscribeUser(uid);
-        enterApp();
+        openApp(uid);
       });
     } else {
       document.getElementById('authScreen').style.display = 'none';
-      subscribeUser(uid);
-      enterApp();
+      openApp(uid);
     }
-  }).catch(err => console.error(err));
+  }).catch(err => {
+    // users hujjatini o'qib bo'lmasa ham foydalanuvchi qora ekranda
+    // qolmasin: xatoni splashda ko'rsatamiz (splash hali ochiq bo'lsa).
+    console.error('initUserData:', err);
+    if(window.splashFail) window.splashFail((err && err.message) || 'users hujjati o\'qilmadi');
+  });
+}
+
+/* subscribeUser() dagi har qanday xato enterApp() ni to'sib qo'ymasin —
+   aks holda hech qaysi ekran yoqilmay, foydalanuvchi qora ekran ko'radi. */
+function openApp(uid){
+  try { subscribeUser(uid); }
+  catch(e){ console.error('subscribeUser:', e); }
+  enterApp();
 }
 
 /* Vazifa progressi endi alohida subkolleksiyada: users/{uid}/taskProgress.
@@ -2823,14 +2875,23 @@ function initUserData(uid){
    (firestore.rules da yozish taqiqlangan). */
 let unsubscribeTaskProgress = null;
 function subscribeTaskProgress(uid){
-  if(unsubscribeTaskProgress){ unsubscribeTaskProgress(); unsubscribeTaskProgress = null; }
-  unsubscribeTaskProgress = db.collection('users').doc(uid).collection('taskProgress')
-    .onSnapshot((snap) => {
-      const next = {};
-      snap.forEach(d => { next[d.id] = d.data() || {}; });
-      state.taskProgress = next;
-      updateTaskCardStates();
-    }, err => console.error('taskProgress yuklanmadi:', err));
+  // Butun blok try ichida: bu tinglovchi initUserData -> subscribeUser
+  // zanjirida, enterApp() dan OLDIN chaqiriladi. Sinxron xato (masalan
+  // eski Firestore SDK'da subkolleksiya yo'qligi) enterApp() ga yetib
+  // bormasdan zanjirni uzib, foydalanuvchini qora ekran oldida qoldirardi.
+  // Progress ko'rinishi ikkinchi darajali — u yiqilsa ham ilova ochilsin.
+  try {
+    if(unsubscribeTaskProgress){ unsubscribeTaskProgress(); unsubscribeTaskProgress = null; }
+    unsubscribeTaskProgress = db.collection('users').doc(uid).collection('taskProgress')
+      .onSnapshot((snap) => {
+        const next = {};
+        snap.forEach(d => { next[d.id] = d.data() || {}; });
+        state.taskProgress = next;
+        updateTaskCardStates();
+      }, err => console.error('taskProgress yuklanmadi:', err));
+  } catch(e){
+    console.error('taskProgress obunasi ochilmadi:', e);
+  }
 }
 
 /* Vazifa bugun (yoki 'once' bo'lsa umuman) necha marta bajarilgan.
