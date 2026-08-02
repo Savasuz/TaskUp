@@ -340,10 +340,15 @@
   /* Nur effekti sandiq ORTIDA; sandiqdan kattaroq bo'lgani uchun chetga chiqadi. */
   /* Nurlar sandiqdan biroz kattaroq va xira: 190%/to'liq yorug'likda ular
      butun kartani to'ldirib, sarlavhani ham yuvib yuborardi. */
-  /* Sandiq o'z kompozitsiyasida markazdan pastroqda chizilgan, shuning uchun
-     nur markazi ham pastga suriladi — aks holda sandiq ustida osilib turardi. */
-  .chest-glow{ position:absolute; left:50%; top:64%; transform:translate(-50%,-50%);
-    width:132%; height:132%; z-index:0; pointer-events:none; opacity:0.42; }
+  /* Sandiq o'z 500x500 kompozitsiyasida markazdan pastda chizilgan (bbox
+     o'lchandi: markazi 49.3% / 66%). Nur aynan shu nuqtadan tarqaladi,
+     aks holda sandiq ustida osilib turardi. */
+  /* Selektor `.chest-art .chest-glow` bo'lishi SHART: yuqoridagi
+     `.chest-art .lot{ inset:0 }` bir xil element uchun kuchliroq edi va
+     nurni qutining chap-yuqori burchagiga surib qo'yardi. */
+  .chest-art .chest-glow{ position:absolute; inset:auto; left:49.3%; top:66%;
+    transform:translate(-50%,-50%); width:132%; height:132%;
+    z-index:0; pointer-events:none; opacity:0.42; }
   /* Sandiqlar navbatma-navbat kattalashadi: 2-si 1-sidan, 3-si 2-sidan kattaroq. */
   .chest-item:nth-child(1) .chest-art{ transform:scale(0.88); }
   .chest-item:nth-child(2) .chest-art{ transform:scale(1); }
