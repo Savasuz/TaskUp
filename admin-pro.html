@@ -328,10 +328,22 @@ setTimeout(function(){
       </div>
       <div id="admobHint" class="form-hint" style="display:none">⚠️ <span data-i18n="admobHint">Rewarded Ad uchun havola kerak emas — reklamani AdMob o'zi ko'rsatadi. Ad Unit ID bu yerga yozilmaydi, u Android ilova sozlamalarida saqlanadi.</span></div>
       <label data-i18n="lblVerify">Tekshirish usuli</label>
-      <select id="newTaskVerify">
+      <select id="newTaskVerify" onchange="onVerifyChange()">
         <option value="auto" data-i18n="verifyAuto">Avtomatik</option>
+        <option value="trust" data-i18n="verifyTrust">Ishonch (havola + 15 s)</option>
         <option value="manual" data-i18n="verifyManual">Qo'lda</option>
+        <option value="telegram" data-i18n="verifyTelegram">Telegram a'zoligi</option>
         <option value="admob" data-i18n="verifyAdmob">AdMob tekshiruvi</option>
+      </select>
+      <div id="tgChatWrap" style="display:none">
+        <label data-i18n="lblTgChat">Telegram kanal (@nom yoki chat_id)</label>
+        <input type="text" id="newTaskTgChat" placeholder="@taskupuz">
+        <div class="form-hint" data-i18n="tgChatHint">Bot shu kanalda administrator bo'lishi va TELEGRAM_BOT_TOKEN maxfiy kaliti o'rnatilgan bo'lishi shart. Foydalanuvchining Telegram hisobi ulanmagan bo'lsa tekshiruv o'tmaydi.</div>
+      </div>
+      <label data-i18n="lblRepeat">Takrorlanishi</label>
+      <select id="newTaskRepeat">
+        <option value="daily" data-i18n="repeatDaily">Har kuni tiklanadi</option>
+        <option value="once" data-i18n="repeatOnce">Bir marta (tiklanmaydi)</option>
       </select>
       <label data-i18n="lblCategory">Kategoriya</label>
       <select id="newTaskType"><option value="oddiy" data-i18n="catSimple">Oddiy</option><option value="premium" data-i18n="catPremium">Premium</option><option value="bonus" data-i18n="catBonus">Bonus</option></select>
@@ -706,6 +718,9 @@ const ADMIN_I18N = {
     lblTaskKind:"Vazifa turi", kindLink:"Oddiy havola", kindRewarded:"Rewarded Ad (AdMob)", kindApp:"Ilova yuklash", kindTg:"Telegram", kindYt:"YouTube", kindSurvey:"So'rovnoma",
     kind_link:"🔗 Oddiy havola", kind_rewarded_ad:"📺 Rewarded Ad", kind_app_install:"⬇ Ilova yuklash", kind_telegram:"✈️ Telegram", kind_youtube:"▶ YouTube", kind_survey:"📋 So'rovnoma",
     lblTaskUrl:"Vazifa havolasi", lblVerify:"Tekshirish usuli", verifyAuto:"Avtomatik", verifyManual:"Qo'lda", verifyAdmob:"AdMob tekshiruvi",
+    verifyTrust:"Ishonch (havola + 15 s)", verifyTelegram:"Telegram a'zoligi", lblTgChat:"Telegram kanal (@nom yoki chat_id)",
+    tgChatHint:"Bot shu kanalda administrator bo'lishi va TELEGRAM_BOT_TOKEN maxfiy kaliti o'rnatilgan bo'lishi shart. Foydalanuvchining Telegram hisobi ulanmagan bo'lsa tekshiruv o'tmaydi.",
+    tgChatRequired:"Telegram kanalini kiriting", lblRepeat:"Takrorlanishi", repeatDaily:"Har kuni tiklanadi", repeatOnce:"Bir marta (tiklanmaydi)",
     lblTotalLimit:"Umumiy bajarish limiti (ixtiyoriy, bo'sh = cheksiz)", lblStartDate:"Boshlanish sanasi (ixtiyoriy)", lblEndDate:"Tugash sanasi (ixtiyoriy)",
     admobHint:"Rewarded Ad uchun havola kerak emas — reklamani AdMob o'zi ko'rsatadi. Ad Unit ID bu yerga yozilmaydi, u Android ilova sozlamalarida saqlanadi.",
     urlRequired:"Vazifa havolasini kiriting (https:// bilan)", badDates:"Tugash sanasi boshlanishdan oldin bo'lishi mumkin emas",
@@ -759,6 +774,9 @@ const ADMIN_I18N = {
     lblTaskKind:"Task type", kindLink:"Simple link", kindRewarded:"Rewarded Ad (AdMob)", kindApp:"App install", kindTg:"Telegram", kindYt:"YouTube", kindSurvey:"Survey",
     kind_link:"🔗 Simple link", kind_rewarded_ad:"📺 Rewarded Ad", kind_app_install:"⬇ App install", kind_telegram:"✈️ Telegram", kind_youtube:"▶ YouTube", kind_survey:"📋 Survey",
     lblTaskUrl:"Task link", lblVerify:"Verification method", verifyAuto:"Automatic", verifyManual:"Manual", verifyAdmob:"AdMob verification",
+    verifyTrust:"Trust (link + 15 s)", verifyTelegram:"Telegram membership", lblTgChat:"Telegram channel (@name or chat_id)",
+    tgChatHint:"The bot must be an administrator of that channel and the TELEGRAM_BOT_TOKEN secret must be set. The check fails if the user has no linked Telegram account.",
+    tgChatRequired:"Enter the Telegram channel", lblRepeat:"Repetition", repeatDaily:"Resets daily", repeatOnce:"Once (never resets)",
     lblTotalLimit:"Total completion limit (optional, empty = unlimited)", lblStartDate:"Start date (optional)", lblEndDate:"End date (optional)",
     admobHint:"Rewarded Ad needs no link — AdMob shows the ad itself. The Ad Unit ID is not entered here; it is stored in the Android app configuration.",
     urlRequired:"Enter the task link (starting with https://)", badDates:"End date cannot be before the start date",
@@ -812,6 +830,9 @@ const ADMIN_I18N = {
     lblTaskKind:"Тип задания", kindLink:"Обычная ссылка", kindRewarded:"Rewarded Ad (AdMob)", kindApp:"Установка приложения", kindTg:"Telegram", kindYt:"YouTube", kindSurvey:"Опрос",
     kind_link:"🔗 Обычная ссылка", kind_rewarded_ad:"📺 Rewarded Ad", kind_app_install:"⬇ Установка", kind_telegram:"✈️ Telegram", kind_youtube:"▶ YouTube", kind_survey:"📋 Опрос",
     lblTaskUrl:"Ссылка задания", lblVerify:"Способ проверки", verifyAuto:"Автоматически", verifyManual:"Вручную", verifyAdmob:"Проверка AdMob",
+    verifyTrust:"Доверие (ссылка + 15 с)", verifyTelegram:"Подписка в Telegram", lblTgChat:"Telegram-канал (@имя или chat_id)",
+    tgChatHint:"Бот должен быть администратором канала, а секрет TELEGRAM_BOT_TOKEN — установлен. Если Telegram-аккаунт пользователя не привязан, проверка не пройдёт.",
+    tgChatRequired:"Укажите Telegram-канал", lblRepeat:"Повторяемость", repeatDaily:"Сбрасывается ежедневно", repeatOnce:"Один раз (без сброса)",
     lblTotalLimit:"Общий лимит выполнений (необязательно, пусто = без лимита)", lblStartDate:"Дата начала (необязательно)", lblEndDate:"Дата окончания (необязательно)",
     admobHint:"Для Rewarded Ad ссылка не нужна — рекламу показывает сам AdMob. Ad Unit ID сюда не вводится, он хранится в конфигурации Android-приложения.",
     urlRequired:"Введите ссылку задания (начиная с https://)", badDates:"Дата окончания не может быть раньше даты начала",
@@ -1071,6 +1092,12 @@ function onTaskKindChange(){
   document.getElementById('admobHint').style.display = isAd ? 'block' : 'none';
   if(isAd) document.getElementById('newTaskVerify').value = 'admob';
   else if(document.getElementById('newTaskVerify').value === 'admob') document.getElementById('newTaskVerify').value = 'auto';
+  onVerifyChange();
+}
+/* Kanal maydoni faqat Telegram a'zoligi tanlanganda kerak */
+function onVerifyChange(){
+  const v = document.getElementById('newTaskVerify').value;
+  document.getElementById('tgChatWrap').style.display = v === 'telegram' ? 'block' : 'none';
 }
 function submitNewTask(btnEl){
   const name = document.getElementById('newTaskName').value.trim();
@@ -1082,6 +1109,8 @@ function submitNewTask(btnEl){
   const kind = document.getElementById('newTaskKind').value;
   const url = document.getElementById('newTaskUrl').value.trim();
   const verify = kind === 'rewarded_ad' ? 'admob' : document.getElementById('newTaskVerify').value;
+  const repeat = document.getElementById('newTaskRepeat').value === 'once' ? 'once' : 'daily';
+  const tgChat = document.getElementById('newTaskTgChat').value.trim();
   const totalLimit = parseInt(document.getElementById('newTaskTotalLimit').value) || 0;
   const startVal = document.getElementById('newTaskStart').value;
   const endVal = document.getElementById('newTaskEnd').value;
@@ -1090,6 +1119,8 @@ function submitNewTask(btnEl){
   if(kind !== 'rewarded_ad'){
     if(!url || !/^https?:\/\/.+/.test(url)){ showToast(t('urlRequired')); return; }
   }
+  // Telegram tekshiruvi kanalsiz ishlamaydi — verifyTelegram 'tg-chat-missing' qaytaradi
+  if(verify === 'telegram' && !tgChat){ showToast(t('tgChatRequired')); return; }
   const startAt = startVal ? new Date(startVal + 'T00:00:00').getTime() : null;
   const endAt = endVal ? new Date(endVal + 'T23:59:59').getTime() : null;
   if(startAt && endAt && endAt < startAt){ showToast(t('badDates')); return; }
@@ -1097,12 +1128,13 @@ function submitNewTask(btnEl){
   const maxOrder = tasksData.reduce((m,x)=>Math.max(m, x.order||0), 0);
   withBtnLoading(btnEl, db.collection('tasks').add({
     name, desc, reward, dailyLimit, icon: selectedIconKey, category, active,
-    kind, url: kind === 'rewarded_ad' ? '' : url, verify,
+    kind, url: kind === 'rewarded_ad' ? '' : url, verify, repeat,
+    tgChat: verify === 'telegram' ? tgChat : '',
     totalLimit, completedCount: 0, startAt, endAt,
     order: maxOrder+1
   }).then(() => {
     showToast(t('taskAdded'));
-    ['newTaskName','newTaskDesc','newTaskReward','newTaskUrl','newTaskTotalLimit','newTaskStart','newTaskEnd'].forEach(id => document.getElementById(id).value='');
+    ['newTaskName','newTaskDesc','newTaskReward','newTaskUrl','newTaskTgChat','newTaskTotalLimit','newTaskStart','newTaskEnd'].forEach(id => document.getElementById(id).value='');
     document.getElementById('newTaskDailyLimit').value='1';
     switchView('tasks');
   }).catch(err => { console.error(err); showToast(t('errGeneric') + ((err && err.code) ? ' (' + err.code + ')' : '')); }));

@@ -6,7 +6,7 @@
 process.env.TZ = 'Asia/Tashkent';
 
 const crypto = require('crypto');
-const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { defineSecret } = require('firebase-functions/params');
 const { initializeApp } = require('firebase-admin/app');
@@ -97,10 +97,39 @@ function maskEmail(email) {
   return name.length <= 3 ? name + '***' : name.slice(0, 3) + '***';
 }
 
-/* ---------- Vazifani bajarish ---------- */
-exports.completeTask = onCall(async (req) => {
-  const uid = requireAuth(req);
-  const taskId = String((req.data && req.data.taskId) || '').trim();
+/* ---------- Vazifani bajarish ----------
+
+   Progress har bir vazifa uchun alohida hujjatda saqlanadi:
+   users/{uid}/taskProgress/{taskId} = { count, lastResetDate, updatedAt }
+
+   Avval hammasi users/{uid}.taskCounts map'ida edi va har bir bajarishda
+   butun map qayta yozilardi. Alohida hujjat per-task qoidani ham imkon
+   beradi: tasks hujjatidagi `repeat` 'daily' bo'lsa lastResetDate bugungi
+   sana bilan solishtirilib hisoblagich nolga tushadi, 'once' bo'lsa u
+   hech qachon tiklanmaydi.
+
+   MOSLIK: eski taskCounts map'i endi YOZILMAYDI, lekin O'SHA KUN ichida
+   hali ham hisobga olinadi. Aks holda deploy kunida allaqachon 3/3 qilgan
+   foydalanuvchi bo'sh taskProgress tufayli limitni yana boshidan
+   aylanib o'tishi mumkin edi. Yarim tundan keyin map ahamiyatsiz qoladi. */
+
+/* completeTask FAQAT mustaqil tekshiruv talab qilmaydigan turlarni bajaradi.
+   'telegram' verifyTelegram orqali, 'admob' esa AdMob SSV callback orqali
+   keladi — aks holda mijoz shunchaki completeTask chaqirib tekshiruvni
+   butunlay chetlab o'tardi. */
+const SELF_SERVE_VERIFY = ['auto', 'manual', 'trust'];
+
+function taskProgressCount(pd, td, today) {
+  if (!pd) return 0;
+  if (td.repeat !== 'once' && pd.lastResetDate !== today) return 0;
+  return Math.max(0, Math.floor(Number(pd.count)) || 0);
+}
+
+/* Vazifani yakunlash — barcha yo'llar (completeTask, verifyTelegram,
+   AdMob SSV) shu bitta tranzaksiyadan o'tadi, shuning uchun limit, kunlik
+   chegara va mukofot hisobi hamma joyda bir xil. Mukofot MIQDORI faqat
+   `tasks` hujjatidan olinadi — chaqiruvchi uni yubora olmaydi. */
+async function grantTask(uid, taskId, allowVerify) {
   if (!taskId || taskId.length > 100) throw new HttpsError('invalid-argument', 'bad-task-id');
 
   const taskRef = db.collection('tasks').doc(taskId);
@@ -108,9 +137,12 @@ exports.completeTask = onCall(async (req) => {
   if (!preSnap.exists) throw new HttpsError('not-found', 'task-not-found');
 
   const userRef = db.collection('users').doc(uid);
+  const progRef = userRef.collection('taskProgress').doc(taskId);
+
   return db.runTransaction(async (tx) => {
     const userDoc = await tx.get(userRef);
     const taskDoc = await tx.get(taskRef);
+    const progDoc = await tx.get(progRef);
 
     if (!userDoc.exists) throw new HttpsError('not-found', 'user-not-found');
     const d = userDoc.data();
@@ -120,6 +152,12 @@ exports.completeTask = onCall(async (req) => {
     if (!taskDoc.exists) throw new HttpsError('not-found', 'task-not-found');
     const td = taskDoc.data();
     if (td.active !== true) throw new HttpsError('failed-precondition', 'task-inactive');
+
+    const verify = String(td.verify || 'auto');
+    if (allowVerify.indexOf(verify) === -1) {
+      throw new HttpsError('failed-precondition', 'needs-verification');
+    }
+
     const now = Date.now();
     if (td.startAt && now < td.startAt) throw new HttpsError('failed-precondition', 'not-started');
     if (td.endAt && now > td.endAt) throw new HttpsError('failed-precondition', 'ended');
@@ -132,11 +170,12 @@ exports.completeTask = onCall(async (req) => {
     if (reward <= 0) throw new HttpsError('failed-precondition', 'bad-task');
 
     const today = new Date().toDateString();
-    let taskCounts = d.taskCounts || {};
-    let dailyEarned = d.dailyEarned || 0;
-    if (d.lastReset !== today) { taskCounts = {}; dailyEarned = 0; }
+    const dailyEarned = d.lastReset === today ? (d.dailyEarned || 0) : 0;
 
-    const count = taskCounts[taskId] || 0;
+    const legacy = (d.lastReset === today && td.repeat !== 'once')
+      ? Math.max(0, Math.floor(Number((d.taskCounts || {})[taskId])) || 0)
+      : 0;
+    const count = Math.max(taskProgressCount(progDoc.exists ? progDoc.data() : null, td, today), legacy);
     if (count >= limit) throw new HttpsError('resource-exhausted', 'limit');
 
     const cap = dailyCap(levelOf(d.lifetimeCoins));
@@ -148,10 +187,15 @@ exports.completeTask = onCall(async (req) => {
       lifetimeCoins: (d.lifetimeCoins || 0) + actual,
       tasksCompletedTotal: (d.tasksCompletedTotal || 0) + 1,
       dailyEarned: dailyEarned + actual,
-      taskCounts: { ...taskCounts, [taskId]: count + 1 },
       lastReset: today,
       ...weeklyPatch(d, actual)
     });
+    tx.set(progRef, {
+      count: count + 1,
+      lastResetDate: today,
+      repeat: td.repeat === 'once' ? 'once' : 'daily',
+      updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
     if ((td.totalLimit || 0) > 0) {
       tx.update(taskRef, { completedCount: (td.completedCount || 0) + 1 });
     }
@@ -160,6 +204,130 @@ exports.completeTask = onCall(async (req) => {
     });
     return { reward: actual };
   });
+}
+
+exports.completeTask = onCall(async (req) => {
+  const uid = requireAuth(req);
+  const taskId = String((req.data && req.data.taskId) || '').trim();
+  return grantTask(uid, taskId, SELF_SERVE_VERIFY);
+});
+
+/* ---------- Telegram kanal a'zoligini tekshirish ----------
+   Vazifa hujjatida `tgChat` bo'lishi shart (masalan "@taskup_kanal"), va bot
+   o'sha kanalda administrator bo'lishi kerak — aks holda getChatMember
+   javob bermaydi.
+
+   Bot tokeni Secret Manager'da: TELEGRAM_BOT_TOKEN (CARD_ENC_KEY bilan bir
+   xil uslub). Yangilash:
+     firebase functions:secrets:set TELEGRAM_BOT_TOKEN
+
+   Foydalanuvchining Telegram ID'si users/{uid}.telegramId da kutiladi.
+   Ilovada hozircha Telegram bilan bog'lash oqimi yo'q, shuning uchun bu
+   tekshiruv 'tg-not-linked' bilan tugaydi — vazifa turini adminda
+   'telegram' qilishdan oldin o'sha oqim qo'shilishi kerak. */
+const TELEGRAM_BOT_TOKEN = defineSecret('TELEGRAM_BOT_TOKEN');
+const TG_MEMBER_STATUSES = ['creator', 'administrator', 'member'];
+
+exports.verifyTelegram = onCall({ secrets: [TELEGRAM_BOT_TOKEN] }, async (req) => {
+  const uid = requireAuth(req);
+  const taskId = String((req.data && req.data.taskId) || '').trim();
+  if (!taskId || taskId.length > 100) throw new HttpsError('invalid-argument', 'bad-task-id');
+
+  const taskSnap = await db.collection('tasks').doc(taskId).get();
+  if (!taskSnap.exists) throw new HttpsError('not-found', 'task-not-found');
+  const td = taskSnap.data();
+  if (String(td.verify || '') !== 'telegram') throw new HttpsError('failed-precondition', 'wrong-verify');
+
+  const chat = String(td.tgChat || '').trim();
+  if (!chat) throw new HttpsError('failed-precondition', 'tg-chat-missing');
+
+  const userSnap = await db.collection('users').doc(uid).get();
+  const tgId = userSnap.exists ? userSnap.data().telegramId : null;
+  if (!tgId) throw new HttpsError('failed-precondition', 'tg-not-linked');
+
+  const token = TELEGRAM_BOT_TOKEN.value();
+  if (!token) throw new HttpsError('failed-precondition', 'tg-token-missing');
+
+  let body;
+  try {
+    const r = await fetch('https://api.telegram.org/bot' + token + '/getChatMember'
+      + '?chat_id=' + encodeURIComponent(chat)
+      + '&user_id=' + encodeURIComponent(String(tgId)));
+    body = await r.json();
+  } catch (e) {
+    throw new HttpsError('unavailable', 'tg-unreachable');
+  }
+  if (!body || body.ok !== true) throw new HttpsError('failed-precondition', 'tg-check-failed');
+  if (TG_MEMBER_STATUSES.indexOf(body.result && body.result.status) === -1) {
+    throw new HttpsError('failed-precondition', 'not-subscribed');
+  }
+
+  return grantTask(uid, taskId, ['telegram']);
+});
+
+/* ---------- AdMob server-side verification (SSV) ----------
+   AdMob rewarded reklama ko'rilgach Google shu manzilga GET so'rov yuboradi.
+   Mukofot MIJOZDAN emas, aynan shu callback'dan beriladi — shuning uchun
+   imzo tekshirilmasa har kim URL'ni qo'lda chaqirib tanga yoza olardi.
+
+   Imzo: so'rov satrining boshidan "&signature=" gacha bo'lgan qismi ustidan
+   ECDSA-SHA256. Ochiq kalitlar Google'da e'lon qilinadi va key_id bo'yicha
+   tanlanadi. Kalitlar xotirada 24 soat keshlanadi.
+
+   AdMob konsolida: SSV callback URL sifatida shu funksiya manzili,
+   user_id -> Firebase uid, custom_data -> taskId qilib sozlanadi. */
+const ADMOB_KEYS_URL = 'https://gstatic.com/admob/reward/verifier-keys.json';
+let admobKeyCache = { at: 0, keys: null };
+
+async function admobKeys() {
+  if (admobKeyCache.keys && Date.now() - admobKeyCache.at < 24 * 3600 * 1000) return admobKeyCache.keys;
+  const r = await fetch(ADMOB_KEYS_URL);
+  const j = await r.json();
+  const map = {};
+  (j.keys || []).forEach((k) => { map[String(k.keyId)] = k.pem; });
+  admobKeyCache = { at: Date.now(), keys: map };
+  return map;
+}
+
+exports.admobSsv = onRequest(async (req, res) => {
+  try {
+    const qs = String(req.originalUrl || req.url || '').split('?')[1] || '';
+    const cut = qs.indexOf('&signature=');
+    if (cut === -1) { res.status(400).send('no-signature'); return; }
+    const signed = qs.slice(0, cut);
+
+    const q = req.query || {};
+    const keys = await admobKeys();
+    const pem = keys[String(q.key_id)];
+    if (!pem) { res.status(400).send('unknown-key'); return; }
+
+    const ok = crypto.createVerify('SHA256')
+      .update(signed)
+      .verify(pem, Buffer.from(String(q.signature), 'base64url'));
+    if (!ok) { res.status(403).send('bad-signature'); return; }
+
+    const uid = String(q.user_id || '').trim();
+    const taskId = String(q.custom_data || '').trim();
+    const txId = String(q.transaction_id || '').trim();
+    if (!uid || !taskId || !txId) { res.status(400).send('missing-params'); return; }
+
+    // Takroriy callback ikkinchi marta tanga bermasin
+    try {
+      await db.collection('admob_ssv').doc(txId).create({
+        uid, taskId, at: FieldValue.serverTimestamp()
+      });
+    } catch (e) {
+      res.status(200).send('duplicate');
+      return;
+    }
+
+    await grantTask(uid, taskId, ['admob']);
+    res.status(200).send('ok');
+  } catch (err) {
+    console.error('admobSsv:', err);
+    // Google 5xx da qayta uriniladi; mantiqiy rad javoblari yuqorida 4xx
+    res.status(500).send('error');
+  }
 });
 
 /* ---------- Vazifa bosqichlari (sandiqlar) ----------

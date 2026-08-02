@@ -2240,7 +2240,7 @@ function getTaskLabel(id){
 let state = {
   email: '', referralCode: '', avatarUrl: '',
   coins: 0, lifetimeCoins: 0,
-  taskCounts: {}, tasksCompletedTotal: 0, dailyEarned: 0, claimedMilestones: [],
+  taskCounts: {}, taskProgress: {}, tasksCompletedTotal: 0, dailyEarned: 0, claimedMilestones: [],
   friendsCount: 0, friendsBonus: 0, cashedOutTotal: 0,
   streakCount: 0, lastStreakClaim: null,
   history: [], paymentHistory: []
@@ -2411,6 +2411,7 @@ const I18N = {
     avatarCropTitle:"Rasmni moslashtiring", avatarCropHint:"Suring va moslang", avatarCropCancel:"Bekor qilish", avatarCropSave:"Saqlash",
     toastAvatarType:"Faqat rasm faylini tanlang", toastAvatarSize:"Rasm hajmi 5 MB dan kichik bo'lsin", toastAvatarUploaded:"Profil rasmi yangilandi", toastAvatarError:"Rasmni yuklashda xatolik yuz berdi",
     enterRefCode:"Sizni taklif qilishganmi? Kodni kiriting", btnRedeem:"Faollashtirish", toastEnterCode:"Taklif kodini kiriting", toastRefRedeemed:"tanga! Referral faollashdi", toastRefAlready:"Siz allaqachon kod kiritgansiz", toastRefNotFound:"Bunday kod topilmadi", toastRefOwn:"O'z kodingizni kirita olmaysiz", toastRefError:"Xatolik yuz berdi",
+    btnVerify:"Tekshirish", toastNotSubscribed:"Kanalga obuna bo'lmagansiz", toastTgNotLinked:"Telegram hisobi ulanmagan", toastNeedsVerify:"Bu vazifa alohida tekshiruvdan o'tadi",
     btnClaim:"Olish", adSoon:"Ilovada tez orada", toastNotStarted:"Vazifa hali boshlanmagan", toastEnded:"Vazifa muddati tugagan", toastTotalLimit:"Vazifa umumiy limiti tugagan",
     toastNotEnough:"Balansingizda buncha tanga yo'q",
     wheelTitle:"Omadli g'ildirak", wheelSub:"Kuniga 1 marta bepul — 500 tangagacha yutib oling!", btnSpin:"Aylantirish", btnClose:"Yopish",
@@ -2494,6 +2495,7 @@ const I18N = {
     avatarCropTitle:"Adjust your photo", avatarCropHint:"Drag and adjust", avatarCropCancel:"Cancel", avatarCropSave:"Save",
     toastAvatarType:"Please select an image file", toastAvatarSize:"Image size must be under 5 MB", toastAvatarUploaded:"Profile photo updated", toastAvatarError:"Failed to upload photo",
     enterRefCode:"Were you invited? Enter the code", btnRedeem:"Activate", toastEnterCode:"Enter the referral code", toastRefRedeemed:"coins! Referral activated", toastRefAlready:"You already used a code", toastRefNotFound:"Code not found", toastRefOwn:"You can't use your own code", toastRefError:"Something went wrong",
+    btnVerify:"Verify", toastNotSubscribed:"You are not subscribed to the channel", toastTgNotLinked:"Telegram account is not linked", toastNeedsVerify:"This task goes through a separate check",
     btnClaim:"Claim", adSoon:"Soon in the app", toastNotStarted:"Task hasn't started yet", toastEnded:"Task has ended", toastTotalLimit:"Task completion limit reached",
     toastNotEnough:"You don't have that many coins",
     wheelTitle:"Lucky Wheel", wheelSub:"One free spin a day — win up to 500 coins!", btnSpin:"Spin", btnClose:"Close",
@@ -2577,6 +2579,7 @@ const I18N = {
     avatarCropTitle:"Настройте фото", avatarCropHint:"Перетащите и настройте", avatarCropCancel:"Отмена", avatarCropSave:"Сохранить",
     toastAvatarType:"Выберите файл изображения", toastAvatarSize:"Размер изображения должен быть меньше 5 МБ", toastAvatarUploaded:"Фото профиля обновлено", toastAvatarError:"Ошибка загрузки фото",
     enterRefCode:"Вас пригласили? Введите код", btnRedeem:"Активировать", toastEnterCode:"Введите реферальный код", toastRefRedeemed:"монет! Реферал активирован", toastRefAlready:"Вы уже использовали код", toastRefNotFound:"Код не найден", toastRefOwn:"Нельзя использовать свой код", toastRefError:"Произошла ошибка",
+    btnVerify:"Проверить", toastNotSubscribed:"Вы не подписаны на канал", toastTgNotLinked:"Telegram-аккаунт не привязан", toastNeedsVerify:"Это задание проходит отдельную проверку",
     btnClaim:"Получить", adSoon:"Скоро в приложении", toastNotStarted:"Задание ещё не началось", toastEnded:"Задание завершено", toastTotalLimit:"Лимит задания исчерпан",
     toastNotEnough:"У вас недостаточно монет",
     wheelTitle:"Колесо удачи", wheelSub:"1 бесплатное вращение в день — до 500 монет!", btnSpin:"Крутить", btnClose:"Закрыть",
@@ -2814,8 +2817,42 @@ function initUserData(uid){
   }).catch(err => console.error(err));
 }
 
+/* Vazifa progressi endi alohida subkolleksiyada: users/{uid}/taskProgress.
+   Foydalanuvchi hujjatidagi taskCounts map'i o'rniga kelgan — server
+   grantTask() tranzaksiyasida shu hujjatlarga yozadi, mijoz faqat o'qiydi
+   (firestore.rules da yozish taqiqlangan). */
+let unsubscribeTaskProgress = null;
+function subscribeTaskProgress(uid){
+  if(unsubscribeTaskProgress){ unsubscribeTaskProgress(); unsubscribeTaskProgress = null; }
+  unsubscribeTaskProgress = db.collection('users').doc(uid).collection('taskProgress')
+    .onSnapshot((snap) => {
+      const next = {};
+      snap.forEach(d => { next[d.id] = d.data() || {}; });
+      state.taskProgress = next;
+      updateTaskCardStates();
+    }, err => console.error('taskProgress yuklanmadi:', err));
+}
+
+/* Vazifa bugun (yoki 'once' bo'lsa umuman) necha marta bajarilgan.
+   Serverdagi taskProgressCount() bilan bir xil qoida:
+   - repeat 'once'  -> hisoblagich hech qachon tiklanmaydi;
+   - repeat 'daily' -> lastResetDate bugungi sanaga teng bo'lmasa 0.
+   Eski taskCounts map'i o'sha kun ichida hisobga olinadi (server ham
+   shunday qiladi), shuning uchun deploy kunida progress yo'qolmaydi. */
+function taskDoneCount(task){
+  const id = (task && typeof task === 'object') ? task.id : task;
+  if(!id) return 0;
+  const once = !!(task && typeof task === 'object' && task.repeat === 'once');
+  const p = state.taskProgress[id];
+  let n = 0;
+  if(p && (once || p.lastResetDate === new Date().toDateString())) n = Number(p.count) || 0;
+  const legacy = once ? 0 : (Number(state.taskCounts[id]) || 0);
+  return Math.max(n, legacy);
+}
+
 function subscribeUser(uid){
   if(unsubscribeUser) unsubscribeUser();
+  subscribeTaskProgress(uid);
   const userRef = db.collection('users').doc(uid);
   unsubscribeUser = userRef.onSnapshot((doc) => {
     if(!doc.exists) return;
@@ -3017,6 +3054,7 @@ function confirmDeleteAccount(){
   showToast(t('deleteInProgress'));
   fns.httpsCallable('deleteAccount')({}).then(() => {
     if(unsubscribeUser) unsubscribeUser();
+    if(unsubscribeTaskProgress){ unsubscribeTaskProgress(); unsubscribeTaskProgress = null; }
     if(unsubscribeTasks){ unsubscribeTasks(); unsubscribeTasks = null; }
     if(unsubscribeNews){ unsubscribeNews(); unsubscribeNews = null; }
     currentUid = null;
@@ -3032,6 +3070,7 @@ function confirmDeleteAccount(){
 
 function signOutUser(){
   if(unsubscribeUser) unsubscribeUser();
+  if(unsubscribeTaskProgress){ unsubscribeTaskProgress(); unsubscribeTaskProgress = null; }
   if(unsubscribeTasks){ unsubscribeTasks(); unsubscribeTasks = null; }
   if(unsubscribeNews){ unsubscribeNews(); unsubscribeNews = null; }
   auth.signOut();
@@ -4023,7 +4062,7 @@ function updateTaskCardStates(){
     if(el.dataset.kind === 'ad') return;
     const id = el.dataset.taskId;
     const dailyLimit = Number(el.dataset.dailyLimit) || 1;
-    const count = state.taskCounts[id] || 0;
+    const count = taskDoneCount({ id, repeat: el.dataset.repeat });
     const limitReached = count >= dailyLimit;
 
     const countEl = el.querySelector('.task-progress-count');
@@ -4041,7 +4080,8 @@ function updateTaskCardStates(){
     btn.dataset.limitLocked = '1';
     btn.disabled = true;
     btn.removeAttribute('data-i18n');
-    btn.textContent = dailyLimit > 1 ? t('taskBtnTomorrow') : t('taskBtnDone');
+    // repeat 'once' bo'lsa vazifa butunlay tugagan — "Ertaga" deyish noto'g'ri
+    btn.textContent = (el.dataset.repeat === 'once' || dailyLimit === 1) ? t('taskBtnDone') : t('taskBtnTomorrow');
   });
 }
 
@@ -4728,23 +4768,29 @@ function taskRowHtml(task, maxReward){
   const desc = escapeHtml(task.desc || '');
   const reward = Number(task.reward) || 0;
   const dailyLimit = Number(task.dailyLimit) || 1;
-  const isAdKind = task.kind === 'rewarded_ad';
-  const count = state.taskCounts[task.id] || 0;
+  const verify = taskVerify(task);
+  const isAdKind = verify === 'admob';
+  const count = taskDoneCount(task);
   const limitReached = !isAdKind && count >= dailyLimit;
   const isTop = !isAdKind && maxReward > 0 && reward === maxReward;
 
   let btnHtml;
   if(isAdKind){
-    // AdMob Rewarded Ad — Android ilovaga SDK ulangach yoqiladi
+    // AdMob Rewarded Ad — mukofot admobSsv callback'i orqali serverda beriladi.
+    // Tugma Android ilovaga reklama SDK'si ulangunicha o'chirilgan turadi.
     btnHtml = `<button class="task-btn" disabled data-i18n="adSoon">${t('adSoon')}</button>`;
   } else if(limitReached){
-    const doneLabel = dailyLimit > 1 ? t('taskBtnTomorrow') : t('taskBtnDone');
+    // repeat 'once' bo'lsa vazifa butunlay tugagan, 'daily' bo'lsa ertaga ochiladi
+    const doneLabel = (task.repeat === 'once' || dailyLimit === 1) ? t('taskBtnDone') : t('taskBtnTomorrow');
     btnHtml = `<button class="task-btn" disabled data-limit-locked="1">${escapeHtml(doneLabel)}</button>`;
   } else {
+    // Havolasi bor vazifada havola AVVAL ochiladi, `verify` esa undan
+    // keyin nima bo'lishini hal qiladi. Havola yo'q bo'lsa (verify 'auto')
+    // to'g'ridan-to'g'ri completeTask chaqiriladi.
     let action;
     if(task.action === 'friends') action = "switchTab('friends')";
-    else if(task.url) action = `startLinkTask('${escapeHtml(task.id)}', '${encodeURIComponent(task.url)}', ${reward}, ${dailyLimit}, this)`;
-    else action = `completeTask('${escapeHtml(task.id)}', ${reward}, ${dailyLimit}, this)`;
+    else if(task.url) action = `startLinkTask('${escapeHtml(task.id)}', '${encodeURIComponent(task.url)}', '${verify}', this)`;
+    else action = `completeTask('${escapeHtml(task.id)}', this)`;
     btnHtml = `<button class="task-btn" onclick="${action}" data-i18n="btnDo">${t('btnDo')}</button>`;
   }
 
@@ -4759,7 +4805,7 @@ function taskRowHtml(task, maxReward){
   if(limitReached) cardClasses.push('task-done');
 
   return `
-      <div class="${cardClasses.join(' ')}" data-cat="${escapeHtml(task.category || 'oddiy')}" data-task-id="${escapeHtml(task.id)}" data-daily-limit="${dailyLimit}"${isAdKind ? ' data-kind="ad"' : ''}>
+      <div class="${cardClasses.join(' ')}" data-cat="${escapeHtml(taskCat(task))}" data-task-id="${escapeHtml(task.id)}" data-daily-limit="${dailyLimit}" data-repeat="${task.repeat === 'once' ? 'once' : 'daily'}"${isAdKind ? ' data-kind="ad"' : ''}>
         ${isTop ? `<div class="task-top-badge">${escapeHtml(t('taskBestReward'))}</div>` : ''}
         <div class="task-icon ${TASK_ICON_CLASS[task.icon] || 'icon-video'}">${TASK_ICON_PHOTO[task.icon] ? `<img src="${TASK_ICON_PHOTO[task.icon]}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:13px">` : (TASK_ICON_SVG[task.icon] || TASK_ICON_SVG.video)}</div>
         <div class="task-body">
@@ -4772,29 +4818,83 @@ function taskRowHtml(task, maxReward){
       </div>`;
 }
 
-/* Havolali vazifa: avval havola ochiladi, 10 soniyadan keyin "Olish" tugmasi chiqadi */
-function startLinkTask(taskId, encodedUrl, reward, dailyLimit, btnEl){
+/* ---- Bajarish oqimi `verify` bo'yicha ----
+   Qiymatlar admin panelda tanlanadi va tasks hujjatida saqlanadi:
+
+     auto     havola yo'q — tugma bosilishi bilan completeTask
+     trust    havola ochiladi, TRUST_WAIT_SECS dan keyin "Olish" faollashadi
+     manual   trust bilan bir xil (eski hujjatlarda uchraydi)
+     telegram havola ochiladi, tugma darrov "Tekshirish" ga aylanadi va
+              verifyTelegram Cloud Function kanal a'zoligini tekshiradi
+     admob    rewarded reklama; mukofot admobSsv callback'ida beriladi
+
+   Server ham xuddi shu ajratishni biladi: completeTask 'telegram' va
+   'admob' turlarini rad etadi, shuning uchun tekshiruvni chetlab o'tib
+   bo'lmaydi. */
+const TRUST_WAIT_SECS = 15;
+const KNOWN_VERIFY = ['auto', 'manual', 'trust', 'telegram', 'admob'];
+function taskVerify(task){
+  if(task && task.kind === 'rewarded_ad') return 'admob';
+  const v = String((task && task.verify) || 'auto');
+  return KNOWN_VERIFY.indexOf(v) === -1 ? 'auto' : v;
+}
+/* Admin panel `category` yozadi; spetsifikatsiyada maydon `cat` deb atalgan —
+   ikkalasi ham qabul qilinadi, shunda eski hujjatlar ham ishlayveradi. */
+function taskCat(task){ return String((task && (task.cat || task.category)) || 'oddiy'); }
+
+function startLinkTask(taskId, encodedUrl, verify, btnEl){
   sndClick();
   if(!currentUid) return;
-  const count = state.taskCounts[taskId] || 0;
-  if(count >= dailyLimit){ showToast(t('toastLimitReached'), true); return; }
+  const task = catalogTasks.find(x => x.id === taskId);
+  const dailyLimit = Number(task && task.dailyLimit) || 1;
+  if(taskDoneCount(task || taskId) >= dailyLimit){ showToast(t('toastLimitReached'), true); return; }
   window.open(decodeURIComponent(encodedUrl), '_blank');
   const btn = btnEl;
   if(!btn) return;
-  btn.disabled = true;
   btn.removeAttribute('data-i18n');
-  let secs = 10;
+
+  if(verify === 'telegram'){
+    // Kutish shart emas — a'zolikni server tekshiradi
+    btn.textContent = t('btnVerify');
+    btn.onclick = function(){ verifyTelegramTask(taskId, btn); };
+    return;
+  }
+
+  btn.disabled = true;
+  let secs = TRUST_WAIT_SECS;
   btn.textContent = secs + 's';
   const iv = setInterval(() => {
     secs--;
-    if(secs > 0){ btn.textContent = secs + 's'; }
-    else {
-      clearInterval(iv);
-      btn.disabled = false;
-      btn.textContent = t('btnClaim');
-      btn.onclick = function(){ completeTask(taskId, reward, dailyLimit, btn); };
-    }
+    if(secs > 0){ btn.textContent = secs + 's'; return; }
+    clearInterval(iv);
+    btn.disabled = false;
+    btn.textContent = t('btnClaim');
+    btn.onclick = function(){ completeTask(taskId, btn); };
   }, 1000);
+}
+
+/* Telegram kanal a'zoligi — mukofotni verifyTelegram beradi, mijoz emas */
+function verifyTelegramTask(taskId, btnEl){
+  sndClick();
+  if(!currentUid) return;
+  const btn = btnEl;
+  const originalText = btn ? btn.innerHTML : null;
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="btn-spinner"></span>'; }
+  fns.httpsCallable('verifyTelegram')({ taskId }).then((res) => {
+    const got = (res.data && res.data.reward) || 0;
+    celebrateReward(got, btn);
+    showToast(`+${got} ${t('toastTaskDone')}`);
+    loadHistory(currentUid);
+    if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
+  }).catch((err) => {
+    const msg = err && err.message;
+    if(msg === 'not-subscribed') showToast(t('toastNotSubscribed'), true);
+    else if(msg === 'tg-not-linked') showToast(t('toastTgNotLinked'), true);
+    else if(msg === 'limit') showToast(t('toastLimitReached'), true);
+    else if(msg === 'dailycap') showToast(t('toastDailyCapReached'), true);
+    else { console.error(err); showToast(friendlyError(err), true); }
+    if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
+  });
 }
 
 function topTaskReward(tasks){
@@ -4947,11 +5047,15 @@ function filterHistory(status, tabEl){
 /* ---------------- Actions ---------------- */
 /* logActivity now defined above using Firestore */
 
-function completeTask(taskId, reward, dailyLimit, btnEl){
+/* Mukofot miqdori va kunlik limit endi argument sifatida OLINMAYDI —
+   ikkalasi ham serverda `tasks` hujjatidan o'qiladi. Bu yerdagi
+   tekshiruvlar faqat keraksiz so'rovni oldini olish uchun. */
+function completeTask(taskId, btnEl){
   sndClick();
   if(!currentUid) return;
-  const count = state.taskCounts[taskId] || 0;
-  if(count >= dailyLimit){ showToast(t('toastLimitReached'), true); return; }
+  const task = catalogTasks.find(x => x.id === taskId);
+  const dailyLimit = Number(task && task.dailyLimit) || 1;
+  if(taskDoneCount(task || taskId) >= dailyLimit){ showToast(t('toastLimitReached'), true); return; }
   const cap = getDailyCap(getLevelInfo(state.lifetimeCoins).num);
   if((state.dailyEarned || 0) >= cap){ showToast(t('toastDailyCapReached') || `Kunlik limit (${cap} tanga) tugadi`, true); return; }
 
@@ -4962,7 +5066,7 @@ function completeTask(taskId, reward, dailyLimit, btnEl){
   // ANTI-CHEAT: mukofot serverda (Cloud Function) hisoblanadi va yoziladi
   setTimeout(()=>{
     fns.httpsCallable('completeTask')({ taskId }).then((res) => {
-      const got = (res.data && res.data.reward) || reward;
+      const got = (res.data && res.data.reward) || 0;
       celebrateReward(got, btn);
       showToast(`+${got} ${t('toastTaskDone')}`);
       loadHistory(currentUid);
@@ -4975,6 +5079,7 @@ function completeTask(taskId, reward, dailyLimit, btnEl){
       else if(msg === 'not-started'){ showToast(t('toastNotStarted'), true); }
       else if(msg === 'ended'){ showToast(t('toastEnded'), true); }
       else if(msg === 'total-limit'){ showToast(t('toastTotalLimit'), true); }
+      else if(msg === 'needs-verification'){ showToast(t('toastNeedsVerify'), true); }
       else { console.error(err); showToast(friendlyError(err), true); }
       if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
     });
