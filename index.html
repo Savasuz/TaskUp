@@ -338,8 +338,12 @@
   .chest-art{ position:relative; width:100%; aspect-ratio:1; }
   .chest-art .lot{ position:absolute; inset:0; z-index:1; }
   /* Nur effekti sandiq ORTIDA; sandiqdan kattaroq bo'lgani uchun chetga chiqadi. */
-  .chest-glow{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-    width:190%; height:190%; z-index:0; pointer-events:none; }
+  /* Nurlar sandiqdan biroz kattaroq va xira: 190%/to'liq yorug'likda ular
+     butun kartani to'ldirib, sarlavhani ham yuvib yuborardi. */
+  /* Sandiq o'z kompozitsiyasida markazdan pastroqda chizilgan, shuning uchun
+     nur markazi ham pastga suriladi — aks holda sandiq ustida osilib turardi. */
+  .chest-glow{ position:absolute; left:50%; top:64%; transform:translate(-50%,-50%);
+    width:132%; height:132%; z-index:0; pointer-events:none; opacity:0.42; }
   /* Sandiqlar navbatma-navbat kattalashadi: 2-si 1-sidan, 3-si 2-sidan kattaroq. */
   .chest-item:nth-child(1) .chest-art{ transform:scale(0.88); }
   .chest-item:nth-child(2) .chest-art{ transform:scale(1); }
@@ -3142,7 +3146,7 @@ function lottieMount(container, key, opts){
     if(opts.speed) anim.setSpeed(opts.speed);
     holder.anim = anim;
     lottieAll.add(anim);
-    if(opts.loop){
+    if(opts.loop && !opts.exempt){
       lottieLoops.push(anim);
       // 3 tadan oshsa — eng eskisini pauza qilamiz
       while(lottieLoops.length > LOOP_LIMIT){ const old = lottieLoops.shift(); try{ old.pause(); }catch(e){} }
@@ -3295,7 +3299,7 @@ function syncTabLottie(tab){
   if(tab === 'friends') mountFriendsLottie();
   else if(tab === 'leaderboard') mountPodiumBgLottie();
   else if(tab === 'home') mountChestBgLottie();
-  if(tab === 'home') startChestGlow(); else stopChestGlow();
+  if(tab === 'home') mountChestGlow(); else stopChestGlow();
 }
 
 /* Do'stlar sahifasi sarlavhasidagi rasm */
@@ -3373,6 +3377,7 @@ function renderChests(){
       '</div>';
   }).join('');
   mountChestArt();
+  mountChestGlow();
   mountMiniCoins(row);
 }
 function mountChestArt(){
@@ -3390,35 +3395,29 @@ function mountChestArt(){
     });
   });
 }
-/* Nur effekti — bir vaqtda FAQAT BITTA sandiqda, navbat bilan aylanadi.
-   Loop emas: har safar bir marta o'ynaydi, shuning uchun doimiy loop
-   hisobiga (3 ta) qo'shilmaydi. */
-let chestGlowIdx = 0, chestGlowTimer = null, chestGlowHolder = null;
-function playChestGlow(){
-  const items = document.querySelectorAll('.chest-item');
-  // Sahifa ko'rinmayotgan bo'lsa yangi animatsiya qurmaymiz: visibilitychange
-  // faqat MAVJUDLARINI pauza qiladi, taymer esa ishlayverib yangisini
-  // qurib qo'yardi va u pauzaga tushmasdan o'ynardi.
-  if(!items.length || !lottieAvailable() || document.hidden) return;
-  const art = items[chestGlowIdx % items.length].querySelector('.chest-art');
-  chestGlowIdx++;
-  if(!art) return;
-  if(chestGlowHolder){ destroyLottie(chestGlowHolder); chestGlowHolder = null; }
-  document.querySelectorAll('.chest-glow').forEach(x => x.remove());
-  const el = document.createElement('div'); el.className = 'lot chest-glow';
-  art.insertBefore(el, art.firstChild);
-  chestGlowHolder = lottieMount(el, 'rewardlight', { loop:false, speed:2 });
-  if(!chestGlowHolder) el.remove();
-}
-function startChestGlow(){
-  if(chestGlowTimer || !lottieAvailable()) return;
-  playChestGlow();
-  chestGlowTimer = setInterval(playChestGlow, 5000);
+/* Nur effekti — HAR BIR sandiq ortida, doimiy aylanadi.
+   Kompozitsiya bitta qatlam va bitta shakldan iborat (gradient bilan
+   bo'yalgan yulduz, 0->359 gradus aylanish), shuning uchun uchtasi ham
+   arzon. LOOP_LIMIT dan ATAYLAB ozod qilingan: bu chegara og'ir bezak
+   animatsiyalari uchun o'ylangan, aks holda ular balans tangasini yoki
+   profil fonini pauza qilib qo'yardi. */
+const chestGlowHolders = [];
+function mountChestGlow(){
+  if(!lottieAvailable()) return;
+  document.querySelectorAll('.chest-art').forEach(art => {
+    if(art.dataset.glow) return;
+    const el = document.createElement('div'); el.className = 'lot chest-glow';
+    art.insertBefore(el, art.firstChild);
+    const h = lottieMount(el, 'rewardlight', { loop:true, speed:1, exempt:true });
+    if(!h){ el.remove(); return; }
+    art.dataset.glow = '1';
+    chestGlowHolders.push(h);
+  });
 }
 function stopChestGlow(){
-  if(chestGlowTimer){ clearInterval(chestGlowTimer); chestGlowTimer = null; }
-  if(chestGlowHolder){ destroyLottie(chestGlowHolder); chestGlowHolder = null; }
+  while(chestGlowHolders.length) destroyLottie(chestGlowHolders.pop());
   document.querySelectorAll('.chest-glow').forEach(x => x.remove());
+  document.querySelectorAll('.chest-art[data-glow]').forEach(x => { delete x.dataset.glow; });
 }
 
 function playChestArt(id){
@@ -4913,7 +4912,7 @@ function initLottieUI(){
   // Bosh sahifa boshlanishida switchTab chaqirilmaydi — tabga bog'liq
   // animatsiyani shu yerda ishga tushiramiz (sandiqlar orqasidagi yulduzlar).
   syncTabLottie('home');
-  startChestGlow();
+  mountChestGlow();
 }
 /* defer skript DOMContentLoaded'dan OLDIN bajariladi, shuning uchun
    o'sha paytda `lottie` allaqachon mavjud bo'ladi. */
