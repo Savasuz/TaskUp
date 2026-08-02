@@ -3326,8 +3326,8 @@ function syncTabLottie(tab){
   if(tab === 'friends') mountFriendsLottie();
   else if(tab === 'leaderboard') mountPodiumBgLottie();
   else if(tab === 'home') mountChestBgLottie();
-  if(tab === 'home'){ mountChestGlow(); startChestLockTimer(); }
-  else { stopChestGlow(); stopChestLockTimer(); }
+  if(tab === 'home'){ mountChestGlow(); startChestLockTimer(); startChestCoinTimer(); }
+  else { stopChestGlow(); stopChestLockTimer(); stopChestCoinTimer(); }
 }
 
 /* Do'stlar sahifasi sarlavhasidagi rasm */
@@ -3443,7 +3443,9 @@ function mountChestGlow(){
     if(art.dataset.glow) return;
     const el = document.createElement('div'); el.className = 'lot chest-glow';
     art.insertBefore(el, art.firstChild);
-    const h = lottieMount(el, 'rewardlight', { loop:true, speed:1, exempt:true });
+    // speed 0.65 — bitta to'liq aylanish ~9 soniya. speed 1 da (6 soniya)
+    // nur juda tez charx urib, ko'z oldida bezovta qilardi.
+    const h = lottieMount(el, 'rewardlight', { loop:true, speed:0.65, exempt:true });
     if(!h){ el.remove(); return; }
     art.dataset.glow = '1';
     chestGlowHolders.push(h);
@@ -3552,10 +3554,11 @@ function claimChest(id){
 
 /* ---- Tangalar ----
    Har bir ".mini-coin" ichiga tanga animatsiyasi quriladi. LOOP QILMAYDI:
-   birinchi kadrda qotib turadi (oldi tomoni). Faqat podiumdagi 2/1/3-o'rin
-   tangalari har 10 soniyada bir marta aylanadi. */
+   birinchi kadrda qotib turadi (oldi tomoni). Podiumdagi 2/1/3-o'rin va
+   sandiqlar tagidagi tangalar har 10 soniyada bir marta aylanadi. */
 const miniCoinAnims = [];
 let podiumCoinTimer = null;
+let chestCoinTimer = null;
 function mountMiniCoins(root){
   if(!lottieAvailable()) return;
   // DOM'dan chiqib ketganlarini tozalaymiz (ro'yxatlar qayta chiziladi)
@@ -3578,12 +3581,14 @@ function mountMiniCoins(root){
     });
   });
 }
-function spinPodiumCoins(){
-  document.querySelectorAll('.podium-coin .mini-coin .lot').forEach(el => {
+function spinCoinsIn(sel){
+  if(document.hidden) return;
+  document.querySelectorAll(sel).forEach(el => {
     const a = miniCoinAnims.find(x => (x.wrapper || x.container) === el);
     if(a){ try{ a.goToAndPlay(0, true); }catch(e){} }
   });
 }
+function spinPodiumCoins(){ spinCoinsIn('.podium-coin .mini-coin .lot'); }
 function startPodiumCoinTimer(){
   if(podiumCoinTimer || !lottieAvailable()) return;
   spinPodiumCoins();
@@ -3592,6 +3597,18 @@ function startPodiumCoinTimer(){
 function stopPodiumCoinTimer(){
   if(!podiumCoinTimer) return;
   clearInterval(podiumCoinTimer); podiumCoinTimer = null;
+}
+/* Sandiqlar tagidagi mukofot tangalari — podium bilan bir xil qoida:
+   har 10 soniyada bir marta aylanadi, loop emas. */
+function spinChestCoins(){ spinCoinsIn('.chest-amt .mini-coin .lot'); }
+function startChestCoinTimer(){
+  if(chestCoinTimer || !lottieAvailable()) return;
+  spinChestCoins();
+  chestCoinTimer = setInterval(spinChestCoins, 10000);
+}
+function stopChestCoinTimer(){
+  if(!chestCoinTimer) return;
+  clearInterval(chestCoinTimer); chestCoinTimer = null;
 }
 
 /* 1-o'rin toji — doim aylanadi (talab bo'yicha). */
