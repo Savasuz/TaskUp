@@ -2468,6 +2468,7 @@ const I18N = {
     avatarCropTitle:"Rasmni moslashtiring", avatarCropHint:"Suring va moslang", avatarCropCancel:"Bekor qilish", avatarCropSave:"Saqlash",
     toastAvatarType:"Faqat rasm faylini tanlang", toastAvatarSize:"Rasm hajmi 5 MB dan kichik bo'lsin", toastAvatarUploaded:"Profil rasmi yangilandi", toastAvatarError:"Rasmni yuklashda xatolik yuz berdi",
     enterRefCode:"Sizni taklif qilishganmi? Kodni kiriting", btnRedeem:"Faollashtirish", toastEnterCode:"Taklif kodini kiriting", toastRefRedeemed:"tanga! Referral faollashdi", toastRefAlready:"Siz allaqachon kod kiritgansiz", toastRefNotFound:"Bunday kod topilmadi", toastRefOwn:"O'z kodingizni kirita olmaysiz", toastRefError:"Xatolik yuz berdi",
+    toastAdRewardPending:"Reklama ko'rildi — mukofot bir necha soniyada tushadi", toastAdNoFill:"Hozircha reklama yo'q, keyinroq urinib ko'ring", toastAdFailed:"Reklamani ko'rsatib bo'lmadi",
     btnVerify:"Tekshirish", toastNotSubscribed:"Kanalga obuna bo'lmagansiz", toastTgNotLinked:"Telegram hisobi ulanmagan", toastTgLinkFirst:"Avval botda /start ni bosing, keyin \"Tekshirish\"", toastNeedsVerify:"Bu vazifa alohida tekshiruvdan o'tadi",
     btnClaim:"Olish", adSoon:"Ilovada tez orada", toastNotStarted:"Vazifa hali boshlanmagan", toastEnded:"Vazifa muddati tugagan", toastTotalLimit:"Vazifa umumiy limiti tugagan",
     toastNotEnough:"Balansingizda buncha tanga yo'q",
@@ -2552,6 +2553,7 @@ const I18N = {
     avatarCropTitle:"Adjust your photo", avatarCropHint:"Drag and adjust", avatarCropCancel:"Cancel", avatarCropSave:"Save",
     toastAvatarType:"Please select an image file", toastAvatarSize:"Image size must be under 5 MB", toastAvatarUploaded:"Profile photo updated", toastAvatarError:"Failed to upload photo",
     enterRefCode:"Were you invited? Enter the code", btnRedeem:"Activate", toastEnterCode:"Enter the referral code", toastRefRedeemed:"coins! Referral activated", toastRefAlready:"You already used a code", toastRefNotFound:"Code not found", toastRefOwn:"You can't use your own code", toastRefError:"Something went wrong",
+    toastAdRewardPending:"Ad watched — your reward will arrive in a few seconds", toastAdNoFill:"No ad available right now, try again later", toastAdFailed:"Could not show the ad",
     btnVerify:"Verify", toastNotSubscribed:"You are not subscribed to the channel", toastTgNotLinked:"Telegram account is not linked", toastTgLinkFirst:"Press /start in the bot first, then \"Verify\"", toastNeedsVerify:"This task goes through a separate check",
     btnClaim:"Claim", adSoon:"Soon in the app", toastNotStarted:"Task hasn't started yet", toastEnded:"Task has ended", toastTotalLimit:"Task completion limit reached",
     toastNotEnough:"You don't have that many coins",
@@ -2636,6 +2638,7 @@ const I18N = {
     avatarCropTitle:"Настройте фото", avatarCropHint:"Перетащите и настройте", avatarCropCancel:"Отмена", avatarCropSave:"Сохранить",
     toastAvatarType:"Выберите файл изображения", toastAvatarSize:"Размер изображения должен быть меньше 5 МБ", toastAvatarUploaded:"Фото профиля обновлено", toastAvatarError:"Ошибка загрузки фото",
     enterRefCode:"Вас пригласили? Введите код", btnRedeem:"Активировать", toastEnterCode:"Введите реферальный код", toastRefRedeemed:"монет! Реферал активирован", toastRefAlready:"Вы уже использовали код", toastRefNotFound:"Код не найден", toastRefOwn:"Нельзя использовать свой код", toastRefError:"Произошла ошибка",
+    toastAdRewardPending:"Реклама просмотрена — награда придёт через несколько секунд", toastAdNoFill:"Сейчас рекламы нет, попробуйте позже", toastAdFailed:"Не удалось показать рекламу",
     btnVerify:"Проверить", toastNotSubscribed:"Вы не подписаны на канал", toastTgNotLinked:"Telegram-аккаунт не привязан", toastTgLinkFirst:"Сначала нажмите /start в боте, затем \"Проверить\"", toastNeedsVerify:"Это задание проходит отдельную проверку",
     btnClaim:"Получить", adSoon:"Скоро в приложении", toastNotStarted:"Задание ещё не началось", toastEnded:"Задание завершено", toastTotalLimit:"Лимит задания исчерпан",
     toastNotEnough:"У вас недостаточно монет",
@@ -3110,6 +3113,8 @@ function resetAdAutoplay(){
 })();
 
 function enterApp(){
+  // Reklama SDK'sini oldindan ishga tushiramiz — birinchi reklama tezroq ochiladi
+  if(typeof initAdMob === 'function') initAdMob();
   document.getElementById('appScreen').style.display = 'flex';
   document.getElementById('appScreen').style.flexDirection = 'column';
   renderAvatarImage();
@@ -4144,7 +4149,8 @@ function renderBalance(){
 /* Vazifa kartalarini qayta chizmasdan (flicker bermasdan) progress/limit holatini yangilaydi */
 function updateTaskCardStates(){
   document.querySelectorAll('.task[data-task-id]').forEach(el => {
-    if(el.dataset.kind === 'ad') return;
+    // Reklama vazifasi ham kunlik limitga bo'ysunadi — avval bu yerdan
+    // chetlab o'tilardi, chunki uning tugmasi baribir o'chirilgan edi.
     const id = el.dataset.taskId;
     const dailyLimit = Number(el.dataset.dailyLimit) || 1;
     const count = taskDoneCount({ id, repeat: el.dataset.repeat });
@@ -4856,13 +4862,15 @@ function taskRowHtml(task, maxReward){
   const verify = taskVerify(task);
   const isAdKind = verify === 'admob';
   const count = taskDoneCount(task);
-  const limitReached = !isAdKind && count >= dailyLimit;
+  // Reklama vazifasi ham kunlik limitga bo'ysunadi (server ham shuni
+  // tekshiradi); avval u hisobdan chetda qolardi, chunki tugma baribir
+  // o'chirilgan edi.
+  const limitReached = count >= dailyLimit;
   const isTop = !isAdKind && maxReward > 0 && reward === maxReward;
 
   let btnHtml;
-  if(isAdKind){
-    // AdMob Rewarded Ad — mukofot admobSsv callback'i orqali serverda beriladi.
-    // Tugma Android ilovaga reklama SDK'si ulangunicha o'chirilgan turadi.
+  if(isAdKind && !admobAvailable()){
+    // Reklama faqat Android ilovada ko'rsatiladi — brauzerda SDK yo'q
     btnHtml = `<button class="task-btn" disabled data-i18n="adSoon">${t('adSoon')}</button>`;
   } else if(limitReached){
     // repeat 'once' bo'lsa vazifa butunlay tugagan, 'daily' bo'lsa ertaga ochiladi
@@ -4873,13 +4881,14 @@ function taskRowHtml(task, maxReward){
     // keyin nima bo'lishini hal qiladi. Havola yo'q bo'lsa (verify 'auto')
     // to'g'ridan-to'g'ri completeTask chaqiriladi.
     let action;
-    if(task.action === 'friends') action = "switchTab('friends')";
+    if(isAdKind) action = `watchRewardedAd('${escapeHtml(task.id)}', this)`;
+    else if(task.action === 'friends') action = "switchTab('friends')";
     else if(task.url) action = `startLinkTask('${escapeHtml(task.id)}', '${encodeURIComponent(task.url)}', '${verify}', this)`;
     else action = `completeTask('${escapeHtml(task.id)}', this)`;
     btnHtml = `<button class="task-btn" onclick="${action}" data-i18n="btnDo">${t('btnDo')}</button>`;
   }
 
-  const progressHtml = (!isAdKind && dailyLimit > 1) ? `
+  const progressHtml = (dailyLimit > 1) ? `
           <div class="task-progress">
             <span class="task-progress-count">${count}/${dailyLimit}</span>
             <div class="task-progress-bar"><div class="task-progress-fill${limitReached ? ' full' : ''}" style="width:${Math.min(100, Math.round((count/dailyLimit)*100))}%"></div></div>
@@ -4944,6 +4953,85 @@ function tgLinked(){ return !!state.telegramId; }
 function openTgLink(){
   if(!currentUid) return;
   window.open('https://t.me/' + TG_VERIFY_BOT + '?start=' + encodeURIComponent(currentUid), '_blank');
+}
+
+/* ---------- AdMob rewarded reklama ----------
+   Ilova bundler ishlatmaydi (oddiy <script> teglari), shuning uchun
+   `@capacitor-community/admob` paketi `import` qilinmaydi — Capacitor
+   plaginni ish vaqtida window.Capacitor.Plugins.AdMob sifatida ro'yxatdan
+   o'tkazadi. npm paketining o'zi baribir kerak: `npx cap sync android`
+   aynan undan native modulni va Google Mobile Ads SDK bog'liqligini oladi.
+
+   Ilova ID'si AndroidManifest.xml da (SDK uni ishga tushishda o'qiydi),
+   reklama birligi esa shu yerda. Vazifa hujjatida `adUnitId` bo'lsa u
+   ustun turadi — shunda har xil vazifaga har xil birlik qo'yish mumkin.
+
+   MUKOFOT BU YERDA BERILMAYDI. Reklama ko'rilgach Google admobSsv
+   callback'iga imzolangan so'rov yuboradi, tanga o'sha yerda — serverda —
+   yoziladi. Mijoz faqat reklamani ko'rsatadi va SSV uchun userId (uid) va
+   customData (taskId) ni uzatadi. Shuning uchun reklamani "ko'rdim" deb
+   soxta qilish tanga bermaydi. */
+const ADMOB_REWARD_UNIT = 'ca-app-pub-3843970093238957/9968285082';
+function nativeApp(){
+  try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
+  catch(e){ return false; }
+}
+function admobPlugin(){
+  try { return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) || null; }
+  catch(e){ return null; }
+}
+function admobAvailable(){ return nativeApp() && !!admobPlugin(); }
+
+let admobReady = false, admobBusy = false;
+function initAdMob(){
+  const AdMob = admobPlugin();
+  if(!admobAvailable() || admobReady) return Promise.resolve(false);
+  return Promise.resolve(AdMob.initialize({ initializeForTesting: false }))
+    .then(() => { admobReady = true; return true; })
+    .catch((e) => { console.error('AdMob initialize:', e); return false; });
+}
+
+function watchRewardedAd(taskId, btnEl){
+  sndClick();
+  if(!currentUid) return;
+  const AdMob = admobPlugin();
+  if(!admobAvailable()){ showToast(t('adSoon'), true); return; }
+  if(admobBusy) return;                       // ikki marta bosishdan himoya
+
+  const task = catalogTasks.find(x => x.id === taskId);
+  const dailyLimit = Number(task && task.dailyLimit) || 1;
+  if(taskDoneCount(task || taskId) >= dailyLimit){ showToast(t('toastLimitReached'), true); return; }
+
+  const btn = btnEl;
+  const originalText = btn ? btn.innerHTML : null;
+  admobBusy = true;
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="btn-spinner"></span>'; }
+  const restore = () => {
+    admobBusy = false;
+    if(btn){ btn.disabled = false; btn.innerHTML = originalText; }
+  };
+
+  initAdMob()
+    .then(() => AdMob.prepareRewardVideoAd({
+      adId: (task && task.adUnitId) || ADMOB_REWARD_UNIT,
+      ssv: { userId: currentUid, customData: taskId }
+    }))
+    .then(() => AdMob.showRewardVideoAd())
+    .then(() => {
+      // Tanga SSV callback'i orqali serverda yoziladi va foydalanuvchi
+      // hujjatining onSnapshot'i bilan o'zi kelib qoladi — bu yerda
+      // hech qanday balans o'zgartirilmaydi.
+      showToast(t('toastAdRewardPending'));
+      restore();
+    })
+    .catch((err) => {
+      const code = String((err && (err.message || err.code)) || '');
+      // Foydalanuvchi reklamani oxirigacha ko'rmay yopsa ham shu yerga tushadi
+      if(/no.?fill|No ad config/i.test(code)) showToast(t('toastAdNoFill'), true);
+      else showToast(t('toastAdFailed'), true);
+      console.error('AdMob:', err);
+      restore();
+    });
 }
 
 function startLinkTask(taskId, encodedUrl, verify, btnEl){

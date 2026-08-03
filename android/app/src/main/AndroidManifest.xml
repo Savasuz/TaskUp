@@ -15,6 +15,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!-- AdMob ilova identifikatori. Bu meta-data BO'LISHI SHART: Google
+             Mobile Ads SDK uni ishga tushishda o'qiydi va topolmasa ilovani
+             darrov yiqitadi ("The Google Mobile Ads SDK was initialized
+             without an application ID"). Reklama birligi (Ad Unit) ID'si esa
+             bu yerda emas — u JS tomonda, ADMOB_REWARD_UNIT da. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3843970093238957~8554865131" />
+
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
