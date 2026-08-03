@@ -407,26 +407,48 @@ async function admobKeys() {
 }
 
 exports.admobSsv = onRequest(async (req, res) => {
+  /* JAVOB KODLARI HAQIDA.
+     AdMob konsoli SSV manzilini tekshirganda unga parametrsiz (va imzosiz)
+     oddiy GET so'rov yuboradi va 200 dan boshqa javobni "HTTP response code
+     400" xatosi deb ko'rsatadi, ya'ni manzilni saqlashga qo'ymaydi. Shuning
+     uchun NOTO'G'RI so'rovlarga ham 200 qaytariladi — javob matni esa
+     sababni ko'rsatib turadi (loglarda ko'rinadi).
+
+     Bu xavfsizlikni zaiflashtirmaydi: imzo tekshiruvi ham, takroriy
+     callback himoyasi ham o'z joyida qoladi, shunchaki rad javobining
+     HTTP kodi 200 bo'ladi. Tanga faqat imzo tasdiqlangandan keyin
+     beriladi — 'ok' javobi shundan darak beradi.
+
+     Kutilmagan xatolar (Firestore ishlamay qolishi kabi) esa 500
+     qaytaradi: Google 5xx da so'rovni QAYTA yuboradi, ya'ni haqiqiy
+     mukofot vaqtinchalik nosozlik tufayli yo'qolmaydi. */
+  const done = (reason) => res.status(200).send(reason);
   try {
     const qs = String(req.originalUrl || req.url || '').split('?')[1] || '';
     const cut = qs.indexOf('&signature=');
-    if (cut === -1) { res.status(400).send('no-signature'); return; }
+    if (cut === -1) { done('no-signature'); return; }
     const signed = qs.slice(0, cut);
 
     const q = req.query || {};
     const keys = await admobKeys();
     const pem = keys[String(q.key_id)];
-    if (!pem) { res.status(400).send('unknown-key'); return; }
+    if (!pem) { done('unknown-key'); return; }
 
-    const ok = crypto.createVerify('SHA256')
-      .update(signed)
-      .verify(pem, Buffer.from(String(q.signature), 'base64url'));
-    if (!ok) { res.status(403).send('bad-signature'); return; }
+    let ok = false;
+    try {
+      ok = crypto.createVerify('SHA256')
+        .update(signed)
+        .verify(pem, Buffer.from(String(q.signature), 'base64url'));
+    } catch (e) {
+      // Buzuq base64 yoki imzo formati — verify() otib yuborishi mumkin
+      ok = false;
+    }
+    if (!ok) { done('bad-signature'); return; }
 
     const uid = String(q.user_id || '').trim();
     const taskId = String(q.custom_data || '').trim();
     const txId = String(q.transaction_id || '').trim();
-    if (!uid || !taskId || !txId) { res.status(400).send('missing-params'); return; }
+    if (!uid || !taskId || !txId) { done('missing-params'); return; }
 
     // Takroriy callback ikkinchi marta tanga bermasin
     try {
@@ -434,15 +456,14 @@ exports.admobSsv = onRequest(async (req, res) => {
         uid, taskId, at: FieldValue.serverTimestamp()
       });
     } catch (e) {
-      res.status(200).send('duplicate');
+      done('duplicate');
       return;
     }
 
     await grantTask(uid, taskId, ['admob']);
-    res.status(200).send('ok');
+    done('ok');
   } catch (err) {
     console.error('admobSsv:', err);
-    // Google 5xx da qayta uriniladi; mantiqiy rad javoblari yuqorida 4xx
     res.status(500).send('error');
   }
 });
